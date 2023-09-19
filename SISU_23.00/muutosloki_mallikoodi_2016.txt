@@ -1,0 +1,1045 @@
+﻿*************************************************************************************************
+* SISU-MALLIN MUUTOSLOKI                                                                        *
+* AINEISTOVUOSI 2016                                                                            *	
+*                                                                                               *	
+* Tähän dokumenttiin merkitään SISU-malliin tehdyt muutokset malliversiosta 18.4 alkaen.        *
+* Lokista ilmenee muutospäivämäärä, päivittäjän nimi, yleiskuvaus muutoksesta ja                *
+* tiedostot, joihin muutoksia on tehty.                                                         *
+*												*
+*************************************************************************************************
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 19.3 JAETTU 8.4.2019     **************************
+*************************************************************************************************
+
+53. Tarkistus-makroa korjattu siten, että se toimii myös tapauksessa, jossa tarkistettavaa 
+	aineistoa ei ole tallennettu levylle (ALKUsimul-ohjelmassa määritys MUISTISSA = 1).
+
+Päivittäjä: MG
+pv. 8.4.2019
+
+	../MAKROT/YLEISET/YleisMakrot.sas
+	../SIMUL_2016/ASUMTUKIsimul.sas
+
+	Tarkistus-makroa muutettu siten, että tarkistus toimii sekä levylle kirjoitetulle että
+	välimuistissa olevalle aineistolle.
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 19.2 JAETTU 4.4.2019     **************************
+*************************************************************************************************
+
+52. Päivitetty rintamalisään, ylimääräiseen rintamalisään ja veteraanilisään 1.4.2019 
+	voimaantulleet euromäärien muutokset.
+
+Päivittäjä: IK
+pv. 2.4.2019
+
+	../PARAM/pkansel.sas7bdat
+	../PARAM/PARAMindeksit.sas
+
+	Päivitetty rintamalisän (RiLi), ylim. rintamalisään oikeuttavan kansaneläkkeen rajan 
+	(YliRiliRaja), ylim. rintamalisän vähimmäismäärän (YliRiliMinimi)ja veteraanilisän 
+	(VeterLisa) euromääriä 1.4.2019 alkaen.
+
+51. Yleisen asumistuen simulointiin tuotu ominaisuus, joka tarkistaa, löytyykö eläkkeensaajan
+	asumistuen simulointimallin starttidataa ja minkä ikäinen starttidata on. 
+
+Päivittäjä: MG
+pv. 26.3.2019
+
+	../SIMUL_2016/ASUMTUKIsimul.sas
+
+	Makrokutsu %Tarkistus keskeyttää simuloinnin, jos eläkkeensaajan asumistuen starttidataa
+	(START_ELASUMTUKI_HENKI) ei löydy tai se on yli 7 vuorokautta vanha. Tarkistuksen 
+	voi kytkeä pois päältä valitsemalla TARKISTUS_ASUMTUKI = 0.
+
+	../SIMUL_2016/KOKOsimul.sas
+	
+	Jos yleinen asumistuki on valittuna, ajetaan %Tarkistus myös KOKOsimul-mallissa. 
+	Tarkistuksen voi kytkeä pois päältä valitsemalla TARKISTUS_ASUMTUKI = 0. Vanha varoitus 
+	poistettu.
+
+	../SIMUL_2016/ALKUsimul.sas
+
+	Luotu globaali makromuuttuja TARKISTUS_ASUMTUKI.
+
+	../MAKROT/YLEISET/YleisMakrot.sas
+
+	Luotu Tarkistus-makro edellä mainittua tarkoitusta varten. Makro on suunniteltu siten,
+	että sitä voi käyttää mahdollisimman pienin muutoksin myös muihin vastaaviin 
+	tarkistuksiin.
+	
+50. Korjattu yleisen asumistuen ja toimeentulotuen simulointia niin, että elokuusta 2019 alkaen
+	opintorahan oppimateriaalilisä on näissä etuuksissa etuoikeutettua tuloa.
+
+Päivittäjä: EA
+pv. 25.3.2019
+
+	../MAKROT/OPINTUKIlakimakrot.sas
+
+	Lisätty lakimakroihin OpRahaKS, OpRahaVS ja OpRahaAsumLisaKS keyword-makroparametri
+	nimeltään oppimateriaali, jolla määritetään se, otetaanko ko. lakimakron laskennassa
+	mahdollinen oppimateriaalilisä huomioon vai ei. 
+
+	../SIMUL_2016/OPINTUKIsimul.sas
+
+	Ohjelma tuottaa tulosaineistoon 4 uutta muuttujaa:
+	TUKIKESK_ILMOP = "Keskiasteen opiskelijan opintoraha ilman oppimateriaalilisää, MALLI"
+	TUKIKESK_ILMHUOLTOP = "Keskiasteen opiskelijan opintoraha ilman huoltajakorotusta
+				ja oppimateriaalilisää, MALLI"
+	TUKIKOR_ILMOP = "Korkeakouluopiskelijan opintoraha ilman oppimateriaalilisää, MALLI"
+	TUKIKOR_ILMHUOLTOP = "Korkeakouluopiskelijan opintoraha ilman huoltajakorotusta
+				ja oppimateriaalilisää, MALLI"
+
+	../SIMUL_2016/VEROsimul.sas
+
+	Ohjelma ei enää jatkossa tuota tulosaineistoon muuttujaa OPTUKI_ILMHUOLT_SIMUL. 
+	
+	../SIMUL_2016/ASUMTUKIsimul.sas
+
+	Muutettu tietojen hakua muista osamalleista siten, että kun aiemmin
+	kaikki tiedot haettiin VERO-osamallin kautta, niin nyt opintotukeen liittyvät tiedot
+	haetaan OPINTUKI-osamallista (TUKIKESK, TUKIKESK_ILMHUOLT, TUKIKESK_ILMHUOLTOP, TUKIKOR,
+	TUKIKOR_ILMHUOLT, TUKIKOR_ILMHUOLTOP).
+
+	../SIMUL_2016/TOIMTUKIsimul.sas
+
+	Rivi 282: Luodaan uusi muuttuja OPINRAHA_DATA = SUM(opirake, opirako).
+
+	Rivi 374: OPINTUKI-mallista haetaan jatkossa myös muuttujat TUKIKESK, TUKIKESK_ILMOP,
+	TUKIKOR ja TUKIKOR_ILMOP.
+
+	Rivit 459-466: Luodaan uudet muuttujat OPINRAHA_SIMUL (opintoraha) ja 
+	OPINRAHA_ILMOP_SIMUL (opintoraha ilman oppimateriaalilisää).
+
+	Rivit 571-582: Elokuusta 2019 lähtien huomioidaan muuttujassa MUUTVERTULOTNETTO
+	(veronalaisten ei-työtulojen nettomäärä vuodessa) opintoraha ilman oppimateriaalilisää.
+
+	../ESIM/KOKOesim.sas
+
+	Rivit 877-878, 883-884, 891-892, 897-898: Tehdään opintorahan laskenta sekä ilman
+	oppimateriaalilisää että ilman huoltajakorotusta ja oppimateriaalilisää.
+
+	Rivit 1332-1390: Luodaan muuttuja OPINRAHA_YA_HUOM, joka kertoo yleisessä asumistuessa
+	eri ajankohtina huomioon otettavan opintorahan määrän. Tätä muuttujaa käytetään
+	lakimakrokutsuissa, joissa lasketaan yleisen asumistuen suuruutta vuodesta 2015 lähtien.
+
+	Rivit 1472-1477: Lasketaan opintorahan oppimateriaalilisä nettona muuttujaan OPPIMAT ja
+	vähennetään tämä euromäärä muuttujasta MUUNETTOTULO, jos ajankohta on 1.8.2019 jälkeen. 
+	
+49. Päivitetty AJANTASAISTUS-kansion sisältö sekä PARAM-kansion parametritaulut vastaamaan
+	uusinta VM:n kevään 2019 ennusteeseen perustuvaa ajantasaistusta (AJANT_2016.40).
+
+Päivittäjä: EA
+pv. 15.3.2019
+
+	../AJANTASAISTUS/...
+	../PARAM/pindeksi_vuosi.sas7bdat
+	../PARAM/pasumtuki.sas7bdat
+	../PARAM/pelasumtuki.sas7bdat
+	../PARAM/pkansel.sas7bdat
+	../PARAM/pkotihtuki.sas7bdat
+	../PARAM/pllisa.sas7bdat
+	../PARAM/popintuki.sas7bdat
+	../PARAM/pphoito.sas7bdat
+	../PARAM/psairvak.sas7bdat
+	../PARAM/ptoimtuki.sas7bdat
+	../PARAM/ptturva.sas7bdat
+	../PARAM/pvero.sas7bdat 
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 19.1 JAETTU 7.3.2019     **************************
+*************************************************************************************************
+
+48. Lisätty ELASUMTUKI-osamalliin lainsäädäntökuukauden huomioiminen.
+
+Päivittäjä: IK, EA
+pv. 6.3.2019
+
+	../PARAM/pelasumtuki.sas7bdat
+
+	Lisätty parametritauluun oma sarake kuukaudelle (Kuuk).
+
+	../MAKROT/ELASUMTUKIlakimakrot.sas
+
+	Lisätty lakimakrot ElakAsumTukiKS ja ElakAsumTukiVS. Lisätty lainsäädäntökuukauden
+	huomioiminen lakimakroihin EHoitoNormiS ja EnimmAsMenoS. Poistettu lakimakro
+	ElakAsumTukiS. 
+
+	../ESIM/ELASUMTUKIesim.sas
+
+	Rivi 17: Lisätty määrittely %LET VUOSIKA.
+	Rivit 269-348: Eroteltu laskenta riippuen siitä, käytetäänkö vuosikeskiarvoa vai tietyn
+	kuukauden lainsäädäntöä.
+
+	../ESIM/KOKOesim.sas
+
+	Rivit 1287-1294: Eroteltu eläkkeensaajan asumistuen laskenta riippuen siitä, käytetäänkö
+	vuosikeskiarvoa vai tietyn kuukauden lainsäädäntöä.
+	
+	../SIMUL_2016/ELASUMTUKIsimul.sas
+
+	Rivi 680: Muutettu makrokutsu %ElakAsumTukiS -> %ElakAsumTukiVS.
+	Rivi 685: Poistettu muuttujan ELAKASUMTUKI jako luvulla 12.
+
+47. Korjattu OPINTUKI-mallin KorkMuuAlle20_2-lakiparametrin arvot vuosille 2021-2023.
+
+Päivittäjä: EA
+pv. 6.3.2019
+
+	../PARAM/popintuki.sas7bdat
+
+	Korjattu KorkMuuAlle20_2-lakiparametrin arvot vuosille 2021-2023: 104,74 -> 101,74.
+
+46. Korjattu kotihoidon tuen hoitolisän laskennassa perheen koon määrittelyä.
+
+Päivittäjä: MG
+pv. 6.3.2019
+
+	../MAKROT/KOTIHTUKIlakimakrot.sas
+
+	KotihTukiKaava2-makroon lisätty apumuuttuja, joka rajoittaa lasten lukumäärän
+	kahteen perheen kokoa laskettaessa, kuten laissa säädetään. Tällä vaikutusta
+	esimerkkilaskelmiin.
+
+45. Päivähoitomaksujen lakimakrot ja parametrit siirretty omiksi kotihoidon tuesta erillisiksi
+	tiedostoiksi. 
+
+Päivittäjä: MG
+pv. 01.03.2019
+
+	Luotu uusina:
+
+	../MAKROT/PHOITOlakimakrot.sas
+	../PARAM/pphoito.sas7bdat
+
+	Muokattu:
+
+	../MAKROT/KOTIHTUKIlakimakrot.sas
+	../PARAM/pkotihtuki.sas7bdat
+	../PARAM/PARAMindeksit.sas
+	../SIMUL_2016/ALKUsimul.sas
+	../SIMUL_2016/KOKOsimul.sas
+	../SIMUL_2016/PHOITOsimul.sas
+	../ESIM/KOKOesim.sas
+	../ESIM/PHOITOesim.sas
+	../OHJAUS/kaikki_param.sas7bdat
+
+	Muutokset pääasiassa parametritaulu- ja lakimakroviittausten korjaamisia vastaamaan 
+	uutta rakennetta.
+
+44. Muutettu rintamalisän määrää kuvaava lakiparametri (RiLi) vuosikohtaiseksi, kuten ilmoitettu 
+	laissa.
+
+Päivittäjä: IK
+pv. 22.02.2019
+
+	../PARAM/pkansel.sas7bdat
+
+	Muutettu rintamalisän määrää kuvaava lakiparametri (RiLi) kuukausikohtaisesta 
+	vuosikohtaiseksi parametritaulussa.
+
+	../MAKROT/KANSELlakimakrot.sas
+
+	Muutettu KanselLisatKS-lakimakroa.
+
+ 	../PARAM/PARAMindeksit.sas
+
+	Muutettu rivillä 350 lakiparametrin arvo kuukausikohtaisesta vuosikohtaiseksi.
+
+43. Lisätty eläkkeensaajan asumistuen pienintä maksettavaa euromäärää kuvaava kuukausikohtainen
+	lakiparametri (EPieninTukiKk), kuten ilmoitettu laissa vuodesta 2008 lähtien.	   
+
+Päivittäjä: IK
+pv. 22.02.2019
+
+	../OHJAUS/kaikki_param.sas7bdat
+	../PARAM/pelasumtuki.sas7bdat
+
+	Lisätty lakiparametreihin pienin maksettava eläkkeensaajan asumistuki kuukaudessa 
+	(EPieninTukiKk). 
+
+	../MAKROT/ELASUMTUKIlakimakrot.sas
+	
+	Muokattu ElakAsumTukiS-lakimakroa.
+
+	../PARAM/PARAMindeksit.sas
+
+	Muutettu rivillä 309 lakiparametrin nimi EPieninTuki -> EPieninTukiKk ja arvo 
+	vuosikohtaisesta kuukausikohtaiseksi.
+
+42. Korjattu PHAlaRaja-parametrin määrittely kaikki_param-taulussa.
+
+Päivittäjä: MG
+pv. 8.2.2019
+ 
+	../OHJAUS/kaikki_param.sas7bdat
+
+	Lisätty KOTIHTUKI_M-sarakkeeseen määrittely "x" parametrin PHAlaRaja kohdalle.
+
+41. Tarkennettu opintotuen oppimateriaalilisän laskentaa. 
+
+Päivittäjä: MW
+pv. 15.1.2019
+
+	../MAKROT/OPINTUKIlakimakrot.sas
+
+	Lakimakroon OpRahaKS korjattu ikärajausta oppimateriaalilisän laskennassa alle 
+	17-vuotiaille.
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 19.0 JAETTU 14.1.2019    **************************
+*************************************************************************************************
+
+40. Tehty vuoden 2019 lakimuutoksiin liittyvät päivitykset.
+
+Päivittäjä: MW, EA
+pv. 14.1.2019
+
+	../PARAM/PARAMindeksit.sas
+
+	Määritelty vuotta 2019 koskevat tasokorotukset indeksisidonnaisiin parametreihin.
+
+	Luotu uusi Kytkenta-makro, jota käytetään KANSEL-mallin RajaTyotulo-lakiparametrin ja 
+	SAIRVAK-mallin VanhMin-lakiparametrien määrittelemisessä.
+
+	Vanhat, vuotta 2018 koskevat indeksisidonnaisuudet on viety tiedoston loppuun
+	kommenteiksi.
+
+	../OHJAUS/kaikki_param.sas7bdat
+	../PARAM/pasumtuki.sas7bdat
+	../PARAM/pelasumtuki.sas7bdat
+	../PARAM/pkansel.sas7bdat
+	../PARAM/pkivero.sas7bdat
+	../PARAM/pkotihtuki.sas7bdat
+	../PARAM/pllisa.sas7bdat
+	../PARAM/popintuki.sas7bdat
+	../PARAM/psairvak.sas7bdat
+	../PARAM/ptamaksu.sas7bdat
+	../PARAM/ptoimtuki.sas7bdat
+	../PARAM/ptturva.sas7bdat
+	../PARAM/pvero.sas7bdat
+
+	Tehty sekä indeksisidonnaisiin että ei-indeksisidonnaisiin
+	lakiparametreihin liittyvät päivitykset.
+
+	OPINTUKI-mallin parametritauluun lisätty uusi oppimateriaalilisän suuruutta kuvaava
+	lakiparametri, OpmatLisa.
+
+	../MAKROT/OPINTUKIlakimakrot.sas
+
+	Lakimakroon OpRahaKS lisätty oppimateriaalilisän laskenta.
+
+	Lakimakroissa VanhKorotusS ja VanhAlennusS huomioitu, että 1.1.2019 alkaen vanhempien
+	tulojen tulokäsitteenä käytetään veronalaisia ansio- ja pääomatuloja, kun siihen saakka
+	tulokäsitteenä on ollut puhtaat ansio- ja pääomatulot. Tätä varten näissä lakimakroissa
+	on jatkossa kaksi eri parametria vanhempien tuloille, vanhtulo1 ja vanhtulo2.
+
+	Lakimakrossa VanhAlennusS huomioitu, että 1.8.2019 alkaen vanhemman tulot eivät enää
+	alenna itsenäisesti asuvan alle 18-vuotiaan opintorahaa.
+
+	../SIMUL_2016/OPINTUKIsimul.sas
+
+	Vanhempien tulotietojen poiminnassa huomiotu tulokäsitteen muutos 1.1.2019 alkaen
+	(puhtaat ansio- ja pääomatulot -> veronalaiset ansio- ja pääomatulot). Lisäksi
+	OpRahaKS-, OpRahaVS-, AsumLisaKS- ja AsumLisaVS-lakimakrokutsuihin lisätty tarpeellinen
+	uusi parametri.
+
+	../ESIM/OPINTUKIesim.sas
+
+	OpRahaKS-, OpRahaVS-, AsumLisaKS- ja AsumLisaVS-lakimakrokutsuihin lisätty uusi parametri
+	vanhempien tulokäsitteen muutoksen johdosta.
+	
+	../ESIM/KOKOesim.sas
+
+	OpRahaKS-, OpRahaVS-, AsumLisaKS- ja AsumLisaVS-lakimakrokutsuihin lisätty uusi parametri
+	vanhempien tulokäsitteen muutoksen johdosta. Parametri saa arvon 0, koska 
+	KOKOesim-ohjelmassa ei huomioida opiskelijan vanhempien tuloja.  
+	
+39. Lisätty vuotta 2023 koskeva sarake pvvero_tuotteet-parametritauluun.
+
+Päivittäjä: EA
+pv. 11.1.2019
+
+	../PARAM/pvvero_tuotteet.sas7bdat
+
+38. Lisätty vuosia 2022 ja 2023 koskevat rivit ptamaksu-parametritauluun.
+
+Päivittäjä: EA
+pv. 11.1.2019
+
+	../PARAM/ptamaksu.sas7bdat
+
+37. Poistettu tarpeettomat rivit popintuki-parametritaulusta.
+  
+Päivittäjä: EA
+pv. 11.1.2019
+
+	../PARAM/popintuki.sas7bdat
+	
+	Poistettu elokuuta 2018 ja elokuuta 2020 koskevat rivit tarpeettomina.
+
+36. Päivitetty pindeksi_vuosi-tiedostossa olevia indeksejä ansio64kolmas ja IndOpt2010.
+
+Päivittäjä: MW, EA
+pv. 11.1.2019
+
+	../PARAM/pindeksi_vuosi.sas7bdat
+
+	Päivitetty ansio64kolmas-indeksin luku vuodelta 2018 tilastolukua vastaavaksi ja vuosien
+	2019-2023 osalta ansiotasoindeksin ennustetun muutoksen mukaisesti (VM:n joulukuun 2018
+	ennuste).
+
+	Päivitetty IndOpt2010-indeksin luvut vuosien 2016 ja 2017 osalta tilastolukuja 
+	vastaaviksi ja vuosien 2018-2023 osalta ansiotasoindeksin ennustetun muutoksen 
+	mukaisesti (VM:n joulukuun 2018 ennuste).
+
+35. Päivitetty PARAM-kansiossa oleva pindeksi_vuosi-tiedosto uusimman VM:n joulukuun 2018 
+	ennusteen mukaiseksi ja edelleen päivitetty tämän tiedoston pohjalta indeksisidonnaiset
+	lakiparametrit.
+
+Päivittäjä: MW
+pv. 31.12.2018
+
+	../PARAM/pindeksi_vuosi.sas7bdat
+	../PARAM/pasumtuki.sas7bdat
+	../PARAM/pelasumtuki.sas7bdat
+	../PARAM/pkansel.sas7bdat
+	../PARAM/pkotihtuki.sas7bdat
+	../PARAM/pllisa.sas7bdat
+	../PARAM/popintuki.sas7bdat
+	../PARAM/psairvak.sas7bdat
+	../PARAM/ptoimtuki.sas7bdat
+	../PARAM/ptturva.sas7bdat
+	../PARAM/pvero.sas7bdat
+	
+34. Päivitetty AJANTASAISTUS-kansion sisältö vastaamaan	uusinta VM:n joulukuun 2018 ennusteeseen
+	perustuvaa ajantasaistusta (AJANT_2016.30). 
+
+Päivittäjä: MW
+pv. 31.12.2018
+
+	../AJANTASAISTUS/...
+	
+33. Korjattu TTURVA-mallia siten, että siinä huomioidaan muutosturvan ansio-osan poistuminen
+	vuoden 2014 alusta.
+
+Päivittäjä: EA
+pv. 16.11.2018
+
+	../PARAM/ptturva.sas7bdat
+
+	Nollattu parametrit MuutTurvaPros1 ja MuutTurvaPros2 vuodesta 2014 lähtien. 
+
+	../MAKROT/TTURVAlakimakrot.sas
+
+	Riville 70, AnsioSidKS-makroon, lisätty vuosiehto, joka huomioi, että muutosturvan
+	ansio-osa on poistunut vuoden 2014 alusta.
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 18.7 JAETTU 5.11.2018   ***************************
+*************************************************************************************************
+
+32. Lisätty työttömyysturvan aktiivimallin huomiointi TTURVA-mallin esimerkkilaskelmaan ja 
+	KOKOesim-ohjelmaan.
+
+	Laki työttömyysturvan aktiivimallista tuli voimaan 1.1.2018. Vaikka tietoa 
+	aktiivisuusehdon täyttymisestä ei ole datassa, voidaan leikkuria soveltaa 
+	esimerkkilaskelmissa.
+
+Päivittäjä: MW
+pv. 5.11.2018
+
+	../OHJAUS/kaikki_param.sas7bdat
+	../PARAM/ptturva.sas7bdat
+
+	Lisätty uusi lakiparametri AlePros.
+
+	../MAKROT/TTURVAlakimakrot.sas
+
+	Lisätty keyword-makroparametri 'aktiivi' lakimakroihin AnsioSidKS, AnsioSidVS, 
+	TyomTukiKS, TyomTukiVS, PerusPRahaKS, PerusPRahaVS, SoviteltuKS ja SoviteltuVS.
+
+	../ESIM/TTURVAesim.sas
+
+	Riveille 141 ja 142 lisätty optio aktiivimallin mukaisen leikkausprosentin 
+	soveltamisesta.
+
+	../ESIM/KOKOesim.sas
+
+	Riville 419 lisätty optio aktiivimallin mukaisen leikkausprosentin soveltamisesta 
+	työttömyysturvaan. 		
+
+31. Korjattu VERO-mallin lakimakroa AlijHyvS.
+
+Päivittäjä: MW
+pv. 5.11.2018
+
+	../MAKROT/VEROlakimakrot.sas 
+
+	Muutokset riveillä 1456-1540.
+
+30. Päivitetty vahvistettuja indeksipistelukuja indeksitauluihin ja päivitetty
+	indeksisidonnaiset parametrit.
+
+Päivittäjä: SL
+pv. 2.11.2018
+
+	../PARAM/pindeksi_vuosi.sas7bdat
+	../PARAM/pindeksi_kuuk.sas7bdat
+	../PARAM/pasumtuki.sas7bdat
+	../PARAM/pelasumtuki.sas7bdat
+	../PARAM/pkansel.sas7bdat
+	../PARAM/pkotihtuki.sas7bdat
+	../PARAM/pllisa.sas7bdat
+	../PARAM/popintuki.sas7bdat
+	../PARAM/psairvak.sas7bdat
+	../PARAM/ptoimtuki.sas7bdat
+	../PARAM/ptturva.sas7bdat
+	../PARAM/pvero.sas7bdat
+
+29. Korjattu kotihoidon tuen hoitolisän ja päivähoitomaksujen perusteena olevien tulojen
+	määrittelyä KOKOesim ja PHOITOsimul-koodeissa.
+
+Päivittäjä: SL
+pv. 29.10.2018
+
+	../ESIM/KOKOesim.sas
+
+	Kotihoidon tuen hoitolisän perusteena oleviin perheen tuloihin vaikuttaa 1.3.2017
+	lähtien elatustuki/-apu, joka on maksettu niille lapsille, joista kotihoidon tukea
+	maksetaan.
+
+	Siirretty elatustuki kotitaloustason laskennasta henkilötason laskentaan eläkkeiden
+	laskennan jälkeen ja siirretty kotihoidon tuen laskenta elatustuen laskennan jälkeen
+	ennen verotuksen laskentaa. Korjattu KOTIHTULOT-muuttujan määrittelyä siten, että
+	siinä huomioidaan eläkkeet, ei huomioida opintotukea ja huomioidaan 1.3.2017 alkaen
+	edellä mainitut elatustuet.
+
+	Korjattu päivähoitomaksun perusteena olevan tulon (PHTULO) laskentaa siten, että
+	siinä ei huomioida opintotukea, huomioidaan eläkkeet ja elatustuesta huomioidaan
+	vain yhden lapsen osalta saatu elatustuki.
+
+	../SIMUL_2016/PHOITOsimul.sas
+
+	Korjattu päivähoitomaksun perusteena olevaa tuloa (TULOT_YHT) siten, että siinä
+	huomioidaan vain yhdestä lapsesta maksettu elatustuki/-apu kerrallaan. Koska elatustuen
+	/-avun muuttujat luodaan starttidataan asuntokuntatasolla, muodostetaan niistä arvio
+	lasta kohden jakamalla elatustuen ja elatusavun määrä perheen lasten määrällä.
+
+	Lisäksi korjattu elatusavun hakua starttidataan. Aineistossa elatusavut ovat lasten
+	riveillä, joten ne on summattu asuntokuntatasolla ja viety starttidataan viitehenkilölle.
+
+	Huomioitu päivähoitomaksun perusteena olevien tulojen laskennassa maksetut elatusavut,
+	jotka pienentävät maksun perusteena olevaa tuloa.
+
+28. Korjattu makroa SovPalkkaS, jolla voidaan päätellä sovitellun työttömyyspäivärahan
+	sovittelupalkka.
+
+Päivittäjä: SL
+pv. 10.10.2018
+
+	../MAKROT/TTURVAlakimakrot.sas
+
+	Korjattu makroa SovPalkkaS:
+
+	Lisätty pyöristys kohtiin, joissa vertaillaan todellista soviteltua päivärahaa ja
+	päätellyllä sovittelupalkalla laskettua soviteltua päivärahaa. Tämä tarvitaan, koska
+	SASin floating point -aritmetiikan epätarkkuuden takia luvut eivät välttämättä ole
+	täsmälleen samat vaikka sovittelupalkka olisikin päätelty oikein.
+
+	Poistettu ylärajatapauksessa muuttujan temp3-kaavasta osa sovpros * sovsuoja.
+	Suojaosan suuruudella ei ole merkitystä silloin kun ollaan ylärajalla.
+
+	Korjattu rivillä 802 viittaus test-muuttujaan viittaukseksi edellisellä rivillä
+	muodostettuun test2-muuttujaan.
+
+27. Muutettu KANSEL-mallia niin, että työkyvyttömyyseläkkeen lepäämään jättäminen huomioidaan
+	kansaneläkkeen ja takuueläkkeen aineistosimuloinnissa ja osamallikohtaisessa
+	esimerkkilaskelmassa vasta vuodesta 2010 alkaen, jolloin on tullut voimaan laki
+	työkyvyttömyyseläkkeellä olevien työhönpaluun edistämisestä.
+
+Päivittäjä: EA
+pv. 2.10.2018
+
+	../MAKROT/KANSELlakimakrot.sas
+
+	Rivi 61: Muutettu aikaehtoa kuuid >= MDY(4, 1, 2002) -> &mvuosi >= 2010.
+
+	Poistettu TakuuElakeKS-makrosta tarpeettomana sekä LuoKuuID-makrokutsu että aikaehto
+	kuuid >= MDY(4, 1, 2002).
+
+	../PARAM/pkansel.sas7bdat
+
+	Nollattu RajaTyotulo-parametrin arvot ennen vuotta 2010.
+
+26. Parannettu KOKOesim-koodia.
+
+Päivittäjä: SL
+pv. 26.9.2018
+
+	../ESIM/KOKOesim.sas
+
+	Rivi 1278: Korvattu ehto &MINIMI_KOKO_PUOLISO = 0 ehdolla KOKO_PUOLISO = 0.
+
+25. Päivitetty AJANTASAISTUS-kansion sisältö sekä PARAM-kansion parametritaulut vastaamaan
+	uusinta VM:n syksyn 2018 ennusteeseen perustuvaa ajantasaistusta (AJANT_2016.20).
+
+Päivittäjä: SL
+pv. 17.9.2018
+
+	../AJANTASAISTUS/...
+	../PARAM/pindeksi_vuosi.sas7bdat
+	../PARAM/pasumtuki.sas7bdat
+	../PARAM/pelasumtuki.sas7bdat
+	../PARAM/pkansel.sas7bdat
+	../PARAM/pkotihtuki.sas7bdat
+	../PARAM/pllisa.sas7bdat
+	../PARAM/popintuki.sas7bdat
+	../PARAM/psairvak.sas7bdat
+	../PARAM/ptoimtuki.sas7bdat
+	../PARAM/ptturva.sas7bdat
+	../PARAM/pvero.sas7bdat
+
+24. Poistettu tarpeettomia tuplarivejä TTURVA-mallin parametritaulusta.
+
+Päivittäjä: SL
+pv. 13.8.2018
+
+	../PARAM/ptturva.sas7bdat
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 18.6 JAETTU 9.8.2018   ****************************
+*************************************************************************************************
+
+23. Poistettu TOIMTUKI-mallin lakimakrot ToimTukiLLKS ja VahimmTuloS tarpeettomina.
+
+Päivittäjä: SL
+pv. 27.7.2018
+
+	../MAKROT/TOIMTUKIlakimakrot.sas
+
+22. Muutettu kotitaloustasoisessa (asuntokuntatasoisessa) tulostaulukoinnissa koulutuksen
+	luokittelevaksi muuttujaksi koulasv (viitehenkilön koulutusaste) muuttujan koulas
+	(henkilön koulutusaste) sijaan.
+
+Päivittäjä: SL
+pv. 23.7.2018
+
+	../SIMUL_2016/ASUMTUKIsimul.sas
+	../SIMUL_2016/ELASUMTUKIsimul.sas
+	../SIMUL_2016/KANSELsimul.sas
+	../SIMUL_2016/KIVEROsimul.sas
+	../SIMUL_2016/KOKOsimul.sas
+	../SIMUL_2016/KOTIHTUKIsimul.sas
+	../SIMUL_2016/LLISAsimul.sas
+	../SIMUL_2016/OPINTUKIsimul.sas
+	../SIMUL_2016/PHOITOsimul.sas
+	../SIMUL_2016/SAIRVAKsimul.sas
+	../SIMUL_2016/TOIMTUKIsimul.sas
+	../SIMUL_2016/TTURVAsimul.sas
+	../SIMUL_2016/VEROsimul.sas
+	../SIMUL_2016/VVEROsimul.sas
+
+	Pidetty lähdeaineistosta mukana muuttuja koulasv ja tarjottu se luokittelevaksi
+	muuttujaksi kotitaloustasoisessa taulukoinnissa.
+
+	../MAKROT/YLEISET/TulosMakrot.sas
+
+	Lisätty SumKotitT-makroon KIDRYHMA-makromuuttujien määrittelyihin koulasv, jotta sitä
+	voidaan käyttää luokittelevana muuttujana kotitaloustasoisessa taulukoinnissa.
+
+21. Paranneltu SisuFormaatit-koodissa määriteltäviä formaatteja ja lisätty uusia formaatteja.
+
+Päivittäjät: HK, SL
+pv. 19.7.2018
+
+	../OHJAUS/SisuFormaatit.sas
+
+	Paranneltu formaattia elivtu muuttamalla arvojen järjestystä. Lisätty formaattiin
+	koulas siitä puuttunut arvo 4 (erikoisammattikoulutusaste).
+
+	Lisätty formaatit koulasv, aslaji, $sp, $sivs, $talotyyp, $csivs, $tukiaika,
+	$tt_asturek, elakelaji (voidaan käyttää muuttujille velaji, tklaji, tylaji ja omalaji),
+	vuoksaan, asko, $tluokke, ttlaji (voidaan käyttää muuttujille ttlaji1-ttlaji5),
+	ehtm ja lhtm.
+
+	Lisäksi lisätty erillistauluista haettavat formaatit muuttujille ammattikoodi
+	(formaattien nimet $ammattikoodi, $ammatti2nro ja $ammatti1nro) ja koulaspitka
+	(formaattien nimet $koulaspitka, $koulutus2nro ja $koulutus1nro).
+
+	../OHJAUS/fammatti.sas7bdat
+	../OHJAUS/fkoulutus.sas7bdat
+
+	Lisätty uudet formaattien erillistaulut, joista haetaan formaatit muuttujille
+	ammattikoodi ja koulaspitka.
+
+20. Korjattu arvoja opintotuen parametritaulussa ajalla 8/2014 - 1/2016.
+
+Päivittäjä: EA
+pv. 2.7.2018
+
+	../PARAM/popintuki.sas7bdat
+
+	Korjattu parametriarvoja, jotka kertovat opintorahaan vanhempien tulojen perusteella
+	tehtävän korotuksen suuruuden: KorkVanh20b, KorkVanhAlle20b, KorkMuuAlle20b, MuuVanh20b,
+	MuuVanhAlle20b ja MuuMuuAlle20b. Korjaukset koskevat aikaa 8/2014 - 1/2016.
+
+19. Päivitetty parametritaulut ja ajantasaistuksen ohjelmakoodit kesäkuun 2018 ajantasaistuksen
+	mukaisiksi.
+
+Päivittäjä: SL
+pv. 15.6.2018
+
+18. Muutettu TAMAKSUjen laskentaa niin, että käyttäjä voi valita käytetäänkö KuEL- ja VaEL- 
+	vakuutettujen palkkojen osalta parametritaulun keskimääräisiä maksuprosentteja vai
+	aineistosta löytyviä y-tunnuksittain poimittuja maksuprosentteja
+
+Päivittäjä: SSH, SL
+pv. 12.6.2018
+
+	../SIMUL_2016/ALKUsimul.sas
+	../SIMUL_2016/TAMAKSUsimul.sas
+	../MAKROT/TAMAKSUlakimakrot.sas
+
+	TAMAKSUsimul-koodissa määritellään KUELVAELDATA-asetuksessa käytetäänkö KuEL- ja VaEL-
+	vakuutettujen palkkojen osalta parametritaulun keskimääräisiä maksuprosentteja (oletus) 
+	KUELVAELDATA = 0 vai r16_tamaksu-erillisaineisosta KUELVAELDATA = 1.
+
+17. Yhtenäistetty parametrien hakua VERO-osamallissa poistamalla HAKU1-makro.
+
+Päivittäjä: SL
+pv. 23.5.2018
+
+	../MAKROT/VEROlakimakrot.sas
+
+	Osassa VERO-osamallin lakimakroista käytettiin parametrien hakuun makroa HAKU1, joka
+	haki parametrit niin, että niille ei tehty inflaatiokorjausta. Kyseisissä makroissa
+	(TyoelMaksuS, TyotMaksuS, KanselVakMaksuS, KunnVeroS, KirkVeroS, PomaOsuusS, YhtHyvS,
+	VahAsKorotS ja YrittajaVahS) ei oletuksena käytetä mitään euromääräisiä parametreja,
+	joten menettely oli sinänsä ok. Kuitenkin mikäli käyttäjä lisäsi johonkin näistä
+	lakimakroista euromääräisen parametrin, ei sillekään tehty inflaatiokorjausta.
+	Yhtenäisyyden vuoksi ja vahinkojen välttämiseksi edellä mainituissa makroissa on nyt
+	korvattu HAKU1-makron kutsu HAKU-makron kutsulla ja lisätty lakimakron parametriksi
+	inflaatiokerroin (minf).
+
+	../SIMUL_2016/VEROsimul.sas
+	../ESIM/VEROesim.sas
+	../ESIM/KOKOesim.sas
+
+	Lisätty edellä mainittujen lakimakrojen kutsuihin inflaatiokerroinparametri (VEROsimul-
+	ohjelmassa &INF, esim-ohjelmissa INF).
+
+	../MAKROT/YLEISET/ParamMakrot.sas
+
+	Poistettu makron HAKU1 määrittely tarpeettomana.
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 18.5 JAETTU 22.5.2018   ***************************
+*************************************************************************************************
+
+16. Päivitetty TAMAKSU-malli
+
+Päivittäjä: SSH
+pv. 22.5.2018
+
+	../SIMUL_2016/TAMAKSUsimul.sas
+	../PARAM/ptamaksu.sas7bdat
+	../MAKROT/TAMAKSUlakimakrot.sas
+	../OHJAUS/SisuFormaatit.sas
+
+	Päivitetty työnantajamaksujen simulointiohjelma aineistovuodelle 2016. 
+	Korjattu virheellisiä parametriarvoja vanhoilta vuosilta, lisätty työnantajasektorille ja 
+	suorituslajille formaatit sekä korjattu virheellisiä selitteitä lakimakroissa. 
+
+15. Nopeutettu VERO-osamallia pudottamalla starttidatasta ne muuttujat, joita ei tarvita
+	varsinaisessa simulointivaiheessa.
+
+Päivittäjä: SL
+pv. 18.5.2018
+
+	../SIMUL_2016/VEROsimul.sas
+
+	Lisätty poimintamakron loppuun DROP-lause, jossa pudotetaan starttidatasta ne muuttujat,
+	joita ei tarvita varsinaisessa simulointivaiheessa.
+
+14. Parannettu valmismatkojen arvonlisäveron laskentaa VVERO-mallissa.
+
+Päivittäjä: SL
+pv. 18.5.2018
+
+	../PARAM/pvvero.sas7bdat
+
+	Jaettu valmismatkojen "arvonlisäverokanta" kahteen eri kantaan: kotimaan valmismatkat
+	(M1) ja ulkomaan valmismatkat (M2). Lisätietoja valmismatkojen arvonlisäverotuksesta
+	löytyy SISU-käsikirjasta.
+
+	../PARAM/pvvero_tuotteet.sas7bdat
+
+	Jaettu valmismatkojen tuoteluokka A096 alaluokkiinsa ja asetettu niille asianmukaiset
+	alv-kannat.
+
+	../SIMUL_2016/VVEROsimul.sas
+
+	Lisätty kanta M2 simulointiin. Selkeytetty tulosmuuttujien selitteitä. Siirretty
+	tulostaulujen tarkempia kuvauksia footnoteista alaotsikoiksi (TITLE2).
+
+13. Päivitetty ja paranneltu VVERO-moduulia vuoden 2016 kulutustutkimuksen aineistoa varten.
+
+Päivittäjä: SL
+pv. 11.5.2018
+
+	../SIMUL_2016/VVEROsimul.sas
+
+	Muokattu VVERO-moduulin simulointikoodi vuoden 2016 aineistolla toimivaksi ja tehty
+	parannuksia:
+
+	- Alvittomien hintojen laskennassa ei käytetä pvvero-taulun alv-kantoja vaan
+	aineistovuoden alv-prosentti haetaan pvvero_tuotteet-taulun vAin-alkuisesta muuttujasta,
+	jonne se on viety lukuna. Näin käyttäjän pvvero-tauluun tekemät muutokset eivät
+	vaikuta alvittomien hintojen laskentaan.
+
+	- Korvattu makromuuttujat KERROIN_BRUTTO ja KERROIN_NETTO yhdellä makromuuttujalla
+	KULUTUS_KOROTUS.
+
+	- Lisätty koodiin selventäviä kommentteja.
+
+	../PARAM/pvvero_tuotteet.sas7bdat
+
+	Korvattu muuttuja vAineisto muuttujilla vAin2012 ja vAin2016, joihin on viety lukuina
+	aineistovuosina voimassa olleet alv-prosentit, joiden avulla lasketaan simulointikoodissa
+	kulutusmenoryhmien alviton kulutus.
+
+	../SIMUL_2016/ALKUsimul.sas
+
+	Korvattu TeeGlobaalit-makrossa makromuuttujat KERROIN_BRUTTO ja KERROIN_NETTO uudella
+	makromuuttujalla KULUTUS_KOROTUS.
+
+	../MAKROT/YLEISET/YleisMakrot.sas
+
+	Muokattu VarExist-makroa siten, että muuttujien puuttuminen antaa WARNING-ilmoituksen
+	sijaan NOTE-ilmoituksen. Näin VVERO-moduulin ajaminen AIKASA-aineistolla ei tuota
+	tarpeettomia virheviestejä lokiin.
+
+	../OHJAUS/KulutusLuokitus.sas
+
+	Lisätty koodin alkuun AINEISTO-asetus, jolla käyttäjä voi valita minkä aineiston
+	muuttujiin luokituksen jakamisessa käytettävät tuoteluokat perustuvat.
+
+12. Nopeutettu päämallia tehostamalla osamalleissa muiden osamallien tulosten yhdistelyä
+	starttidatoihin.
+
+Päivittäjä: SL
+pv. 3.5.2018
+
+	../SIMUL_2016/PHOITO.sas
+	../SIMUL_2016/TOIMTUKIsimul.sas
+	../SIMUL_2016/VEROsimul.sas
+
+	Tehostettu OsaMallit-alkuisia makroja siten, että muiden osamallien tulokset
+	yhdistetään starttidataan yhdessä DATA-askeleessa.
+
+	../SIMUL_2016/ASUMTUKIsimul.sas
+
+	Tehostettu väliaikaistiedostojen TEMP.ASUMTUKI_SIMULVERO_KOTIT1 ja
+	TEMP.ASUMTUKI_SIMULVERO_KOTIT2 yhdistämistä kotitaloustasoiseen starttidataan siten,
+	että se suoritetaan yhdessä DATA-askeleessa.
+
+	../SIMUL_2016/KOKOsimul.sas
+
+	Lisätty osamallien tulosten yhdistämiselle ehto, jonka seurauksena yhdistämiskoodi
+	ajetaan vain jos joku osamalli on valittuna.
+
+11. Paranneltu PHOITO-osamallin koodia jotta vältytään ylimääräisten rivien muodostumiselta
+	tulosdataan.
+
+Päivittäjä: SL
+pv. 2.5.2018
+
+	../SIMUL_2016/PHOITOsimul.sas
+
+	PHOITO-osamallin tulosdataan tulostui ylimääräisiä rivejä. Mallin eri starttidatoja
+	on nyt yhtenäistetty niin, että starttidatassa START_PHOITO_LAPSET ei pidetä kaikkia
+	alle 8-vuotiaita lapsia vaan vain ne lapset, joilla on hoitokuukausia tai
+	hoitomaksuja. Lisäksi varsinaisessa simuloinnissa on varmuuden vuoksi laskettu
+	kokoaikaisen hoidon maksu vain niille, joilla hoiaikak > 0 ja osa-aikaisen
+	hoidon maksu vain niille, joilla hoiaikao > 0.
+
+10. Korjattu virhe yleisen asumistuen vuotta 2015 edeltävän lainsäädännön lakimakrossa
+	TuloMuokkausS.
+
+Päivittäjä: SL
+pv. 30.4.2018
+
+	../MAKROT/ASUMTUKIlakimakrot.sas
+
+	Rivi 390: Korjattu sulku oikealle paikalle, ennen rivillä luki seuraavasti:
+
+	IF (&henk > 8) THEN &tulos = SUM(&tulot, -(&henk - 8)) * &OmaVastVah;
+
+	Oikea muoto on:
+
+	IF (&henk > 8) THEN &tulos = SUM(&tulot, -(&henk - 8) * &OmaVastVah);
+
+9. Päivitetty ajantasaistuksen tiedostot 30.4.2018 suoritetun ylimääräisen ajantasaistuksen
+	mukaiseksi (Ajantasaistuskierros 2016.00).
+
+Päivittäjä: SL
+pv. 30.4.2018
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 18.4 JAETTU 25.4.2018            ******************
+*************************************************************************************************
+
+8. Korjattu yrittäjien sairausvakuutuksen päivärahamaksun korotuksen määrä.
+
+Päivittäjä: EA
+pv. 24.4.2018
+
+	../PARAM/pvero.sas7bdat
+
+	Korjattu SairVakYrit-parametrin arvo vuosille 2018-2022: 0.017 -> 0.0017
+
+7. Muokattu etuuksien perusteena olevien tulojen päättelyissä käytettyjä makroja niin, että
+	niissä ei enää käytetä satunnaisfunktioita.
+
+Päivittäjä: SL
+pv. 16.4.2018
+
+	../MAKROT/KOTIHTUKIlakimakrot.sas
+
+	Muokattu makroa HoitoLisaTuloKS siten, että jos hoitolisä on maksimihoitolisä, tuloksi
+	annetaan 0. Jos hoitolisä on 0, tuloksi annetaan 99999.
+
+	../MAKROT/OPINTUKIlakimakrot.sas
+
+	Muokattu makroa AsumLisaVuokraKS siten, että jos asumislisä on maksimiasumislisä,
+	vuokraksi annetaan asumislisän vuokrakatto.
+
+	../MAKROT/SAIRVAKlakimakrot.sas
+
+	Muokattu makroa VanhRahaTuloS siten, että vähimmäispäivärahan tapauksessa päivärahan
+	perusteena olevaksi tuloksi annetaan 0. Lisäksi poistettu makro EtsiVahimm.
+
+6. Lisätty leskeneläkkeen kertasuoritus simuloituun leskeneläkkeeseen.
+
+Päivittäjä: SL
+pv. 16.4.2018
+
+	../SIMUL_2016/KANSELsimul.sas
+
+	Pidetty starttidatassa mukana leskeneläkkeen kertasuoritukset (uusi muuttuja psmk) ja ne
+	henkilöt, joilla kyseinen muuttuja > 0. Lisätty datan tieto simuloituun muuttujaan
+	LESKENELAKE. Muuttuja psmk sisältyy jo valmiiksi datan muuttujiin hpelake ja tperhel.
+
+5. Lisätty VERO-malliin lahjoitusvähennyksen huomiointi sekä poistettu lahjoitusvähennyksen
+	lakimakro ja parametrit tarpeettomina.
+
+Päivittäjä: SL
+pv. 13.4.2018
+
+	../SIMUL_2016/VEROsimul.sas
+
+	Lisätty lahjoitusvähennyksen huomiointi niinä vuosina joina se on ollut voimassa
+	(2009-2012 ja 2016 eteenpäin). Muuttujiin MUU_VAH_VALT2 ja MUU_VAH_KUNN2 lisätään
+	aineiston lahjoitusvähennysmuuttuja vlahj. Lahjoitusvähennyksen simuloiminen ei ole
+	nykyisellä tietosisällöllä mahdollista, koska vähennyksen enimmäismäärä koskee vain
+	yhdelle saajalle tehtyjä lahjoituksia, eli henkilön lahjoitusvähennyksellä ei
+	ole ylärajaa.
+
+	../MAKROT/VEROlakimakrot.sas
+	../PARAM/pvero.sas7bdat
+	../OHJAUS/kaikki_param.sas7bdat
+
+	Poistettu käyttämätön lakimakro LahjoitusVahS sekä siihen liittyvät lakiparametrit
+	LahjVahVahimm ja LahjVahEnimm, koska lahjoitusvähennystä ei ole käytännössä mahdollista
+	simuloida.
+
+4. Poistettu KANSEL-mallista takuueläkkeiden adhoc-korjaus lainsäädäntövuodelle 2011
+	tarpeettomana.
+
+Päivittäjä: SL
+pv. 13.4.2018
+
+	../SIMUL_2016/KANSELsimul.sas
+
+	Poistettu kohta jossa takuueläkettä korjattiin kun lainsäädäntövuosi oli 2011. Ilmeisesti
+	korjaus oli alun perin tarkoitettu koskemaan aineistovuotta 2011. Joka tapauksessa se
+	ei juuri vaikuta tuloksiin ja poistetaan tarpeettomana.
+
+3. Paranneltu VERO-mallissa ulkomaan verojen vähennystä.
+
+Päivittäjä: SL
+pv. 13.4.2018
+
+	../SIMUL_2016/VEROsimul.sas
+
+	Muuttuja ULKVAH oli huomioitu VERO-mallissa vasta muodostettaessa muuttujaa
+	MAKSP_VEROT. Datan muuttujissa vähennetyt ulkomaan verot on kuitenkin huomioitu jo
+	eri verolajien muuttujissa (ltva, ltvp jne...). Lisätty uusi koodinpätkä, jossa
+	ULKVAH jaetaan vähennettäväksi eri verolajeista riippuen siitä, mitä ulkomaantuloja
+	henkilö on saanut. Muutos parantaa datan veromuuttujien ja simuloitujen veromuuttujien
+	käsitteiden vastaavuutta.
+
+2. Lisätty opintolainavähennys VERO-malliin.
+
+Päivittäjä: SL
+pv. 13.4.2018
+
+	../SIMUL_2016/VEROsimul.sas
+
+	Lisätty opintolainavähennyksen huomiointi. Koska aineistossa ei ole riittäviä
+	taustatietoja vähennyksen simulointiin, käytetään vähennyksen määränä datassa olevaa
+	tietoa (muuttuja vopintov). Näin saatu opintolainavähennys jaetaan henkilötasolla eri
+	verolajeihin erityisen alijäämähyvityksen jaon jälkeen. Uuden jakovaiheen takia eri
+	verojen lopullisilla muuttujilla on eri nimet kuin aiemmin. Esim. valtion ansiotuloveron
+	lopullinen muuttuja on nyt VALTVEROH kun ennen se oli VALTVEROG. Uudet tulosmuuttujat on
+	huomioitu taulukoinnissa, KEEP-lauseissa ja selitteiden määrittelyssä.
+
+	../SIMUL_2016/KOKOsimul.sas
+
+	Huomioitu uudet VERO-mallin tulosmuuttujien nimet.	
+
+1. Päivitetty simulointikoodit aineistovuodelle 2016.
+
+Päivittäjä: SL
+pv. 13.4.2018
+
+	Tässä muutokset, jotka on tehty simulointikoodien päivityksen yhteydessä:
+
+	../SIMUL_2016/SAIRVAKsimul.sas
+
+	Paranneltu vanhempainpäivärahojen simulointia laadukkaampien vanhempainrahapäivien
+	muuttujien avulla. Poistettu simuloinnista vaiheet, joissa käytettiin muuttujia apv ja
+	apvt ja perustettu simulointi vain päivälajeittain muodostettuihin päivätietoihin
+	aivpvk, aivpv1, aivpv2, aivpvkt, aivpvt1 ja aivpvt2. Lisäksi poistettu vaihe, jossa
+	minimivanhempainpäivärahat laskettiin erikseen. Muokattu muuhun kuin työtuloon
+	perustuvan vanhempainpäivärahan laskentaa niin että se tehdään ansiopäivärahan
+	laskukaavalla vain silloin kun perusteena on ollut työttömyysturva (muuperu = "TT").
+
+	../SIMUL_2016/VEROsimul.sas
+
+	Päivitetty kunnallis- ja kirkollisveroäyrien haku aineistovuoden mukaiseksi. Lisätty
+	tuloerään POTAPP uusi tieto fluotmu (muista pääomatuloista kuin luovutusvoitoista
+	vähennetyt luovutustappiot) silloin kun lainsäädäntövuosi on vähintään 2016.
+	Yhdenmukaistettu kirkollisveron laskukaava kunnallisveron kanssa poistamalla erillisen
+	KAYRI_KORJ-muuttujan luominen (ei vaikutusta tuloksiin).
+
+	Poistettu tarpeeton apumuuttuja EIKIRK.
+
+	Korjattu pääomatulojen tappioiden erää lisäämällä muuttuja ftvuora (tappiolliset
+	vuokratulot).
+
+	../SIMUL_2016/ELASUMTUKIsimul.sas
+
+	Korjattu käytettäväksi lämmitysryhmämuuttujaksi yleisen asumistuen vanhan
+	lämmitysryhmän (vlamm) sijaan eläkkeensaajan asumistuen lämmitysryhmää (evlamm).
+
+	../SIMUL_2016/KIVEROsimul.sas
+
+	Lisätty kiinteistöveron osuudet hoitovastikkeista vuodelle 2016 asunto-osakeyhtiöiden
+	taloustilaston lukujen perusteella.
+
+	../SIMUL_2016/PHOITO.sas
+
+	Lisätty päivähoitomaksut yhteensä sekä datan muuttujaksi että simuloiduksi muuttujaksi.

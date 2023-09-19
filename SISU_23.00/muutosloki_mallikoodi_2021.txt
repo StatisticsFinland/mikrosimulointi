@@ -1,0 +1,44 @@
+﻿*************************************************************************************************
+* SISU-MALLIN MUUTOSLOKI                                                                        *
+* AINEISTOVUOSI 2021  	                                                                        *	
+*                                                                                               *	
+* Tähän dokumenttiin merkitään SISU-malliin tehdyt muutokset malliversiosta 23.00 alkaen.	*
+* Lokista ilmenee muutospäivämäärä, päivittäjän nimi, yleiskuvaus muutoksesta ja                *
+* tiedostot, joihin muutoksia on tehty.								*
+*				                                                                *
+*************************************************************************************************
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 23.00 JAETTU 30.06.2023  **************************
+*************************************************************************************************
+
+3. 	Poistettu VEROsimul-ohjelmasta riveiltä 435-437 ja 694 kunnallisveroprosenttien korjaus
+	kohti keskimääräistä kunnallisveroprosenttia sekä Ahvenanmaan kunnallisveroprosenttien
+	poikkeus. Tämä siitä syystä, että vuoden 2021 data sisältää tuoreimmat sote-uudistuksen
+	mukaiset kunnalisveroprosentit vuodelta 2023.
+
+Päivittäjä: IH
+pv. 21.6.2023
+
+	../SIMUL_2021/VEROsimul.sas
+
+
+2.	Poistettu pohja-ainestosta poistunut veromuuttuja FTYHMT ohjelmasta VEROsimul 
+	starttimuuttujien poiminnasta riveiltä 169 ja 351 sekä riviltä 278 lauseesta 
+	POTAPP = SUM(ftappm, ftapep, ftappmp, ftapepp, ftyhmt, ftvuora);.
+
+Päivittäjä: IH
+pv. 20.6.2023
+
+	../SIMUL_2021/VEROsimul.sas
+
+
+1.	Lisätty pohjadatan uudet veromuuttujat TTYOSUHDEMATKAL ("Työsuhdematkalippu verovapaa 
+	osuus") ja TPOLKUPYORAETUV ("Polkupyöräedun verovapaa osuus") ohjelmiin KOKOsimul ja
+	TOIMTUKIsimul verottomien tulojen summiin.
+
+Päivittäjä: IH
+pv. 20.6.2023
+
+	../SIMUL_2021/KOKOsimul.sas
+	../SIMUL_2021/TOIMTUKIsimul.sas

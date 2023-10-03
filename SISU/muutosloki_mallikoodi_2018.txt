@@ -1,0 +1,742 @@
+﻿*************************************************************************************************
+* SISU-MALLIN MUUTOSLOKI                                                                        *
+* AINEISTOVUOSI 2018                                                                            *	
+*                                                                                               *	
+* Tähän dokumenttiin merkitään SISU-malliin tehdyt muutokset malliversiosta 20.4 alkaen.        *
+* Lokista ilmenee muutospäivämäärä, päivittäjän nimi, yleiskuvaus muutoksesta ja                *
+* tiedostot, joihin muutoksia on tehty.                                                         *
+*												*
+*************************************************************************************************
+
+
+41. Korjattu työttömyysturvan suojaosan korotuksen voimassaoloa (kesäkuun 2021 loppuun saakka) 
+	ajantasaistuksessa päivittyneeseen työttömyysturvan parametritauluun.
+
+Päivittäjä: MW
+pv. 25.5.2021
+
+	../PARAM/ptturva.sas7bdat
+
+40. Päivitetty AJANTASAISTUS-kansion sisältö sekä PARAM-kansion parametritaulut vastaamaan
+        uusinta VM:n maaliskuun 2021 ennusteeseen perustuvaa ajantasaistusta (AJANT_2018.40).
+
+Päivittäjä: MW
+pv. 25.5.2021
+
+        ../AJANTASAISTUS/...
+        ../PARAM/pindeksi_vuosi.sas7bdat
+        ../PARAM/pasumtuki.sas7bdat
+        ../PARAM/pelasumtuki.sas7bdat
+        ../PARAM/pkansel.sas7bdat
+        ../PARAM/pkotihtuki.sas7bdat
+        ../PARAM/pllisa.sas7bdat
+        ../PARAM/popintuki.sas7bdat
+        ../PARAM/pphoito.sas7bdat
+        ../PARAM/psairvak.sas7bdat
+        ../PARAM/ptoimtuki.sas7bdat
+        ../PARAM/ptturva.sas7bdat
+        ../PARAM/pvero.sas7bdat
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 21.01 JAETTU 30.03.2021  **************************
+*************************************************************************************************
+
+39. Jatkettu työttömyysturvan suojaosan korotusta (300 e/kk -> 500 e/kk) kesäkuun 2021 loppuun
+	saakka.
+
+Päivittäjä: EA
+pv. 19.3.2021
+
+	../PARAM/ptturva.sas7bdat
+
+38. Lisätty kaikki_param-taulun pysyvat-sarakkeeseen globaali makromuuttuja SYSSTREAMINGLOG, 
+	jotta SAS EG 8.3 -versiossa ei tule virheilmoitusta siitä, että tämä uusi SAS:n 
+	automaattinen makromuuttuja yritetään tuhota. Muutoksella ei ole vaikutusta muita 
+	vanhempia SAS-versioita käytettäessä.
+
+Päivittäjä: MW
+pv. 15.3.2021
+
+	../OHJAUS/kaikki_param.sas7bdat 
+
+37. Lisätty formaatit toimiala ja toimialak liittyen rekisteriaineistoon lisättyyn 
+	toimiala-muuttujaan.
+
+Päivittäjä: IK
+pv. 11.3.2021
+
+	../OHJAUS/SisuFormaatit.sas
+	
+	Muutokset riveillä 517-533.
+
+	../OHJAUS/ftoimiala.sas7bdat
+
+	Lisätty uusi formaattitaulu ftoimiala.
+
+36. Korjattu esimerkkilaskelmien tulosten vieminen exceliin. Korjauksen yhteydessä on lisätty
+	TulosMakrot.sas-tiedostoon uusi EsimTulokset-makro esimerkkilaskelmien tulosten 
+	tulostamista ja tulosten exceliin vientiä varten. 
+
+Päivittäjä: AS
+pv. 10.3.2021
+
+	../MAKROT/YLEISET/TulosMakrot.sas
+
+	Muutokset riveillä 753-769.
+
+	../ESIM/ASUMTUKIesim.sas
+	../ESIM/ELASUMTUKIesim.sas
+	../ESIM/KANSELesim.sas
+	../ESIM/KIVEROesim.sas
+	../ESIM/KOTIHTUKIesim.sas
+	../ESIM/LLISAesim.sas
+	../ESIM/OPINTUKIesim.sas
+	../ESIM/PHOITOesim.sas
+	../ESIM/SAIRVAKesim.sas
+	../ESIM/TOIMTUKIesim.sas
+	../ESIM/TTURVAesim.sas
+	../ESIM/VANHRAHAesim.sas
+	../ESIM/VEROesim.sas
+
+	Uusi makrokutsu lisätty jokaisen esimerkkilaskelmaohjelman loppupuolelle. Makrokutsulla 
+	on korvattu aiempi kovakoodattu tulosten käsittely. 
+
+	../ESIM/KOKOesim.sas
+
+	Muutos rivillä 1855. Makrokutsulla on korvattu aiempi kovakoodattu tulosten käsittely. 
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 21.00 JAETTU 15.01.2021   *************************
+*************************************************************************************************
+
+35. Korjattu talotyyp-muuttujan formaattia niin, että se vastaa tulonjaon palveluaineiston 
+	mukaista luokitusta.
+
+Päivittäjä: MW
+pv. 13.1.2021
+
+	../OHJAUS/SisuFormaatit.sas
+
+	Muutokset riveillä 304-309.
+
+34. Korjattu VanhPRahaKS-lakimakroa niin, että normaalin vanhempainpäivärahan laskenta käyttää 
+	oikeaa parametria kolmannen tulorajan ylittävissä tapauksissa. Korjauksella ei ole 
+	vaikutusta vuodesta 2016 eteenpäin, johtuen lakimakron tämänhetkisestä rakenteesta.
+
+Päivittäjä: MW
+pv. 13.1.2021
+
+	../PARAM/MAKROT/SAIRVAKlakimakrot.sas
+
+	Rivi 526: &SPros3 -> &SPros3Vanh.  
+
+33. Korjattu alennetun elatustuen määrän parametriarvoja pllisa-parametritauluun.
+
+Päivittäjä: MW
+pv. 13.1.2021
+
+	../PARAM/pllisa.sas7bdat
+
+	AlenElatTuki-parametri vuonna 1995 (tammi- ja heinäkuu): 637 -> 518.
+
+32. Tehty vuoden 2021 lakimuutoksiin liittyvät päivitykset.
+
+Päivittäjä: EA, MW
+pv. 12.1.2021
+
+	../PARAM/sairvak.sas7bdat
+	../PARAM/ptturva.sas7bdat
+	../PARAM/pkotihtuki.sas7bdat
+	../PARAM/pkansel.sas7bdat
+	../PARAM/popintuki.sas7bdat
+	../PARAM/pvero.sas7bdat
+	../PARAM/pkivero.sas7bdat
+	../PARAM/pllisa.sas7bdat
+	../PARAM/pelasumtuki.sas7bdat
+	../PARAM/pasumtuki.sas7bdat
+	../PARAM/pphoito.sas7bdat
+	../PARAM/ptoimtuki.sas7bdat
+	../PARAM/ptamaksu.sas7bdat
+
+	Tehty sekä indeksisidonnaisiin että ei-indeksisidonnaisiin lakiparametreihin liittyvät
+	päivitykset.
+
+	../MAKROT/OPINTUKIlakimakrot.sas
+
+	Rivit 413 ja 419: Lisätty IF-lauseeseen ehto, että 1.8.2021 alkaen oppimateriaalilisää
+	ei makseta niille, jotka ovat oppivelvollisuuslain mukaan oikeutettuja maksuttomaan
+	koulutukseen: (kuuid < MDY(8,1,2021) OR &ika > MIN(&mvuosi - 2005, 20)).
+
+31. Päivitetty pindeksi_kuuk-taulukossa indeksipistelukuja Kh51Kuuk, Ansio64Kuuk ja IndKel
+	uusien toteutumien mukaan.
+
+Päivittäjä: EA
+pv. 12.1.2021
+
+	../PARAM/pindeksi_kuuk.sas7bdat	
+
+30. Korjattu pindeksi_kuuk-taulukossa IndKel-indeksipisteluvun arvot vuoden 2020 osalta.
+
+Päivittäjä: EA
+pv. 12.1.2021
+
+	../PARAM/pindeksi_kuuk.sas7bdat
+
+	Arvon korjaus 1617 -> 1633.
+
+29. Kiinteistöveromalliin päivitetty kiinteistöveron osuudet hoitovastikkeista vuodelle 2018.
+
+Päivittäjä: MW
+pv. 10.1.2021
+
+	../SIMUL_2018/KIVEROsimul.sas
+	
+	Muutokset riveillä 299-320.
+
+28. Muutettu opintotuen ikäluokan määrittelyä OPINTUKIsimul-ohjelmassa.
+
+Päivittäjä: EA
+pv. 06.01.2021
+
+	../SIMUL_2018/OPINTUKIsimul.sas
+
+	Rivit 151-162 & rivi 168: Muutettu opintotuen ikäluokan (IKA-muuttuja) määrittelyä niin,
+	että jatkossa eritellään alle 17-vuotiaat ja 17-vuotiaat toisistaan sekä 18-vuotiaat ja
+	19-vuotiaat toisistaan. 
+
+27. Korjattu IkaKuuk-makroa, jotta se toimii oikein myös silloin, kun makroparametrit ika_ala ja
+	ika_yla	ovat yhtäsuuret.
+
+Päivittäjä: EA
+pv. 06.01.2021
+
+	../MAKROT/YLEISET/YleisMakrot.sas
+
+	Korjaukset riveillä 103-118.
+
+26. Korjattu parametriarvoja ptamaksu-parametritauluun.
+
+Päivittäjä: EA
+pv. 31.12.2020
+
+	../PARAM/ptamaksu.sas7bdat
+
+	VaEl-parametri vuonna 2020 ja siitä eteenpäin: 16,7 -> 16,69.
+	KuEl-parametri vuonna 2019: 21,17 -> 21,11.
+	YEl-parametri vuonna 2019: 23,1 -> 23,2.
+	YEl-parametri vuonna 2020 ja siitä eteenpäin: 23,1 -> 23,4.
+
+25. Laskettu keskimääräinen ev.lut. kirkon veroprosentti vuodelle 2020 (samaa lukua käytetään 
+	myös tätä seuraaville vuosille). Keskimääräinen prosentti pysyy kuitenkin muuttumattomana 
+	edellisvuoteen (2019) nähden.
+
+Päivittäjä: MW
+pv. 31.12.2020
+
+	../PARAM/pvero.sas7bdat  
+
+24. Korjattu keskimääräistä kunnallista veroprosenttia vuodelle 2018.
+
+Päivittäjä: MW
+pv. 31.12.2020
+
+	../PARAM/pvero.sas7bdat  
+
+	KeskKunnPros-parametrin arvo muuttunut 19,86 -> 19,84.
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 20.9 JAETTU 17.12.2020   **************************
+*************************************************************************************************
+
+23. Lisätty uusi vuosirivi 2025 niihin tauluihin joita ei päivitetty ajantasaistuksessa 
+	PARAMindeksit-ohjelmalla. 
+
+Päivittäjä: IK
+pv. 14.12.2020
+	
+	../PARAM/pepidem.sas7bdat
+        ../PARAM/pkivero.sas7bdat
+        ../PARAM/ptamaksu.sas7bdat
+
+22. Päivitetty AJANTASAISTUS-kansion sisältö sekä PARAM-kansion parametritaulut vastaamaan
+        uusinta VM:n joulukuun 2020 ennusteeseen perustuvaa ajantasaistusta (AJANT_2018.30).
+
+Päivittäjä: IK
+pv. 14.12.2020
+
+        ../AJANTASAISTUS/...
+        ../PARAM/pindeksi_vuosi.sas7bdat
+        ../PARAM/pasumtuki.sas7bdat
+        ../PARAM/pelasumtuki.sas7bdat
+        ../PARAM/pkansel.sas7bdat
+        ../PARAM/pkotihtuki.sas7bdat
+        ../PARAM/pllisa.sas7bdat
+        ../PARAM/popintuki.sas7bdat
+        ../PARAM/pphoito.sas7bdat
+        ../PARAM/psairvak.sas7bdat
+        ../PARAM/ptoimtuki.sas7bdat
+        ../PARAM/ptturva.sas7bdat
+        ../PARAM/pvero.sas7bdat 
+
+21. Esimerkkilaskelmiin lisätty mahdollisuus huomioida epidemiakorvaus toimeentulotuen 
+laskennassa. Lisäksi luotu epidemiatuen laskeva lakimakro.
+
+Päivittäjä: EA, MW
+pv. 11.12.2020
+
+	../MAKROT/EPIDEMlakimakrot.sas
+
+	Luotu uusi lakimakrotiedosto josta löytyvät lakimakrot epidemiakorvauksen laskennalle 
+	sekä kuukausitasolla että vuosikeskiarvona. Lisäksi on luotu lakimakro jonka avulla on
+	mahdollista laskea epidemiatuki, mutta tätä ei ole integroitu varsinaisiin
+	esimerkkilaskelmiin.  
+
+	../PARAM/pepidem.sas7bdat
+
+	Luotu uusi parametritaulu epidemiakorvauksen ja epidemiatuen parametreille. 
+
+	../OHJAUS/kaikki_param.sasbdat
+
+	Lisätty kaksi uutta saraketta EPIDEM ja EPIDEM_M.
+
+	../SIMUL_2018/ALKUsimul.sas
+
+	Rivit 184 ja 194: Luotu tyhjät globaalit makromuuttujat epidemiaetuuksien
+	lakimakrotiedostolle ja lakiparametritiedostolle.
+
+	../ESIM/TOIMTUKIesim.sas	 
+
+	Rivit 39, 42, 49, 180, 190-192 ja 196: Tehty tarvittavat lisäykset epidemiaetuuksien
+	lakimakrojen ja parametrien hakua varten.
+
+	Rivit 132-134, 160 ja 166: Lisätty kaksi uutta makromuuttujaa, joiden avulla 
+	esimerkkilaskelmalle voidaan määritellä epidemiakorvauksen kuukausien määrä. Tehty 
+	myös muut tarvittavat lisäykset, jotta uudet makromuuttujat toimivat.
+
+	Rivit 216-222 ja 232-238: Lisätty ehtorakenteet, joiden täyttyessä ohjelma laskee 
+	epidemiakorvauksen määrän joko vuosikeskiarvona tai käyttäen tietyn kuukauden
+	lainsäädäntöä.
+
+	Rivit 242, 244, 246, 248, 250, 274, 278-283 ja 301: Lisätty epidemiakorvauksen 
+	laskentaan liittyviä uusia tulosmuuttujia sekä annettu näille selitteet. Lisäksi 
+	määritelty tarvittavat uudet muuttujat kokonaisluvuiksi tulostaulukkoon.
+
+	../ESIM/KOKOesim.sas
+
+	Rivit 70, 88, 105 ja 1986-1992: Tehty tarvittavat lisäykset epidemiaetuuksien
+	lakimakrojen ja parametrien hakua varten. 
+
+	Rivit 425-428, 586 ja 1261: Lisätty makromuuttuja, joka määrittelee, lasketaanko 
+	mahdollinen epidemiakorvaus. Vastaavan tulosmuuttujan arvo asetetaan nollaksi mikäli
+	epidemikorvausta ei lasketa.
+	
+	Rivit 1497-1500 ja 1505-1508: Lisätty ehtorakenteet, joiden täyttyessä ohjelma laskee 
+	epidemiakorvauksen määrän joko vuosikeskiarvona tai käyttäen tietyn kuukauden
+	lainsäädäntöä.
+	
+	Rivi 1515: Lisätty mahdollisesti laskettava epidemiakorvaus käytettävissä olevien 
+	tulojen summaan.
+
+	Rivit 1595, 1606, 1646, 1794 ja 1816: Lisätty uudet epidemiakorvauksen tulosmuuttujat
+	sopivaan kohtaan tulosmuuttujien listauksessa ja annettu tulosmuuttujille selitteet.
+	Lisäksi määritelty tarvittavat uudet muuttujat kokonaisluvuiksi tulostaulukkoon.   	   
+
+20. Poistettu SIMUL_2017-kansio.
+
+Päivittäjä: MW
+pv. 1.12.2020
+
+	../SIMUL_2017/..
+
+19. Korjattu KOKOsimul-ohjelmaa niin, että myös TTURVA-osamallissa simuloitavat
+	ylläpitokorvaukset yhdistetään KOKO-mallin starttidataan. Muutos korjaa 
+	ajantasaistuksessa havaitun virheen, että simuloidut ylläpitokorvaukset 
+	eivät siirry ajantasaistettuun aineistoon.     
+
+Päivittäjä: MW
+pv. 1.12.2020
+
+	../SIMUL_2018/KOKOsimul.sas
+
+	Rivi 587: KEEP-lauseeseen lisätty muuttuja YPITOK
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 20.8 JAETTU 20.11.2020   **************************
+*************************************************************************************************
+
+18. Julkaistu vuoden 2018 TAMAKSUsimul-ohjelma, joka toimii aineistovuoden 2018	pohja-aineiston
+	(r18_tamaksu) kanssa.
+
+Päivittäjä: IK
+pv. 10.11.2020
+
+	../SIMUL_2018/TAMAKSUsimul.sas
+
+	Rivit 122 ja 143: Muuttuja autolis poistunut pohja-aineistosta ja se on korvattu uudella 
+	muuttujalla autovere. 
+
+17. Muutettu työttömyysturvan lakiparametreja niin, että myös vuoden 2020 marras-joulukuussa 
+	työttömyysturvan suojaosa on 500 e/kk (vrt. aiempi muutos nro 8).
+
+Päivittäjä: EA
+pv. 2.11.2020
+
+	../PARAM/ptturva.sas7bdat
+
+	Muutos koskee lakiparametreja SovSuoja ja SovSuojaKoul.
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 20.7 JAETTU 15.10.2020   **************************
+*************************************************************************************************
+
+16. Korjattu pindeksi_vuosi-taulun sairausvakuutuksen sairaanhoitomaksun parametria SvPro 
+	vuosille 2020-2024. Parametrin arvo kyseisille vuosille ollut virheellisesti 
+	prosenttilukuna, desimaalilukuna ilmaistun prosentin sijaan. Korjaus tehty myös
+	PARAMindeksit-ohjelman kytkennän kautta pvero-taulun sairausvakuutusmaksuprosentin
+	parametriin SvPros. Korjaukset viety myös AJANTASAISTUS-kansion alla oleviin 
+	parametritauluihin. 
+
+	Virhe koski ainoastaan malliversiossa 20.6 julkaistuja parametritauluja.
+
+Päivittäjä: MW
+pv. 14.10.2020
+
+	../PARAM/pindeksi_vuosi.sas7bdat
+	../PARAM/pvero.sas7bdat
+	../AJANTASAISTUS/REK/param/pindeksi_vuosi.sas7bdat
+	../AJANTASAISTUS/REK/param/pvero.sas7bdat     
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 20.6 JAETTU 08.10.2020   **************************
+*************************************************************************************************
+
+15. Poistettu ylimääräinen tyhjä rivi eläkkeensaajan asumistuen parametritaulusta. Poisto 
+	tehty sekä PARAM- että AJANTASAISTUS-kansion alla oleviin pelasumtuki-tauluihin.
+
+Päivittäjä: MW
+pv. 8.10.2020
+
+	../PARAM/pelasumtuki.sas7bdat
+	../AJANTASAISTUS/REK/param/pelasumtuki.sas7bdat
+
+14. Päivitetty aikuiskoulutustukea 1.8.2020 voimaantulleen lakimuutoksen mukaisesti.
+
+Päivittäjä: IK, EA
+pv. 14.9.2020
+		
+	../PARAM/PARAMindeksit.sas
+
+	Rivi 265: Muutettu ATPerus-parametrin perusvuotta ja parametrin arvoa.
+ 
+	../PARAM/popintuki.sas7bdat
+
+	Päivitetty lakimuutoksen mukaiset arvot parametreihin ATPros1, ATTaite, ATPerus,
+	ATSovsuoja ja ATSovPros.
+
+	../MAKROT/OPINTUKIlakimakrot.sas
+
+	Muutettu aikuiskoulutustuen sovitteluun liittyviä makroja AikKoulSoviteltuKS ja
+	AikKoulSoviteltuVS. 
+	
+	../ESIM/OPINTUKIesim.sas
+
+	Rivit 286 ja 289: Lisätty makrokutsuihin OPINTUKI_AIKKOUL_TULO-parametri.
+
+13. Päivitetty AJANTASAISTUS-kansion sisältö sekä PARAM-kansion parametritaulut vastaamaan
+        uusinta VM:n syyskuun 2020 ennusteeseen perustuvaa ajantasaistusta (AJANT_2018.20).
+
+Päivittäjä: MW
+pv. 11.9.2020
+
+        ../AJANTASAISTUS/...
+        ../PARAM/pindeksi_vuosi.sas7bdat
+        ../PARAM/pasumtuki.sas7bdat
+        ../PARAM/pelasumtuki.sas7bdat
+        ../PARAM/pkansel.sas7bdat
+        ../PARAM/pkotihtuki.sas7bdat
+        ../PARAM/pllisa.sas7bdat
+        ../PARAM/popintuki.sas7bdat
+        ../PARAM/pphoito.sas7bdat
+        ../PARAM/psairvak.sas7bdat
+        ../PARAM/ptoimtuki.sas7bdat
+        ../PARAM/ptturva.sas7bdat
+        ../PARAM/pvero.sas7bdat 
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 20.5 JAETTU 05.08.2020   **************************
+*************************************************************************************************
+
+12. Korjattu excel-tulosteen tuottamiseen tarkoitettua komentoa TulosMakrot.sas-ohjelmassa.
+
+Päivittäjä: MG
+pv. 4.8.2020
+
+	../MAKROT/YLEISET/TulosMakrot.sas
+	
+	Rivit 44 ja 86: Muutettu ODS HTML3 -komentoa, jotta tulosteen tuottaminen toimii
+	kaikissa SAS-ohjelmistoversioissa.
+
+11. Lisätty TAMAKSUsimul-koodiin mahdollisuus TEMP-kirjaston tyhjentämiselle.
+
+Päivittäjä: EA
+pv. 30.7.2020
+
+	../SIMUL_2017/TAMAKSUsimul.sas
+
+	Muutokset riveillä 221-227.
+
+10. Muutettu TAMAKSUsimul-koodissa tulostaulukon luontia ja samalla lisätty mahdollisuus
+	tulostaulukon esivalintoihin.
+
+Päivittäjä: IK
+pv. 30.7.2020
+
+	../SIMUL_2017/TAMAKSUsimul.sas
+
+	Rivit 43-67: Lisätty tulostaulukon esivalintoihin liittyviä makromuuttujia.
+	Rivi 237: Lisätty KokoTulokset-makrokutsu.
+
+9. Muutettu TAMAKSUsimul-koodia niin, että tavalliseen tulosaineistoon tulevat mukaan kaikki
+	pohja-aineiston rivit ja lisäksi luodaan aina myös henkilötasolle summattu
+	tulosaineisto.
+
+Päivittäjä: EA
+pv. 30.7.2020
+
+	../SIMUL_2017/TAMAKSUsimul.sas
+
+	Muutokset riveillä 103-106, 121-122 ja 196-219.
+ 
+8. Muutettu työttömyysturvan lakiparametreja niin, että vuoden 2020 kesä-lokakuussa 
+	työttömyysturvan suojaosa on 500 e/kk.
+
+Päivittäjä: EA
+pv. 27.7.2020
+
+	../PARAM/ptturva.sas7bdat
+
+	Muutos koskee lakiparametreja SovSuoja ja SovSuojaKoul.
+
+7. Korjattu työttömyysturvan aineistosimulointia niin, että simulointi toimii myös 
+	vuosikeskiarvoja käytettäessä (TYYPPI=SIMUL).
+
+Päivittäjä: EA
+pv. 27.7.2020
+
+	../MAKROT/TTURVAlakimakrot.sas
+
+	Lisätty SoviteltuVS-lakimakroon keyword-makroparametri vuorsov, jolla on oletusarvo 0.
+
+	../SIMUL_2018/TTURVAsimul.sas
+
+	Korvattu lakimakrokutsut seuraavasti:
+	%SoviteltuKS -> %SoviteltuVS
+	%VuorVapKorvKS -> %VuorVapKorvVS
+
+6. Tehty muutos ptamaksu-lakiparametritaulun TyEl-parametrin arvoon (16.95 -> 14.35) 1.5 lähtien
+	vuodelle 2020. Muutos liittyy 1.5.2020 voimaantulleeseen työeläkemaksun muutokseen.
+
+Päivittäjä: IK
+pv. 24.7.2020
+
+	../PARAM/ptamaksu.sas7bdat
+
+5. Lisätty TAMAKSU-osamalliin kuukausitaso ja mahdollisuus tehdä laskelmia sekä tietyn kuukauden
+	lainsäädännöllä että vuosikeskiarvoina.
+
+Päivittäjä: IK
+pv. 24.7.2020
+
+	../PARAM/ptamaksu.sas7bdat
+	
+	Lisätty kuukausisarake.
+	
+	../SIMUL_2017/TAMAKSUsimul.sas
+
+	Tehty muutoksia, jotta laskelmia voidaan tehdä sekä tietyn kuukauden lainsäädännöllä
+	että vuosikeskiarvona.
+
+	../MAKROT/TAMAKSUlakimakrot.sas
+
+	Muutettu aikaisemmat vuositasoiset makrot kuukausitasoisiksi sekä luotu kokonaan uusia
+	vuosikeskiarvon laskentaan liittyviä makroja.
+	Uudet makrot: SairVakMaksuKTAS SairVakMaksuVTAS TyotVakMaksuKTAS TyotVakMaksuVTAS
+	ElMaksuKTAS ElMaksuVTAS, RyHeMaksuKTAS, RyHeMaksuVTAS, TaTuMaksuKTAS, TaTuMaksuVTAS.
+
+4. Lisätty VVERO-lakimakroihin kuvaukset (DES).
+
+Päivittäjä: IK
+pv. 30.6.2020
+
+	../MAKRO/VVEROlakimakrot.sas
+
+3. Päivitetty AJANTASAISTUS-kansion sisältö sekä PARAM-kansion parametritaulut vastaamaan
+        uusinta VM:n kesäkuun 2020 ennusteeseen perustuvaa ajantasaistusta (AJANT_2018.10).
+
+Päivittäjä: IK
+pv. 22.6.2020
+
+        ../AJANTASAISTUS/...
+        ../PARAM/pindeksi_vuosi.sas7bdat
+        ../PARAM/pasumtuki.sas7bdat
+        ../PARAM/pelasumtuki.sas7bdat
+        ../PARAM/pkansel.sas7bdat
+        ../PARAM/pkotihtuki.sas7bdat
+        ../PARAM/pllisa.sas7bdat
+        ../PARAM/popintuki.sas7bdat
+        ../PARAM/pphoito.sas7bdat
+        ../PARAM/psairvak.sas7bdat
+        ../PARAM/ptoimtuki.sas7bdat
+        ../PARAM/ptturva.sas7bdat
+        ../PARAM/pvero.sas7bdat 
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 20.4 JAETTU 12.06.2020   **************************
+*************************************************************************************************
+
+2. Lisätty ominaisuus, että työttömyysturvan aineistosimulointiohjelma tuottaa varoituksen,
+	jos keston mallinnus on päällä eli APKESTOSIMUL = 1 tai VKKESTOSIMUL = 1.
+
+Päivittäjä: EA
+pv. 28.05.2020
+
+	../SIMUL_2018/TTURVAsimul.sas
+
+	Muutos riveillä 140-151. Varoitus on seuraava: "WARNING: TTURVA-mallissa on keston
+	mallinnus päällä. Suhtauduthan saataviin tuloksiin varovaisesti, sillä keston
+	mallinnuksessa on havaittu epäselvyyksiä." 
+
+1. Päivitetty aineistosimulointiohjelmat aineistovuodelle 2018. 
+
+Päivittäjä: EA
+pv. 30.05.2020
+
+	../SIMUL_2018
+
+	Luotu SIMUL_2018-kansio, johon on viety aineistovuoden 2018 pohja-aineistojen kanssa
+	toimivat aineistosimulointiohjelmat.
+
+	Aineistosimulointiohjelmissa aineistovuodeksi (AVUOSI) ja lainsäädäntövuodeksi (LVUOSI)
+	on asetettu 2018 (pl. VVEROsimul.sas). Lisäksi aineistosimulointiohjelmissa parametrien
+	hakutyypiksi (TYYPPI tai TYYPPI_KOKO) on asetettu SIMUL.
+
+	../SIMUL_2018/ALKUsimul.sas
+
+	Rivi 44: Mallivuosi (MVUOSI) on 2018.
+
+	../SIMUL_2018/KANSELsimul.sas
+
+	Muuttuja ttyoel (Työnantajan maksama eläke) poistunut pohja-aineistosta:
+	ttyoel-muuttujaa ei enää summata mukaan MUUT_EL-muuttujaan (Muut eläkkeet kuin
+	kansaneläke ja takuueläke, (e/v), DATA).
+
+	Muuttuja tulkel (Eläketulo ulkomaantulosta ansiotulona, brutto) poistunut
+	pohja-aineistosta: tulkel-muuttujaa ei enää summata mukaan MUUT_EL-muuttujaan (Muut
+	eläkkeet kuin kansaneläke ja takuueläke, (e/v), DATA).
+
+	Muuttuja tyhthav (Hankintatyön arvo yhtymästä) poistunut pohja-aineistosta: 
+	tyhthav-muuttujaa ei enää summata mukaan TYOTULO-muuttujaan (Työtulo (e/v), DATA).
+
+	Muuttuja tylaji (Työttömyyseläkkeen laji) poistunut pohja-aineistosta: tylaji-muuttujaa
+	käyttävä ehto (tylaji = 4) poistettu riveiltä 281 ja 445.
+
+	../SIMUL_2018/VEROsimul.sas
+
+	Rivit 187-199 ja 414-430: Muutettu kunnallis- ja kirkollisveroprosentteihin liittyvät
+	kohdat sen mukaisesti, että vuoden 2018 pohja-aineistossa on tieto kunnallis- ja
+	kirkollisveroprosenteista vuosille 2018-2020.
+
+	Muuttuja tyhtmy (Puun myyntitulo yhtymästä) poistunut pohja-aineistosta: tyhtmy-muuttuja
+	korvattu uudella tosmetpt-muuttujalla (Osuus verotusyhtymän metsätalouden puhtaasta
+	pääomatulosta).
+
+	Muuttuja vthm (Muut tulonhankkimiskulut) poistunut pohja-aineistosta: vthm-muuttuja
+	korvattu uudella vthmp-muuttujalla (Tulonhankkimiskulut palkkatuloista).
+	
+	Muuttuja vtyasvv (Työasuntovähennys, vähennetty) poistunut pohja-aineistosta:
+	vtyasvv-muuttuja korvattu vtyasv-muuttujalla (Työasuntovähennys, myönnetty). 
+
+	Muuttuja cvakm (Vakuutusmaksutunnus) poistunut pohja-aineistosta:
+	lause IF cvakm = 1 THEN SAIRVAKA = 0; poistettu riviltä 711.
+
+	Muuttuja ftapot (Pääomatulon verovuonna käytetyt tappiot yhteensä) poistunut
+	pohja-aineistosta: ftapot-muuttujaa ei enää summata mukaan POTAPP-muuttujaan (Pääomatulon
+	tappiot, DATA).
+
+	Muuttuja ttyoel (Työnantajan maksama eläke) poistunut pohja-aineistosta: ttyoel-muuttujaa
+	ei enää summata mukaan MUUT_EL-muuttujaan (Muut eläkkeet, DATA).
+
+	Muuttuja tulkel (Eläketulo ulkomaantulosta ansiotulona, brutto) poistunut
+	pohja-aineistosta: tulkel-muuttujaa ei enää summata mukaan MUUT_EL-muuttujaan (Muut
+	eläkkeet, DATA) ja ehtolauseissa riveillä 1150 ja 1160 tulkel-muuttuja korvattu uudella
+	tulkelvp-muuttujalla (Ulkomaan eläkkeet).
+
+	Muuttuja tyhthav (Hankintatyön arvo yhtymästä) poistunut pohja-aineistosta: 
+	tyhthav-muuttujaa ei enää summata mukaan YRITYSTA-muuttujaan (Yrittäjätulot ansiotuloina
+	(yrittäjävähennystä ei ole tehty), DATA).
+
+	Muuttuja vlapsv (Lapsivähennys yhteensä) poistunut pohja-aineistosta: simuloitua
+	lapsivähennyksen määrää ei voi verrata datan vastaavaan. 
+
+	Muuttuja vthm3 (Tulonhankkimiskulut muista AT:sta kuin työtuloista) poistunut
+	pohja-aineistosta: vthm3-muuttujaa ei enää summata mukaan THANKK-muuttujaan (Ulkomaantulon
+	kuluvähennys ja tulonhankkimiskulut muista kuin työ- ja palkkatuloista,	DATA).
+
+	Muuttuja vurvael (Urheilijan vapaaehtoinen eläke- ja työttömyysvakuutusmaksu) poistunut
+	pohja-aineistosta: vurvael-muuttuja poistettu lakimakrokutsuista riveillä 766 ja 774 sekä
+	ehtolauseesta rivillä 773.
+
+	../SIMUL_2018/PHOITOsimul.sas
+
+	Rivit 138-149: Lisätty ominaisuus, että päivähoidon aineistosimulointiohjelma tuottaa
+	varoituksen, jos sitä käytetään aineistovuoden 2018 pohja-aineistolla. Varoitus on
+	seuraava: "WARNING: PHOITO-mallissa aineistovuonna 2018 käytettävät lasten kunnallisen
+	varhaiskasvatuksen osallistumiskuukausien määrät on päätelty perustuen suurelta osin
+	vanhempien työllisyystietoihin."
+
+	Rivi 166: Aineiston rajauksesta on poistettu ehto hoimaksk > 0 OR hoimakso > 0.
+
+	../SIMUL_2018/ELASUMTUKIsimul.sas
+
+	Muuttuja tulkel (Eläketulo ulkomaantulosta ansiotulona, brutto) poistunut
+	pohja-aineistosta: ehtolauseessa rivillä 223 tulkel-muuttuja korvattu uudella 
+	tulkelvp-muuttujalla (Ulkomaan eläkkeet).
+
+	Muuttuja tylaji (Työttömyyseläkkeen laji) poistunut pohja-aineistosta: tylaji-muuttujaa
+	käyttävä ehto (tylaji = 0) poistettu riviltä 195.
+
+	../SIMUL_2018/ASUMTUKIsimul.sas
+
+	Muuttuja tyhthav (Hankintatyön arvo yhtymästä) poistunut pohja-aineistosta: 
+	tyhthav-muuttujaa ei enää summata mukaan TYOTULOKK-muuttujaan.
+
+	../SIMUL_2018/TOIMTUKIsimul.sas
+
+	Muuttuja vthm (Muut tulonhankkimiskulut) poistunut pohja-aineistosta: vthm-muuttuja
+	korvattu uudella vthmp-muuttujalla (Tulonhankkimiskulut palkkatuloista).
+
+	Muuttuja tyhthav (Hankintatyön arvo yhtymästä) poistunut pohja-aineistosta: 
+	tyhthav-muuttujaa ei enää summata mukaan VERTYOTULO-muuttujaan (Veronalainen
+	työtulo (e/v), DATA).
+
+	../SIMUL_2018/KOKOsimul.sas
+
+	Rivi 96: Muutettu oletuksia niin, että PHOITO-mallia ei oletuksena ajeta.
+
+	Muuttuja tyhtmy (Puun myyntitulo yhtymästä) poistunut pohja-aineistosta: tyhtmy-muuttuja
+	korvattu uudella tosmetpt-muuttujalla (Osuus verotusyhtymän metsätalouden puhtaasta
+	pääomatulosta).
+
+	Muuttuja vthm (Muut tulonhankkimiskulut) poistunut pohja-aineistosta: vthm-muuttuja
+	korvattu uudella vthmp-muuttujalla (Tulonhankkimiskulut palkkatuloista).
+
+	Muuttuja ttyoel (Työnantajan maksama eläke) poistunut pohja-aineistosta: ttyoel-muuttujaa
+	ei enää summata mukaan MUUT_EL-muuttujaan (Ansio ym. eläkkeet yhteensä,	DATA).
+
+	Muuttuja tulkel (Eläketulo ulkomaantulosta ansiotulona, brutto) poistunut
+	pohja-aineistosta: tulkel-muuttujaa ei enää summata mukaan MUUT_EL-muuttujaan (Ansio ym.
+	eläkkeet yhteensä, DATA).
+
+	Muuttuja tyhthav (Hankintatyön arvo yhtymästä) poistunut pohja-aineistosta: 
+	tyhthav-muuttujaa ei enää summata mukaan YRIT_ANSIO-muuttujaan (Yritystulot ansiotuloina
+	yhteensä, DATA).

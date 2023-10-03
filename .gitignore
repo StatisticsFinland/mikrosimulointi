@@ -13,6 +13,6 @@ SISU/TULOS/TEMP/*
 !SISU/TULOS/TEMP/.gitkeep
 
 # Rajataan DOKUM-kansiosta pois kaikki paitsi excel- ja pdf-tiedostot + tutkijapalveluiden säännöt ja ohjeet
-!SISU/DOKUM/.pdf
-!SISU/DOKUM/.xlsx
+!SISU/DOKUM/*.pdf
+!SISU/DOKUM/*.xlsx
 SISU/DOKUM/Tutkijapalveluiden_saannot_ja_ohjeet_20170421.pdf

@@ -15,4 +15,6 @@ SISU/TULOS/TEMP/*
 # Rajataan DOKUM-kansiosta pois kaikki paitsi excel- ja pdf-tiedostot + tutkijapalveluiden säännöt ja ohjeet
 !SISU/DOKUM/*.pdf
 !SISU/DOKUM/*.xlsx
+*.docx
+*.doc
 SISU/DOKUM/Tutkijapalveluiden_saannot_ja_ohjeet_20170421.pdf

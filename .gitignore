@@ -1,0 +1,17 @@
+# Rajataan kansiot DATA ja AJANTASAISTUS pois gittiin viennistä
+SISU/DATA/
+SISU/DATA/
+
+SISU/AJANTASAISTUS/
+
+# Viedään kansioista TULOS vain kansiorakenne, ei dataa
+SISU/TULOS/OUTPUT/*
+SISU/TULOS/TEMP/*
+
+# Otetaan kuitenkin .gitkeep tiedostot TULOS-kansiosta niin kansiot saadaan näkyviin
+!SISU/TULOS/OUTPUT/.gitkeep
+!SISU/TULOS/TEMP/.gitkeep
+
+# Rajataan DOKUM-kansiosta pois kaikki paitsi excel- ja pdf-tiedostot
+!SISU/DOKUM/.pdf
+!SISU/DOKUM/.xlsx

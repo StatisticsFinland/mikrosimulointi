@@ -76,12 +76,15 @@
 %LET MAKSIMI_SAIRVAK_VANHRAHA = 0;
 
 * Onko kyse korotetusta äitiyspäivärahasta (1 = tosi, 0 = epätosi)
-  (tarkoittaa 90 ensimmäiseltä äitiyslomapäivältä maksettavaa päivärahaa (2007-));
+  (tarkoittaa 90 ensimmäiseltä äitiyslomapäivältä maksettavaa päivärahaa (2007-2015))
+  (tarkoittaa 56 ensimmäiseltä äitiyslomapäivältä maksettavaa päivärahaa (2016-07/2022))
+  (tarkoittaa 40 raskausrahapäivältä maksettavaa päivärahaa (08/2022-));
 %LET MINIMI_SAIRVAK_KORAIT = 0;
 %LET MAKSIMI_SAIRVAK_KORAIT = 0;
 
 * Onko kyse korotetusta vanhempainrahasta (1 = tosi, 0 = epätosi)
-  (tarkoittaa 56 päivältä maksettavaa korotettua päivärahaa (2007-));
+  (tarkoittaa 56 päivältä maksettavaa korotettua päivärahaa (2007-2015))
+  (tarkoittaa 16 päivältä maksettavaa korotettua päivärahaa (08/2022-));;
 %LET MINIMI_SAIRVAK_KORVANH = 0;
 %LET MAKSIMI_SAIRVAK_KORVANH = 0;
 

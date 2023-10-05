@@ -723,7 +723,7 @@ SET OUTPUT.&TULOSNIMI_VE;
 /* 3.2.1 Lasketaan palkkaverotuksen tuloverot */
 
 IF VERO_PTULO > 0 THEN DO;
-	%TuloVerot_SimpleS(TULOVERO, VERO_VUOSI, INF, VERO_PTULO, VERO_IKA);
+%TuloVerot_SimpleS(TULOVERO, VERO_VUOSI, INF, VERO_PTULO, VERO_IKA);
 
 	/* Verojen osuus tuloista */
 	VOSUUSPTULO = (TULOVERO / VERO_PTULO) * 100;

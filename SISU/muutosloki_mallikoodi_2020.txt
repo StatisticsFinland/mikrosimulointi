@@ -1,0 +1,287 @@
+﻿*************************************************************************************************
+* SISU-MALLIN MUUTOSLOKI                                                                        *
+* AINEISTOVUOSI 2020  	                                                                        *	
+*                                                                                               *	
+* Tähän dokumenttiin merkitään SISU-malliin tehdyt muutokset malliversiosta 22.30 alkaen.	*
+* Lokista ilmenee muutospäivämäärä, päivittäjän nimi, yleiskuvaus muutoksesta ja                *
+* tiedostot, joihin muutoksia on tehty.								*
+*				                                                                *
+* Koronan takia aineistovuosi 2020 on poikkeuksellinen. Tämän takia malliversiota 22.55, jossa	*
+* on käytetty 2019 aineistoa pohjana, on SISU-kansion oletusmalliversio.			*
+*************************************************************************************************
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 22.60 JAETTU 28.04.2023  **************************
+*************************************************************************************************
+* Malliversion julkaisun yhteydessä on myös julkaistu korjattu rek2020, ks. tarkemmat tiedot	*
+* muutosloki_aineisto_2020.txt-tiedostosta.							*
+*************************************************************************************************
+
+17.	SOTE-valinnan poisto VEROsimul- ja KOKOsimul-koodien valinnoista. Sote-lainsäädäntö
+	ajetaan vallitsevana lainsäädäntönä 2023 lähtien. Vuodelle 2022 ei ole enää mahdollista
+	valita sote-lainsäädäntöä.
+
+Päivittäjä: MK, TO
+pv. 21.4.2023
+
+	../SIMUL_2020/VEROsimul.sas
+	../SIMUL_2020/KOKOsimul.sas
+	../SIMUL_2020/ALKUsimul.sas
+
+16.	Kotitalousvähennyksen makron KotitVahErillJakoSkorjaus ja makrokutsun lisääminen 
+	simulointikoodiin.
+
+Päivittäjä: TO, RS
+pv. 21.4.2023
+
+	../SIMUL_2020/VEROsimul.sas
+	../SISU/MAKROT/VEROlakimakrot
+
+15.	Työtulovähennykseen korotus yli 60-vuotiaille.
+	Työtulovähennystä korotetaan:
+		200 eurolla 60–61-vuotiailla
+		400 eurolla 62–64-vuotiailla
+		600 eurolla 65 vuotta täyttäneillä.
+
+Päivittäjä: TO, RS
+pv. 21.4.2023
+
+	../SISU/ESIM/VEROesim.sas
+	../SISU/ESIM/VEROesim.sas
+	../SISU/MAKROT/VEROlakimakrot
+
+14.	Tehty vuoden 2023 lakimuutoksiin liittyvät parametripäivitykset sekä indeksisidonnaisiin
+	että ei-indeksisidonnaisiin lakiparametreihin. Lisäksi päivitetty KEL-indeksisidonnaiset
+	parametrit elokuulle 2022.
+
+Päivittäjä: TO, RS, TP
+pv. 21.4.2023
+
+	../PARAM/pindeksi_vuosi.sas7bdat
+	../PARAM/pindeksi_kuuk.sas7bdat
+        ../PARAM/pasumtuki.sas7bdat
+        ../PARAM/pelasumtuki.sas7bdat
+        ../PARAM/pkansel.sas7bdat
+        ../PARAM/pkivero.sas7bdat
+        ../PARAM/pkotihtuki.sas7bdat
+        ../PARAM/pllisa.sas7bdat
+        ../PARAM/popintuki.sas7bdat
+        ../PARAM/pphoito.sas7bdat
+        ../PARAM/psairvak.sas7bdat
+        ../PARAM/ptoimtuki.sas7bdat
+        ../PARAM/ptturva.sas7bdat
+        ../PARAM/pvero.sas7bdat
+        ../PARAM/ptamaksu.sas7bdat
+        ../PARAM/PARAMindeksit.sas
+
+
+13.	Ajantasaistetaan hyväksyttävien asumismenojen kuntakohtaiset rajat vuosille 2023-2027.
+	Päivitetään taulut Kelan tietojen perusteella.
+
+Päivittäjä: TP
+pv. 21.4.2023
+
+	../PARAM/asummenorajat_2023.sas7bdat
+	../PARAM/asummenorajat_2024.sas7bdat
+	../PARAM/asummenorajat_2025.sas7bdat
+	../PARAM/asummenorajat_2026.sas7bdat
+	../PARAM/asummenorajat_2027.sas7bdat
+
+
+12. 	Korjattu SOTE-laskennan virheitä verolakimakroissa. Eläketulovähennystä sekä
+	työtulovähennystä leikattiin aiemmin virheellisesti kahteen kertaan, mikä johti liian 
+	pieniin vähennyksiin. Lisäksi verolakimakrossa OpRahVahS 
+	oli virheellisesti &tulos = &OpRahVah, korjattu &tulos = &YhdOpRahVah.
+
+Päivittäjä: TO
+pv. 21.4.2023
+
+	../MAKROT/VEROlakimakrot.sas
+
+11.	Sote-lainsäädännön päivitys esimerkkilaskuihin.
+
+Päivittäjä: TO, MK
+pv. 21.4.2023
+
+	../SIMUL_2020/VEROsimul.sas
+	../SIMUL_2020/KOKOsimul.sas
+	../SISU/MAKROT/VEROlakimakrot
+
+10.	Päivitetty AnsioSidKestoRaj-makroon siirtymävuodet, jolloin työttömyyspäivärahan 
+	lisäpäiväoikeuden alaikärajan korotukset astuvat vuoden 2023 lainsäädännön mukaisesti voimaan.
+
+Päivittäjä: RS
+pv. 21.4.2023
+
+	../SIMUL_2020/TTURVAlakimakrot.sas
+
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 22.40 JAETTU 19.10.2022  **************************
+*************************************************************************************************
+
+9.	Korjattu päivähoitomaksujen parametrien arvot elokuulle 2022. Korjattu PalkVahPros
+	arvo vuodelle 2022 pindeksi_vuosi tauluun ja ptturva tauluun. Ajantasaistuksen yhteydessä
+	on päivitetty osamallien parametritaulut.
+
+Päivittäjä: TO
+pv. 14.10.2022
+
+
+8.	Poistettu laskennallisista eristä sekä TTURVAsimul-ohjelmasta SOVKORPM-, koropvpks- ja
+	PERKORPRM-muuttujat, jotka olivat jääneet malliin virheellisesti edellisen aineisto-
+	päivityksen yhteydessä.
+
+Päivittäjä: TO
+pv. 5.10.2022
+
+	../SIMUL_2020/TTURVAsimul.sas
+	Laskennalliset erat.sas
+
+7. 	Korjattu SOTE-laskennan virheitä verolakimakroissa. Eläketulovähennystä sekä
+	työtulovähennystä leikattiin aiemmin virheellisesti kahteen kertaan, mikä johti liian 
+	pieniin vähennyksiin. Tämä on nyt korjattu mallissa. Lisäksi verolakimakrossa OpRahVahS 
+	oli virheellisesti &tulos = &OpRahVah, korjattu &tulos = &YhdOpRahVah.
+
+Päivittäjä: TO
+pv. 27.9.2022
+
+	../MAKROT/VEROlakimakrot.sas
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 22.30 JAETTU 22.09.2022  **************************
+*************************************************************************************************
+
+6. 	Aineistomuutoksen vuoksi osinkojen muuttuja suorlaji muutettu koodissa characterista numeeriseksi.
+
+Päivittäjä: IH
+pv. 29.8.2022
+
+	../SIMUL_2020/OSINKOsimul.sas
+	
+
+5. 	Elokuussa 2022 voimaan astuvan perhevapaauudistukseen liittyen sairvak-osamalliin sekä KOKOsimuliin
+	on lisätty ohjausparametri PERHEVAP, jonka arvolla 1 malli voidaan ajaa käyttäen perhevapaauudistuksen
+	mukaisia korotettuja vanhempainpäivärahapäiviä. Lisäksi SAIRVAKesim- ja KOKOesim-ohjelmiin on päivitetty elokuusta
+	2022 alkaen korotettujen vanhempainpäivärahojen laskeminen lain mukaisesti.
+
+
+Päivittäjä: IH
+pv. 12.8.2022
+
+	../SIMUL_2020/ALKUsimul.sas
+	../SIMUL_2020/SAIRVAKsimul.sas
+	../SIMUL_2020/KOKOsimul.sas
+	../PARAM/psairvak.sas7dbat
+	../MAKROT/SAIRVAKlakimakrot.sas
+	../ESIM/SAIRVAKesim.sas
+
+
+4. 	TAMAKSU-moduuli muokattu toimimaan vuoden 2020 aineistolla. Aineistosta tippui pois suorlaji-
+	muuttuja. Tulojen osalta siirrytty tulorekisteripoimintaan ja suorituslajit huomioitu siellä.
+	Vuoden 2020 TAMAKSU-erillisaineistoa voi käyttää malliversiolla SIMUL_2020. Aineistoa ei ole
+	muokattu toimimaan SIMUL_2020 mallilla. Käyttäjä voi tehdä halutessaan vastaavan muutoksen itse 	
+	vuoden 2020 malliversioon.
+
+
+Päivittäjä: RH
+pv. 10.8.2022
+
+	../SIMUL_2020/TAMAKSUsimul.sas
+
+
+3. Verohallinnon pohja-aineiston muutosten takia malliin on tehty seuraavat muuttujien muutokset:
+TPTELAK (Vapaaehtoisiin eläke- ja henkilövakuutuksiin perustuvat eläkkeet (POT)) on poistunut. Muuttuja
+on korvattu TVAHEVAS-muuttujalla (Vapaaehtoiseen yksilölliseen eläkevakuutukseen perustuva pääomatuloa oleva vuosittain maksettava eläke).
+Vuoden 2020 ja 2020 välillä TVAHEVAS merkitys on muuttunut, joten vuoden 2020 TKAPITE korvaantuu vuoden
+2020 aineistossa muuttujalla TKAPITE (Kapitalisaatiosopimuksen voitto).
+
+TPTELAK (2020) -> TVAHEVAS (2020)
+TVAHEVAS (2020) -> TKAPITE (2020)
+
+Päivittäjä: TO
+pv. 10.5.2022
+
+	../SIMUL_2020/KOKOsimul.sas
+	../SIMUL_2020/VEROsimul.sas
+	
+
+2. Kelan pohja-aineiston muutosten takia malliin on tehty seuraavat muuttujien muutokset:
+
+Omalaji (Oman kansaneläkkeen laji) korvattu muuttujilla velake (Kansaneläkkeen vanhuuseläke, €/vuosi) ja tkelake (Kansaneläkkeen työkyvyttömyyseläke, €/vuosi).
+Perlaji (Perhe-eläkkeen laji) korvattu muuttujilla lapper (Lapseneläkkeen perusmäärä), laptay (Lapseneläkkeen täydennysmäärä), vakio (Lesken alkueläkkeen vakio-osa), perus (Lesken jatkoeläkkeen perusmäärä), tayde (Lesken jatkoeläkkeen täydennysmäärä)
+
+kelkan -> kelake
+elaktuki -> elaketuki
+takelake -> takuuelake
+hpelake -> pelake
+lake -> laelake
+leto -> tayde
+lepe -> vakio + perus
+hpelake -> pelake
+omakanel -> kelake
+hlaho -> vtukia16
+rili -> tielake
+riyl -> ryelake
+kelapu -> etuki
+kelatk -> tkelake
+kelave -> velake
+kellaps -> lapsikorotus
+omakelve, omahve -> velake
+omakeltk, omahtk -> tkelake
+
+
+Päivittäjä: IH
+pv. 8.4.2022
+
+	../SIMUL_2020/VEROsimul.sas
+	../SIMUL_2020/TOIMTUKIsimul.sas
+	../SIMUL_2020/KANSELsimul.sas
+	../SIMUL_2020/ASUMTUKIsimul.sas
+	../SIMUL_2020/ELASUMTUKIsimul.sas
+
+
+1. Pohja-aineiston muutosten takia seuraavat muuttujat on poistettu mallista:
+	
+gttakelake
+KOROSAPKS
+KOROPVPKS
+korosatkf
+korosazkg
+korosazkf
+koropvtkg
+koropvtkf
+koropvzkg
+koropvzkf
+dttsyhtez
+dtosyhtez
+dtthyhtez
+dttayspvz
+dttspvz
+dtospvz
+dtthpvz
+dtvpvz
+dttspalkz
+dtomapalz
+dtovlkmz
+dtopalkkz
+palkmz
+dtyllaez
+dtyllapvz
+dttllkm
+dtopalkkz
+yhtez
+psmk
+ktuki
+TMUUT
+TPTELAK
+rvvm
+
+
+Päivittäjä: IH, TO
+pv. 8.4.2022
+
+	../SIMUL_2020/VEROsimul.sas
+	../SIMUL_2020/TOIMTUKIsimul.sas
+	../SIMUL_2020/KANSELsimul.sas
+	../SIMUL_2020/ASUMTUKIsimul.sas

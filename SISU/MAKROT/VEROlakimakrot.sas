@@ -3190,6 +3190,7 @@ DES = 'VERO: Kotitalousvähennys erillisdatasta';
 
 %MEND KotitVahErillJakoS;
 
+
 /* 59. Yrittäjävähennys 
 
 Parametrit:

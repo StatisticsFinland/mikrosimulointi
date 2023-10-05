@@ -1,5 +1,5 @@
 ﻿*************************************************************************************************
-* SISU-MALLIN MUUTOSLOKI                                                                        *
+* SISU-MALLIN MUUTOSLOKI                                                                         *
 * AINEISTOVUOSI 2019                                                                            *	
 *                                                                                               *	
 * Tähän dokumenttiin merkitään SISU-malliin tehdyt muutokset malliversiosta 22.00 alkaen.       *
@@ -7,124 +7,6 @@
 * tiedostot, joihin muutoksia on tehty.                                                         *
 *												*
 *************************************************************************************************
-
-*************************************************************************************************
-**************************   UUSI MALLIVERSIO 22.55 JAETTU 2.5.2023  ****************************
-*************************************************************************************************
-31. 	Korjattu ProsEro ("Ero Ahvenanmaan ja Manner-Suomen veroprosenttien välillä") arvo pvero-
-	taulussa vuosille 2023-2027. Päivitetty VEROsimul-koodiin aineistovuosi 2019 oletus-
-	arvoksi Vero_Ayrit-makroon riville 437.
-
-Päivittäjä: RS, TO
-pv. 28.4.2023
-
-	../SIMUL_2019/VEROsimul.sas
-        ../PARAM/pvero.sas7bdat
-
-*************************************************************************************************
-**************************   UUSI MALLIVERSIO 22.50 JAETTU 2.2.2023  ***************************
-
-Koronan takia aineistovuosi 2020 on poikkeuksellinen. Tämän takia 2023 lainsäädäntömuutokset
-on viety malliversioon 22.20, jossa pohjalla käytetään aineistovuotta 2019. Päivityksen
-yhteydessä rek2019 on ajantasaistettu vuosille 2020-2027.
-
-*************************************************************************************************
-30. 	Aineistojen ajantasaistus vuosille 2020-2027.
-	Päivitetään vuoden 2019 pohja-aineisto vastaamaan VM:n joulukuun 2022 ennusteita.
-
-Päivittäjä: TO
-pv. 2.2.2023
-
-
-29.	Kotitalousvähennyksen makron KotitVahErillJakoSkorjaus ja makrokutsun lisääminen 
-	simulointikoodiin.
-
-Päivittäjä: TO, RS
-pv. 27.1.2023
-
-	../SIMUL_2019/VEROsimul.sas
-	../SISU/MAKROT/VEROlakimakrot
-
-28.	Työtulovähennykseen korotus yli 60-vuotiaille.
-	Työtulovähennystä korotetaan:
-		200 eurolla 60–61-vuotiailla
-		400 eurolla 62–64-vuotiailla
-		600 eurolla 65 vuotta täyttäneillä.
-
-Päivittäjä: TO, RS
-pv. 27.1.2023
-
-	../SISU/ESIM/VEROesim.sas
-	../SISU/ESIM/VEROesim.sas
-	../SISU/MAKROT/VEROlakimakrot
-
-27.	Tehty vuoden 2023 lakimuutoksiin liittyvät parametripäivitykset sekä indeksisidonnaisiin että 
-	ei-indeksisidonnaisiin lakiparametreihin. Lisäksi päivitetty KEL-indeksisidonnaiset
-	parametrit elokuulle 2022.
-
-
-Päivittäjä: TO, RS, TP
-pv. 27.1.2023
-
-	../PARAM/pindeksi_vuosi.sas7bdat
-	../PARAM/pindeksi_kuuk.sas7bdat
-        ../PARAM/pasumtuki.sas7bdat
-        ../PARAM/pelasumtuki.sas7bdat
-        ../PARAM/pkansel.sas7bdat
-        ../PARAM/pkivero.sas7bdat
-        ../PARAM/pkotihtuki.sas7bdat
-        ../PARAM/pllisa.sas7bdat
-        ../PARAM/popintuki.sas7bdat
-        ../PARAM/pphoito.sas7bdat
-        ../PARAM/psairvak.sas7bdat
-        ../PARAM/ptoimtuki.sas7bdat
-        ../PARAM/ptturva.sas7bdat
-        ../PARAM/pvero.sas7bdat
-        ../PARAM/ptamaksu.sas7bdat
-        ../PARAM/PARAMindeksit.sas
-
-
-26.	Ajantasaistetaan hyväksyttävien asumismenojen kuntakohtaiset rajat vuosille 2023-2027.
-	Päivitetään taulut Kelan tietojen perusteella.
-
-Päivittäjä: TP
-pv. 24.1.2023
-
-	../PARAM/asummenorajat_2023.sas7bdat
-	../PARAM/asummenorajat_2024.sas7bdat
-	../PARAM/asummenorajat_2025.sas7bdat
-	../PARAM/asummenorajat_2026.sas7bdat
-	../PARAM/asummenorajat_2027.sas7bdat
-
-
-25. 	Korjattu SOTE-laskennan virheitä verolakimakroissa. Eläketulovähennystä sekä
-	työtulovähennystä leikattiin aiemmin virheellisesti kahteen kertaan, mikä johti liian 
-	pieniin vähennyksiin. Lisäksi verolakimakrossa OpRahVahS 
-	oli virheellisesti &tulos = &OpRahVah, korjattu &tulos = &YhdOpRahVah.
-
-Päivittäjä: TO
-pv. 18.1.2023
-
-	../MAKROT/VEROlakimakrot.sas
-
-24.	Sote-lainsäädännön päivitys esimerkkilaskuihin.
-
-Päivittäjä: TO, MK
-pv. 18.1.2022
-
-	../SIMUL_2019/VEROsimul.sas
-	../SIMUL_2019/KOKOsimul.sas
-	../SISU/MAKROT/VEROlakimakrot
-
-23.	Päivitetty AnsioSidKestoRaj-makroon siirtymävuodet, jolloin työttömyyspäivärahan 
-	lisäpäiväoikeuden alaikärajan korotukset astuvat vuoden 2023 lainsäädännön mukaisesti voimaan.
-
-Päivittäjä: RS
-pv. 18.1.2023	
-
-	../SIMUL_2019/TTURVAlakimakrot.sas
-
-
 
 *************************************************************************************************
 **************************   UUSI MALLIVERSIO 22.20 JAETTU 26.04.2022  **************************
@@ -190,7 +72,7 @@ pv. 17.3.2022
 	../SIMUL_2019/VEROlakimakrot
 
 
-17. Tehty vuoden 2022 lakimuutoksiin liittyvät parametripäivitykset sekä indeksisidonnaisiin että 
+17. Tehty vuoden 2021 lakimuutoksiin liittyvät parametripäivitykset sekä indeksisidonnaisiin että 
 	ei-indeksisidonnaisiin lakiparametreihin.
 
 Päivittäjä: TO, RH, IH, JM
@@ -441,4 +323,3 @@ pv. 22.12.2021
 	../SIMUL_2019/KANSELsimul.sas
 	../SIMUL_2019/ASUMTUKIsimul.sas
 
-testi

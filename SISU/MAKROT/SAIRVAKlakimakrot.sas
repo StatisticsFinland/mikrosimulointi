@@ -1,6 +1,6 @@
 /*******************************************************************
 *  Kuvaus: Sairausvakuutuksen päivärahojen lainsäädäntöä makroina  * 
-*  Viimeksi päivitetty: 13.1.2021 							       * 
+*  Viimeksi päivitetty: 4.7.2022 							       * 
 *******************************************************************/
 
 
@@ -390,10 +390,16 @@ tulos: Makron tulosmuuttuja, korotettu vanhempainpäiväraha, e/kk
 mvuosi: Vuosi, jonka lainsäädäntöä käytetään
 mkuuk: Kuukausi, jonka lainsäädäntöä käytetään 
 minf: Deflaattori euromääräisten parametrien kertomiseksi 
-ait: (1 tai 0), äideille ensimmäisten 56 äitiyslomapäivän aikana
+ait: 1)
+	 07/2022 asti: äideille ensimmäisten 56 äitiyslomapäivän aikana
      myönnettävä korotettu päiväraha, jossa käytetään 90 prosentin
-     kerrointa. Muuten kyse on 75 prosentin kertoimesta alkuperäisen
-     lainsäädännön mukaan.
+     kerrointa.
+	 08/2022 lähtien: äideille 40 raskauspäivärahapäivän aikana
+     myönnettävä korotettu päiväraha, jossa käytetään 90 prosentin
+     kerrointa. 
+	 0) 2015 asti: 75 prosentin kerroin
+		2016-07/2022: 0 prosentin kerroin
+		08/2022 lähtien: 90 prosentin kerroin ensimmäiseltä 16 päivältä
 lapsia: Alaikäisten lasten lukumäärä (ei vaikutusta vuoden 1993 jälkeen, parametrin arvo parametritaulukossa ratkaisee)
 tulo: Henkilön omat (työ)tulot, e/vuosi
 yrittaja: Henkilön yrittäjätulot, e/vuosi
@@ -402,9 +408,9 @@ tulonhankk: tulonhankkimiskulut;
 %MACRO KorVanhRahaKS (tulos, mvuosi, mkuuk, minf, ait, lapsia, tulo, yrittaja = 0, tulonhankk = 0)/
 DES = 'SAIRVAK: Korotettu vanhempainpäiväraha kuukausitasolla';
 
-/*Ennen vuotta 2007 lasketaan normaali vanhempainpäiväraha. Samoin vuodesta 2016 lähtien, jos kyse ei ole äitien
-ensimmäisen 56 päivän äitiysrahasta;*/
-IF &mvuosi < 2007 OR (&mvuosi > 2015 and &ait = 0) THEN DO;
+/*Ennen vuotta 2007 lasketaan normaali vanhempainpäiväraha. Samoin välillä 2016-07/2022, jos kyse ei ole äitien
+ensimmäisen 56 päivän äitiysrahasta.;*/
+IF &mvuosi < 2007 OR ((2015 < &mvuosi < 2022 OR (&mvuosi = 2022 AND &mkuuk < 8)) AND  &ait = 0) THEN DO;
 	%SairVakPrahaKS(&tulos, &mvuosi, &mkuuk, &minf, 1, &lapsia, &tulo, yrittaja = &yrittaja, tulonhankk = &tulonhankk);
 END;
 
@@ -495,7 +501,7 @@ DES = 'SAIRVAK: Eri suuruiset vanhempainpäivärahat päivää kohden kuukausitasolla
 
 /*Ennen vuotta 2007 lasketaan normaali päiväraha. Samoin vuodesta 2016 lähtien, jos kyse ei ole äitien
 ensimmäisen 56 päivän äitiysrahasta;*/
-IF &mvuosi < 2007 or (&mvuosi > 2015 AND &ait = 0) THEN DO;
+IF &mvuosi < 2007 or (2015 < &mvuosi AND &PERHEVAP=0 AND &ait = 0) or (&PERHEVAP=1 AND &norm=1) THEN DO;
 	%SairVakPrahaKS(temp, &mvuosi, &mkuuk, &minf, 1, &lapsia, &vanhtulo, yrittaja = &yrittaja, tulonhankk=&tulonhankk);
 	&tulos = temp / &SPaivat;
 END;

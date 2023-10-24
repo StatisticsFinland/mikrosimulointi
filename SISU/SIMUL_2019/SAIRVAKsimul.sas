@@ -145,7 +145,7 @@
 	DATA STARTDAT.START_SAIRVAK;
 	SET POHJADAT.&AINEISTO&AVUOSI
 	(KEEP = hnro knro ppv ppvt tulosrt tuloprt haiprva hsaiprva pmkyt amkyt hwmky wpv
-	muuperu aivpvkt aivpvt2 aivpvk aivpv2 aivpv1 aivpvt1
+	muuperu aivpvkt aivpvt2 aivpvk aivpv2 aivpv1 aivpvt1 tosinktp
 
 	SAIR_PVX SAIR_PER_PV VANH_PER_PV SAIR_TULO VANH_TULO SAIR_PV_TYONANT
 	VANH_PV_TYONANT SAIRTULO_TYONANT VANHTULO_TYONANT ERITHOIT_PER_PV ERITHOIT_TULO ANSPALKKA);
@@ -224,8 +224,16 @@ END;
 
 /* Vaihtoehtoisesti simulointi datan tulotiedoilla */
 ELSE DO;
-	%SairVakPRahaVS(SAIRPR, &LVUOSI, &INF, 0, 0, tulosrt / (1 - &PalkVah));
-	%SairVakPRahaVS(SAIRPR_TYONANT, &LVUOSI, &INF, 0, 0, tulosrt / (1 - &PalkVah));
+	/* Lainsäädäntövuodesta 2022 eteenpäin ja 2019-2021 aineistolla */
+	IF &LVUOSI >= 2021 AND 2019 <= &AVUOSI <= 2021 THEN DO; 
+		%SairVakPRahaVS(SAIRPR, &LVUOSI, &INF, 0, 0, SUM(tulosrt, tosinktp) / (1 - &PalkVah));
+		%SairVakPRahaVS(SAIRPR_TYONANT, &LVUOSI, &INF, 0, 0, SUM(tulosrt, tosinktp) / (1 - &PalkVah));
+	END;
+	/* Muulloin */
+	ELSE DO;
+		%SairVakPRahaVS(SAIRPR, &LVUOSI, &INF, 0, 0, tulosrt / (1 - &PalkVah));
+		%SairVakPRahaVS(SAIRPR_TYONANT, &LVUOSI, &INF, 0, 0, tulosrt / (1 - &PalkVah));
+	END;
 END;
 
 SAIRPR = SAIR_PVX * SAIRPR / &SPaivat;
@@ -247,14 +255,28 @@ END;
 
 /* Vaihtoehtoisesti simulointi datan tulotiedoilla */
 ELSE DO;
-	/* Vakuutetulle maksetut */
-	%VanhPRahaVS(PROS90VANH, &LVUOSI, &INF, 1, 0, 0, 0, tuloprt /(1 - &PalkVah));
-	%VanhPRahaVS(PROS75VANH, &LVUOSI, &INF, 0, 1, 0, 0, tuloprt / (1 - &PalkVah));
-	%VanhPRahaVS(NORMVANH, &LVUOSI, &INF, 0, 0, 1, 0, tuloprt / (1 - &PalkVah));
-	/* Työnantajalle maksetut */
-	%VanhPRahaVS(PROS90VANH_TYONANT, &LVUOSI, &INF, 1, 0, 0, 0, tuloprt / (1 - &PalkVah));
-	%VanhPRahaVS(PROS75VANH_TYONANT, &LVUOSI, &INF, 0, 1, 0, 0, tuloprt / (1 - &PalkVah));
-	%VanhPRahaVS(NORMVANH_TYONANT, &LVUOSI, &INF, 0, 0, 1, 0, tuloprt / (1 - &PalkVah));
+	/* Lainsäädäntövuodesta 2022 alkaen ja 2019-2021 aineistolla */
+	IF &LVUOSI >= 2021 AND 2019 <= &AVUOSI <= 2021 THEN DO;
+		/* Vakuutetulle maksetut */
+		%VanhPRahaVS(PROS90VANH, &LVUOSI, &INF, 1, 0, 0, 0, SUM(tuloprt, tosinktp) /(1 - &PalkVah));
+		%VanhPRahaVS(PROS75VANH, &LVUOSI, &INF, 0, 1, 0, 0, SUM(tuloprt, tosinktp) / (1 - &PalkVah));
+		%VanhPRahaVS(NORMVANH, &LVUOSI, &INF, 0, 0, 1, 0, SUM(tuloprt, tosinktp) / (1 - &PalkVah));
+		/* Työnantajalle maksetut */
+		%VanhPRahaVS(PROS90VANH_TYONANT, &LVUOSI, &INF, 1, 0, 0, 0, SUM(tuloprt, tosinktp) / (1 - &PalkVah));
+		%VanhPRahaVS(PROS75VANH_TYONANT, &LVUOSI, &INF, 0, 1, 0, 0, SUM(tuloprt, tosinktp) / (1 - &PalkVah));
+		%VanhPRahaVS(NORMVANH_TYONANT, &LVUOSI, &INF, 0, 0, 1, 0, SUM(tuloprt, tosinktp) / (1 - &PalkVah));
+	END;
+	/* Muulloin */
+	ELSE DO;
+		/* Vakuutetulle maksetut */
+		%VanhPRahaVS(PROS90VANH, &LVUOSI, &INF, 1, 0, 0, 0, tuloprt /(1 - &PalkVah));
+		%VanhPRahaVS(PROS75VANH, &LVUOSI, &INF, 0, 1, 0, 0, tuloprt / (1 - &PalkVah));
+		%VanhPRahaVS(NORMVANH, &LVUOSI, &INF, 0, 0, 1, 0, tuloprt / (1 - &PalkVah));
+		/* Työnantajalle maksetut */
+		%VanhPRahaVS(PROS90VANH_TYONANT, &LVUOSI, &INF, 1, 0, 0, 0, tuloprt / (1 - &PalkVah));
+		%VanhPRahaVS(PROS75VANH_TYONANT, &LVUOSI, &INF, 0, 1, 0, 0, tuloprt / (1 - &PalkVah));
+		%VanhPRahaVS(NORMVANH_TYONANT, &LVUOSI, &INF, 0, 0, 1, 0, tuloprt / (1 - &PalkVah));
+	END;
 END;
 
 /* Kerrotaan päivillä */

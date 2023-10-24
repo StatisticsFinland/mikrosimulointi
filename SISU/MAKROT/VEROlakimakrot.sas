@@ -1,6 +1,6 @@
 /*******************************************************************
 *  Kuvaus: Tuloverotuksen lainsäädäntöä makroina                   * 
-*  Viimeksi päivitetty: 5.11.2018        					       * 
+*  Viimeksi päivitetty: 3.3.2022        					       * 
 *******************************************************************/
 
 /* SISÄLLYS */
@@ -65,9 +65,18 @@
 55. ValtVerMeriVahS = Valtionverotuksen merityötulovähennys
 56. TuloVerot_Simple_PRahTyoS = Tuloverot yksinkertaisessa perustapauksessa, jossa päiväraha ja palkkatuloja
 57. KotitVahErillS = Kotitalousvähennyksen lisädatan laskentamakro
-58. YrittajaVahS = Yrittäjävähennys
-59. KunnVerKerroin = Makro, jonka avulla tuotetaan kunnallisen ja kirkollisen veroprosentin muuntamiseen tarvittavat kertoimet
-60. VahennysSwap = Makro, jonka avulla vähennyksiä siirretään puolisoiden kesken
+58. KotitVahErillJakoS = Kotitalousvähennyksen lisädatan laskentamakro työn lajeittain
+59. YrittajaVahS = Yrittäjävähennys
+60. KunnVerKerroin = Makro, jonka avulla tuotetaan kunnallisen ja kirkollisen veroprosentin muuntamiseen tarvittavat kertoimet
+61. VahennysSwap = Makro, jonka avulla vähennyksiä siirretään puolisoiden kesken
+61. VerMeriVahS = Merityötulovähennys (Sotemuutokset, 2023 alkaen)
+62. OpRahVahS = Opintorahavähennys (Sotemuutokset, 2023 alkaen)
+63. AnsVahS = Ansiotulovähennys (Sotemuutokset, 2023 alkaen)
+64. ElTulVahS = Eläketulovähennys (Sotemuutokset, 2023 alkaen)
+65. PerVahS = Perusvähennys (Sotemuutokset, 2023 alkaen)
+66. ValtVerAnsVahS_2023 = Valtionverotuksen työtulovähennys (Sotemuutokset, 2023 alkaen)
+67. ValtTuloVeroS_sote =  Valtion tulovero (sotemuutosten poikkeustapauksia varten)
+
 */
 
 /* 1. Tulonhankkimisvähennys. 
@@ -822,7 +831,9 @@ END;
 	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
 	minf: Deflaattori euromääräisten parametrien kertomiseksi
 	tulo = Valtion verotuksessa verotettava tulo eli tulo vähennysten jälkeen 
-	      (vuodesta 1993 lähtien koskee vain ansiotuloa);
+	      (vuodesta 1993 lähtien koskee vain ansiotuloa)
+	ahv= 1 , jos korjataan verotusta Ahvenanmaalle, muulloin 0;
+	
 
 %MACRO ValtTuloVeroS(tulos, mvuosi, minf, tulo)/
 DES = 'VERO: Valtion tulovero (veroasteikko)';
@@ -832,43 +843,41 @@ DES = 'VERO: Valtion tulovero (veroasteikko)';
 IF &tulo <= 0 THEN &tulos = 0;
 
 ELSE DO;
+		IF &tulo GE  &Raja12 THEN
+			&tulos =  &Vakio12 + &Pros12 * (&tulo -  &Raja12);
 
-	IF &tulo GE  &Raja12 THEN
-		&tulos =  &Vakio12 + &Pros12 * (&tulo -  &Raja12);
+		ELSE IF &tulo GE  &Raja11 THEN
+			&tulos =  &Vakio11 + &Pros11 * (&tulo -  &Raja11);
 
-	ELSE IF &tulo GE  &Raja11 THEN
-		&tulos =  &Vakio11 + &Pros11 * (&tulo -  &Raja11);
+		ELSE IF &tulo GE  &Raja10 THEN
+			&tulos =  &Vakio10 + &Pros10 * (&tulo -  &Raja10);
 
-	ELSE IF &tulo GE  &Raja10 THEN
-		&tulos =  &Vakio10 + &Pros10 * (&tulo -  &Raja10);
+		ELSE IF &tulo GE  &Raja9 THEN
+			&tulos =  &Vakio9 + &Pros9 * (&tulo -  &Raja9);
 
-	ELSE IF &tulo GE  &Raja9 THEN
-		&tulos =  &Vakio9 + &Pros9 * (&tulo -  &Raja9);
+		ELSE IF &tulo GE  &Raja8 THEN
+			&tulos =  &Vakio8 + &Pros8 * (&tulo -  &Raja8);
 
-	ELSE IF &tulo GE  &Raja8 THEN
-		&tulos =  &Vakio8 + &Pros8 * (&tulo -  &Raja8);
+		ELSE IF &tulo GE  &Raja7 THEN
+			&tulos =  &Vakio7 + &Pros7 * (&tulo -  &Raja7);
 
-	ELSE IF &tulo GE  &Raja7 THEN
-		&tulos =  &Vakio7 + &Pros7 * (&tulo -  &Raja7);
+		ELSE IF &tulo GE  &Raja6 THEN
+			&tulos =  &Vakio6 + &Pros6 * (&tulo -  &Raja6);
 
-	ELSE IF &tulo GE  &Raja6 THEN
-		&tulos =  &Vakio6 + &Pros6 * (&tulo -  &Raja6);
+		ELSE IF &tulo GE  &Raja5 THEN
+			&tulos =  &Vakio5 + &Pros5 * (&tulo -  &Raja5);
 
-	ELSE IF &tulo GE  &Raja5 THEN
-		&tulos =  &Vakio5 + &Pros5 * (&tulo -  &Raja5);
+		ELSE IF &tulo GE  &Raja4 THEN
+			&tulos =  &Vakio4 + &Pros4 * (&tulo -  &Raja4);
 
-	ELSE IF &tulo GE  &Raja4 THEN
-		&tulos =  &Vakio4 + &Pros4 * (&tulo -  &Raja4);
+		ELSE IF &tulo GE  &Raja3 THEN
+			&tulos =  &Vakio3 + &Pros3 * (&tulo -  &Raja3);
 
-	ELSE IF &tulo GE  &Raja3 THEN
-		&tulos =  &Vakio3 + &Pros3 * (&tulo -  &Raja3);
+		ELSE IF &tulo GE  &Raja2 THEN
+			&tulos =  &Vakio2 + &Pros2 * (&tulo -  &Raja2);
 
-	ELSE IF &tulo GE  &Raja2 THEN
-		&tulos =  &Vakio2 + &Pros2 * (&tulo -  &Raja2);
-
-	ELSE IF &tulo GE  &Raja1 THEN
-		&tulos =  &Vakio1 + &Pros1 * (&tulo -  &Raja1);
-
+		ELSE IF &tulo GE  &Raja1 THEN
+			&tulos =  &Vakio1 + &Pros1 * (&tulo -  &Raja1);
 END;
 
 %MEND ValtTuloVeroS;
@@ -2909,6 +2918,7 @@ DROP temp;
 
 %MEND ValtVerMeriVahS;
 
+
 /* 56. Tuloverot yksinkertaisessa perustapauksessa, kun tulot
 	   ovat pelkästään vanhempainpäivärahaa tai muuta vastaavaa sosiaalietuutta (ei työtuloa eikä eläkettä)
        ja palkkatuloja. */
@@ -2990,7 +3000,73 @@ DES = 'VERO: Kotitalousvähennys erillisdatasta';
 
 %MEND KotitVahErillS;
 
-/* 58. Yrittäjävähennys 
+
+
+/* 58. Kotitalousvähennyksen lisädatan laskentamakro työn lajeittain.
+	Laskee kotitalousvähennyksen ostoihin, palkkakuluihin ja palkan sivukuluihin sekä 
+	kotitalous-, hoiva- tai hoitotyöhön ja asunnon tai vapaa-ajan asunnon kunnossapito- tai perusparannustyöhön
+	eritellystä	datasta.
+
+Parametrit:
+    tulos: Makron tulosmuuttuja, kotitalousvähennysoikeus
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	minf: Deflaattori euromääräisten parametrien kertomiseksi 
+	palksiku_remontti: palkatun työntekijän palkan sivukulut, oma osuus, asunnon tai vapaa-ajan asunnon kunnossapito- tai perusparannustyö
+	palksiku_koti: palkatun työntekijän palkan sivukulut, oma osuus, kotitalous-, hoiva- tai hoitotyö
+	palkomos_remontti: palkatun työntekijän palkka, oma osuus, asunnon tai vapaa-ajan asunnon kunnossapito- tai perusparannustyö
+	palkomos_koti: palkatun työntekijän palkka, oma osuus, kotitalous-, hoiva- tai hoitotyö
+	tyonosuu_remontti: työn osuus yrityksen työstä, asunnon tai vapaa-ajan asunnon kunnossapito- tai perusparannustyö
+	tyonosuu_koti: työn osuus yrityksen työstä, kotitalous-, hoiva- tai hoitotyö
+*/
+
+
+%MACRO KotitVahErillJakoS(tulos, mvuosi, minf, palksiku_remontti, palksiku_koti, palkomos_remontti, palkomos_koti, tyonosuu_remontti, tyonosuu_koti)/
+DES = 'VERO: Kotitalousvähennys erillisdatasta';
+
+	%HAKU;
+
+	/*Asunnon tai vapaa-ajan asunnon kunnossapito- tai perusparannustyö*/
+
+	IF &tyonosuu_remontti > 0 THEN DO;
+		temp1_remontti = 0 + &tyonosuu_remontti * &KotitVahTyoKerroinRemontti;
+	END;
+
+	IF &palkomos_remontti > 0 THEN DO;
+		temp2_remontti = 0 + &palksiku_remontti + &palkomos_remontti * &KotitVahPalKerroinRemontti;
+	END;
+
+	remonttiYht = sum(temp1_remontti, temp2_remontti);
+	
+	IF SUM(remonttiYht, -&KotitVahOmavast) > &kotitVahEnimmRemontti THEN tulosRemontti = &kotitVahEnimmRemontti;
+	ELSE IF SUM(remonttiYht, -&KotitVahOmavast) < 0 THEN tulosRemontti = 0;
+	ELSE tulosRemontti = remonttiYht;
+
+	/*kotitalous-, hoiva- tai hoitotyö*/
+
+	IF &tyonosuu_koti > 0 THEN DO;
+		temp1_koti = 0 + &tyonosuu_koti * &KotitVahTyoKerroin;
+	END;
+
+	IF &palkomos_koti > 0 THEN DO;
+		temp2_koti = 0 + &palksiku_koti + &palkomos_koti * &KotitVahPalKerroin;
+	END;
+
+	kotiYht = sum(temp1_koti, temp2_koti);
+
+	IF SUM (kotiYht, -&KotitVahOmavast) > &kotitVahEnimm THEN tulosKoti = &kotitVahEnimm;
+	ELSE IF SUM(kotiYht, -&KotitVahOmavast) < 0 THEN tulosKoti = 0;
+	ELSE tulosKoti = kotiYht;
+
+	/*Kaikki kotitalousvähennykset yhteensä*/
+	
+	IF SUM(tulosRemontti, tulosKoti) > &kotitVahEnimm THEN &tulos = &kotitVahEnimm;
+	ELSE IF SUM(tulosRemontti, tulosKoti) < 0 THEN &tulos = 0;
+	ELSE &tulos = SUM(tulosRemontti, tulosKoti);	
+
+%MEND KotitVahErillJakoS;
+
+
+/* 59. Yrittäjävähennys 
 
 Parametrit:
     tulos: Makron tulosmuuttuja, Yrittäjävähennys
@@ -3015,7 +3091,7 @@ DROP temp;
 %MEND YrittajaVahS;
 
 
-/* 59. Makro, jonka avulla tuotetaan kunnallisen ja kirkollisen
+/* 60. Makro, jonka avulla tuotetaan kunnallisen ja kirkollisen
     veroprosentin muuntamiseen tarvittavat kertoimet
 
 Makron parametrit:
@@ -3055,7 +3131,7 @@ RUN;
 %MEND KunnVerKerroin;
 
 
-/* 60. Makro, jonka avulla vähennyksiä siirretään puolisoiden kesken
+/* 61. Makro, jonka avulla vähennyksiä siirretään puolisoiden kesken
 
 Makron parametrit:
 	vahennys: Jaettavan vähennyksen määrä, e/vuosi
@@ -3080,3 +3156,302 @@ ELSE DO;
 	&VAHENNYS.2FINAL = 0;
 END;
 %MEND VahennysSwap;
+
+***************** UUDET MAKROT ************************************;
+
+ /* 61. Merityötulovähennys  
+	yhdistetty, ei enää erillisistä laskentaa valtionverotuksessa ja kunnallisessa verotuksessa */
+
+/* Makron parametrit:
+    tulos: Makron tulosmuuttuja, verotuksen merityötulovähennys
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	minf: Deflaattori euromääräisten parametrien kertomiseksi
+	merityötulo: Veronalainen merityötulo */
+
+%MACRO VerMeriVahS(tulos, mvuosi, minf, merityotulo)/
+DES = 'VERO: Merityötulovähennys';
+
+%HAKU;
+
+temp = 0;
+
+IF &merityotulo GT 0 THEN DO;
+
+	temp = MIN((&merityotulo * (&MeriVahPros)), &MeriVahMax);
+
+	yliraja = SUM(&merityotulo, -&MeriVahYli) * (&MeriVahYliPros); 
+	IF &merityotulo GT &MeriVahYli THEN temp = SUM(-yliraja, temp); 
+
+END;
+	
+&tulos = MAX(temp, 0);
+
+DROP temp;
+
+%MEND VerMeriVahS;
+/* 62. Opintorahavähennys 
+Ennen ollut vain kunnallisverotuksessa, nyt yhteinen
+
+*Makron parametrit:
+    tulos: Makron tulosmuuttuja, opintorahavähennys 
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	minf: Deflaattori euromääräisten parametrien kertomiseksi
+	opraha: Opintoraha (veronalainen opintukilain mukainen opintoraha)
+	puhdanstulo: Puhdas ansiotulo; */
+
+%MACRO OpRahVahS (tulos, mvuosi, minf, opraha, puhdanstulo)/
+DES = 'VERO: Opintorahavähennys';
+
+%HAKU;
+
+IF &opraha = 0 THEN &tulos = 0;
+
+ELSE DO;
+
+	&tulos = &OpRahVah;
+
+	IF &puhdanstulo > &YhdOpRahVah THEN  &tulos =  &YhdOpRahVah - &YhdOpRahPros * (&puhdanstulo  - &YhdOpRahVah);
+
+	IF &tulos < 0 THEN &tulos = 0;
+
+	IF &tulos > &opraha THEN &tulos = &opraha;
+END;
+
+%MEND OpRahVahS;
+/* 63. Ansiotulovähennys. 
+	   Ennen ollut vain kunnallisverotuksessa, nyt yhteinen
+ */
+
+*Makron parametrit:
+    tulos: Makron tulosmuuttuja, Kunnallisverotuksen ansiotulovähennys
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	minf: Deflaattori euromääräisten parametrien kertomiseksi
+	puhdanstulo: Puhdas ansiotulo
+	tyotulo: Työtulo;
+	
+	
+
+%MACRO AnsVahS(tulos, mvuosi, minf, puhdanstulo, tyotulo)/
+DES = 'VERO: Ansiotulovähennys';
+
+%HAKU;
+
+vahtulo = &tyotulo;
+
+IF vahtulo <  &AnsRaja1 THEN &tulos = 0;
+
+ELSE IF vahtulo >= &AnsRaja1 THEN &tulos = &AnsPros1 * (vahtulo - &AnsRaja1);
+
+IF vahtulo >= &AnsRaja2 THEN &tulos = &AnsPros1 * (&AnsRaja2 - &AnsRaja1) + &AnsPros2 * (vahtulo -  &AnsRaja2);
+
+IF &tulos > &AnsEnimm THEN &tulos = &AnsEnimm;
+
+verttulo = &puhdanstulo;
+
+IF verttulo > &AnsRaja3 THEN &tulos = &tulos - &AnsPros3 * (verttulo -  &AnsRaja3);
+
+IF &tulos < 0 THEN &tulos = 0;
+
+IF &tulos > verttulo THEN &tulos = verttulo;
+
+DROP vahtulo verttulo;
+
+%MEND AnsVahS;
+
+
+
+/* 64. Eläketulovähennys.
+	   Parametreissa vuodesta 1983 lähtien.
+	   Kaavassa otetaan huomioon tulokäsitteiden muutos. */
+
+*Makron parametrit:
+    tulos: Makron tulosmuuttuja, Eläketulovähennys
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	minf: Deflaattori euromääräisten parametrien kertomiseksi
+	puoliso: On puoliso (1/0)
+	elaketulo: Eläketulo
+	puhdansiotulo: Puhdas ansiotulo;
+
+
+%MACRO ElTulVahS (tulos, mvuosi, minf, elaketulo, puhdansiotulo)/
+DES = 'VERO:Eläketulovähennys';
+
+%HAKU;
+
+taysivah = &ElKerr * &KelaYks;
+
+%pyoristys10e(utaysivah, taysivah);
+
+tulo = &puhdansiotulo;
+
+/* Vähennystä pienennetään */
+
+IF tulo > utaysivah THEN utaysivah = utaysivah - &ElPros * (tulo - utaysivah);
+
+IF tulo > &ElRaja THEN utaysivah = utaysivah - &ElPros * (&ElRaja - utaysivah)- &ElPros2 * (tulo - &ElRaja);
+
+IF utaysivah < 0 THEN utaysivah = 0;
+
+/* Vähennys ei voi olla eläketuloa suurempi */
+
+vah = utaysivah;
+
+IF vah > &elaketulo THEN vah = &elaketulo;
+
+&tulos = vah;
+
+DROP tulo taysivah utaysivah vah;
+
+%MEND ElTulVahS;
+
+/* 65. Perusvähennys */	
+
+*Makron parametrit:
+    tulos: Makron tulosmuuttuja, Kunnallisverotuksen perusvähennys
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	minf: Deflaattori euromääräisten parametrien kertomiseksi
+	vertuloA: Verotettava tulo ennen perusvähennystä;
+
+%MACRO PerVahS(tulos, mvuosi, minf, vertuloA)/
+DES = 'VERO: Perusvähennys';
+
+%HAKU;
+
+IF &vertuloA <= &PerEnimm THEN &tulos = &vertuloA;
+
+ELSE &tulos =  &PerEnimm - &PerPros * (&vertuloA - &PerEnimm);
+
+IF &tulos < 0 THEN &tulos = 0;
+
+%MEND PerVahS;
+
+/* 66. Valtionverotuksen työtulovähennys.
+	   Huom! Verosta tehtävä vähennys.
+
+SOTEUUDISTUS huomioitu tässä versiossa
+	    */
+
+*Makron parametrit:
+    tulos: Makron tulosmuuttuja, Valtionverotuksen ansiotulovähennys/työtulovähennys
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	minf: Deflaattori euromääräisten parametrien kertomiseksi
+	tyotulo: Työtulo
+	puhdanstulo: Puhdas ansiotulo;
+
+%MACRO ValtVerTyotVahS_2023(tulos, mvuosi, minf, tyotulo, puhdanstulo)/
+DES = 'VERO: Valtionverotuksen ansiotulovähennys/työtulovähennys (vähennys verosta), sotemuutokset huomioitu';
+
+%HAKU;
+
+vah = MIN(&ValtTyotPros1 * &tyotulo,&ValtTyotEnimm);
+
+IF &puhdanstulo > &ValtTyotAlaRaja THEN vah = vah - &ValtTyotPros2 * (&puhdanstulo - &ValtTyotAlaRaja);
+
+IF &puhdanstulo > &ValtTyotYlaRaja THEN vah = vah - &ValtTyotPros2 * (&ValtTyotYlaRaja - &ValtTyotAlaRaja) - &ValtTyotPros3 * (&puhdanstulo - &ValtTyotYlaRaja);
+
+&tulos=vah;
+
+IF &tulos < 0 THEN &tulos = 0;
+
+DROP vah;
+
+%MEND ValtVerTyotVahS_2023;
+/* 67. Valtion tulovero (sotemuutosten poikkeustapauksia varten) */
+/* Tällä makrolla käsitellään Ahvenmaan valtionverotuksen sekä vuoden 2022 poikkeustilanteet */
+
+*Makron parametrit:
+    tulos: Makron tulosmuuttuja, Valtion tulovero 
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	minf: Deflaattori euromääräisten parametrien kertomiseksi
+	tulo = Valtion verotuksessa verotettava tulo eli tulo vähennysten jälkeen 
+	      (vuodesta 1993 lähtien koskee vain ansiotuloa)
+	ahven= 1 , jos korjataan verotusta Ahvenanmaalle, muulloin 0;
+	
+%MACRO ValtTuloVeroS_sote(tulos, mvuosi, minf, tulo, ahven)/
+DES = 'VERO: Valtion tulovero (veroasteikko, sotemuutostoen poikkeustapaukset)';
+
+%HAKU;
+
+IF &tulo <= 0 THEN &tulos = 0;
+
+ELSE DO;
+	/* Vuoden 2022 poikkeusparametrit */
+	IF &ahven=0 THEN DO;
+			IF &tulo GE  &Raja12sote THEN
+				&tulos =  &Vakio12sote + &Pros12sote * (&tulo -  &Raja12sote);
+
+			ELSE IF &tulo GE  &Raja11sote THEN
+				&tulos =  &Vakio11sote + &Pros11sote * (&tulo -  &Raja11sote);
+
+			ELSE IF &tulo GE  &Raja10sote THEN
+				&tulos =  &Vakio10sote + &Pros10sote * (&tulo -  &Raja10sote);
+
+			ELSE IF &tulo GE  &Raja9sote THEN
+				&tulos =  &Vakio9sote + &Pros9sote * (&tulo -  &Raja9sote);
+
+			ELSE IF &tulo GE  &Raja8sote THEN
+				&tulos =  &Vakio8sote + &Pros8sote * (&tulo -  &Raja8sote);
+
+			ELSE IF &tulo GE  &Raja7sote THEN
+				&tulos =  &Vakio7sote + &Pros7sote * (&tulo -  &Raja7sote);
+
+			ELSE IF &tulo GE  &Raja6sote THEN
+				&tulos =  &Vakio6sote + &Pros6sote * (&tulo -  &Raja6sote);
+
+			ELSE IF &tulo GE  &Raja5sote THEN
+				&tulos =  &Vakio5sote + &Pros5sote * (&tulo -  &Raja5sote);
+
+			ELSE IF &tulo GE  &Raja4sote THEN
+				&tulos =  &Vakio4sote + &Pros4sote * (&tulo -  &Raja4sote);
+
+			ELSE IF &tulo GE  &Raja3sote THEN
+				&tulos =  &Vakio3sote + &Pros3sote * (&tulo -  &Raja3sote);
+
+			ELSE IF &tulo GE  &Raja2sote THEN
+				&tulos =  &Vakio2sote + &Pros2sote * (&tulo -  &Raja2sote);
+
+			ELSE IF &tulo GE  &Raja1sote THEN
+				&tulos =  &Vakio1sote + &Pros1sote * (&tulo -  &Raja1sote);
+	END;
+
+	IF &ahven=1 THEN DO;
+			/* Ahvenanmaan valtionverotuksen korjaukset sotemuutoksiin liittyen */
+			IF &tulo GE  &Raja12ahven THEN
+				&tulos =  &Vakio12ahven + &Pros12ahven * (&tulo -  &Raja12ahven);
+
+			ELSE IF &tulo GE  &Raja11ahven THEN
+				&tulos =  &Vakio11ahven + &Pros11ahven * (&tulo -  &Raja11ahven);
+
+			ELSE IF &tulo GE  &Raja10ahven THEN
+				&tulos =  &Vakio10ahven + &Pros10ahven * (&tulo -  &Raja10ahven);
+
+			ELSE IF &tulo GE  &Raja9ahven THEN
+				&tulos =  &Vakio9ahven + &Pros9ahven * (&tulo -  &Raja9ahven);
+
+			ELSE IF &tulo GE  &Raja8ahven THEN
+				&tulos =  &Vakio8ahven + &Pros8ahven * (&tulo -  &Raja8ahven);
+
+			ELSE IF &tulo GE  &Raja7ahven THEN
+				&tulos =  &Vakio7ahven + &Pros7ahven * (&tulo -  &Raja7ahven);
+
+			ELSE IF &tulo GE  &Raja6ahven THEN
+				&tulos =  &Vakio6ahven + &Pros6ahven * (&tulo -  &Raja6ahven);
+
+			ELSE IF &tulo GE  &Raja5ahven THEN
+				&tulos =  &Vakio5ahven + &Pros5ahven * (&tulo -  &Raja5ahven);
+
+			ELSE IF &tulo GE  &Raja4ahven THEN
+				&tulos =  &Vakio4ahven + &Pros4ahven * (&tulo -  &Raja4ahven);
+
+			ELSE IF &tulo GE  &Raja3ahven THEN
+				&tulos =  &Vakio3ahven + &Pros3ahven * (&tulo -  &Raja3ahven);
+
+			ELSE IF &tulo GE  &Raja2ahven THEN
+				&tulos =  &Vakio2ahven + &Pros2ahven * (&tulo -  &Raja2ahven);
+
+			ELSE IF &tulo GE  &Raja1ahven THEN
+				&tulos =  &Vakio1ahven + &Pros1ahven * (&tulo -  &Raja1ahven);
+	END;
+END;
+
+%MEND ValtTuloVeroS_sote;

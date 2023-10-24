@@ -46,7 +46,9 @@
 			* Simuloidaanko toimeentulotuki myös yrittäjätalouksille.
 	  	   	Jos toimeentulotukea ei simuloida yrittäjätalouksille, tämä on 0.
 	       	Jos toimeentulotuki simuloidaan yrittäjätalouksille, tämä on 1.;
-			%LET YRIT = 0; 
+			%LET YRIT = 0;
+
+			%LET ASUMKUST_MAKS = 0; *Käytetäänkö simuloinnissa Kelan ohjeellisia asumiskustannusten maksimiarvoja (1 käytetään, 0 ei käytetä);
 
 			* Inflaatiokorjaus. Euro- tai markkamääräisten parametrien haun yhteydessä suoritettavassa
 			  deflatoinnissa käytettävän kertoimen voi syöttää itse INF-makromuuttujaan
@@ -140,6 +142,8 @@
 
 %Aloitus;
 
+%put &asumkust_maks;
+%put &poiminta;
 
 /* 2. Datan poiminta ja apumuuttujien luominen (optio) */
 
@@ -161,7 +165,7 @@
 			hoimakso hoiaikay hoimaksy hopila opirake opirako tukiaika optukk tpjta aemkm hoiaikap hoimaksp
 			varm lveru anstukor yrtukor vvvmk1 vvvmk3 vvvmk5 dtyhtep korosapks korosapkw yhtez korosazkg
 			korosazkf tmtukimk korosatkg korosatkf tmaat1evyr tmaat1pevyr tliik1evyr tliikpevyr tporo1evyr
-			tyhtmatevyr tyhtateevyr tyhtmat	tyhtate yrvahan yrvahpo AILMKORQDAT);
+			tyhtmatevyr tyhtateevyr tyhtmat	tyhtate yrvahan yrvahpo kuntakoodi jasenia AILMKORQDAT);
 		RUN;
 
 /* 2.2 Muodostetaan laskennassa tarvittavat yksilötason muuttujat taulukkoon STARTDAT.START_TOIMTUKI */
@@ -284,7 +288,7 @@
 			* Opintoraha;
 			OPINRAHA_DATA = SUM(opirake, opirako);
 		
-			KEEP hnro knro paasoss
+			KEEP hnro knro paasoss kuntakoodi jasenia
 				EIAMSI
 				ONAIK ONAIKLAPSI ONLAPSI17 ONLAPSI10_16 ONLAPSIALLE10
 				VERTYOTULO VEROTTYOTULO VEROTTUL_MUU SEKALVERO THANKK ASUMISKULUT_KK PHOITO_YKS ELMAKSUT 
@@ -597,12 +601,27 @@
 		* Tulonhankkimiskulut kuukaudessa;
 		THANKK_KK = MAX(THANKK / 12, 0);
 
-		KEEP hnro knro paasoss 
+		KEEP hnro knro paasoss kuntakoodi jasenia
 			EIAMSI ONAIK ONAIKLAPSI ONLAPSI17 ONLAPSI10_16 ONLAPSIALLE10
 			LLISAT_KK TYOTULONETTO_KK MUUTTULOTNETTO_KK ASUMISKULUT_KK HARKINMENOT_KK
 			THANKK_KK JARJ;
 
 	RUN;
+
+
+	*Lasketaan asumismenojen maksimi kelan normien mukaan;
+
+	%IF &ASUMKUST_MAKS = 1 AND &lvuosi >= 2022 %THEN %DO;
+	%AsumMenoRajat(&lvuosi, &lkuuk);
+
+	data TEMP.TEMP_TOIMTUKI_HENKI; 
+	set TEMP.TEMP_TOIMTUKI_HENKI;
+	ASUMISKULUT_KK = min(ASUMNORMIT, ASUMISKULUT_KK);
+	run;
+
+	%END;
+
+	*Summataan kotitaloustasolle;
 
 	PROC SQL;
 		CREATE TABLE TEMP.TEMP_TOIMTUKI_KOTI1
@@ -640,6 +659,8 @@
 	RUN;
 	%LET TYOTULONETTO_KK_MAX = TYOTULONETTO_KK_%EVAL(&KOTITALOUSKOKO_MAX);
 	%LET THANKK_KK_MAX = THANKK_KK_%EVAL(&KOTITALOUSKOKO_MAX);
+
+
 
 	DATA TEMP.&TULOSNIMI_TO;
 		SET TEMP.TEMP_TOIMTUKI_KOTI;

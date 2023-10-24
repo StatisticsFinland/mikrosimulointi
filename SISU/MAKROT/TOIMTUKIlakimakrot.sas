@@ -8,9 +8,7 @@
 1. LapsKerrS = Alaikäisten lasten osuus desimaalilukuna toimeentulotuen peruosasta
 2. ToimTukiKS = Toimeentulotuki kuukaudessa
 3. ToimTukiVS = Toimeentulotuki vuosikeskiarvona
-4. ToimTukiLLKS = Toimeentulotuen perusosa ja lapsilisät yhteensä kuukaudessa
-5. VahimmTuloS = Toimeentulotuen perusosa, maksimaalinen yleisessä asumistuessa hyväksyttävä asumiskustannus
-				 ja lapsilisät yhteensä kuukaudessa */
+4. 4. Asumismenojen kuntakohtaiset kohtuullisena pidettävät määrät
 
 
 
@@ -226,3 +224,36 @@ DES = "TOIMTUKI: Toimeentulotuki vuosikeskiarvona";
 	DROP ttvuosi ttkk;
 
 %MEND ToimTukiVS;
+
+
+
+
+/* 4. Asumismenojen kuntakohtaiset kohtuullisena pidettävät määrät */
+
+/* Makron parametrit:
+		tulos: Makron tulosmuuttuja, toimeentulotuki vuosikeskiarvona, e/kk
+		mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+ */ 
+
+%MACRO AsumMenoRajat(mvuosi, mkuuk) /
+DES = "ASUMMENOMAKS: Asumismenojen kuntakohtainen maksimi, e / kk";
+
+	%HaeParam&TYYPPI(&mvuosi, &mkuuk, &TOIMTUKI_PARAM, PARAM.&PTOIMTUKI);
+
+	proc sql;
+	create table TEMP.TEMP_TOIMTUKI_HENKI as
+	select a.*, 
+		case
+			when a.jasenia=1 then (b.yksi_henkilo + &HuomVesi * jasenia)
+			when a.jasenia=2 then (b.kaksi_henkiloa + &HuomVesi * jasenia) 
+			when a.jasenia=3 then (b.kolme_henkiloa + &HuomVesi * jasenia)
+			when a.jasenia=4 then (b.nelja_henkiloa + &HuomVesi * jasenia)
+			when a.jasenia>4 then (b.nelja_henkiloa + (b.lisa_henkilo * (a.jasenia-4)) + (&HuomVesi * a.jasenia))
+		end as ASUMNORMIT
+	from TEMP.TEMP_TOIMTUKI_HENKI a
+	left join PARAM.asummenorajat_&mvuosi. b on a.kuntakoodi=b.koodi 
+	; 
+	quit;
+
+
+%MEND AsumMenoRajat;

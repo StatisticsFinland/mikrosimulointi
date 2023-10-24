@@ -207,6 +207,8 @@ Makroa kutsutaan jokaisen osamallin ja esimerkkilaskelman alussa.
 
 			MAKSIMI_VERO_PUOLISO MINIMI_KOKO_PUOLISO
 
+			ASUMKUST_MAKS
+
 			/* Yleisen asumistuen laskennassa tarvittava makromuuttuja */
 			AIKMAX
 
@@ -225,6 +227,9 @@ Makroa kutsutaan jokaisen osamallin ja esimerkkilaskelman alussa.
 
 			/*TAMAKSUjen työeläkevakuutusmaksuprosentin valinta KuEL- ja VaEL-vakuutettujen palkkojen  osalta*/
 			KUELVAELDATA
+
+			/* Sotemuutoksien käyttöönoton ilmaiseva makromuuttuja */
+			SOTE
 			;
 
 	/* 3.2.2 Osamallien nimet ohjausparametreina */

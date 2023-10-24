@@ -8,10 +8,136 @@
 *												*
 *************************************************************************************************
 
-*************************************************************************************************
-**************************   UUSI MALLIVERSIO 22.00 JAETTU 22.02.2022  **************************
-*************************************************************************************************
 
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 22.10 JAETTU 22.03.2022  **************************
+*************************************************************************************************
+18. Sotemuutokset verotukseen vuodesta 2023 alkaen ja mahdollisuus ajaa muutoksia jo vuodelle 2022 
+soteparametrin avulla. VEROsimul haarautuu kahdeksi osaksi, joista ensimmäinen
+sisältää uuden sotelainsäädännön ja toinen noudattaa vanhaa lainsäädäntöä. 
+
+VEROlakimakrot.sas sisältää seuraavat uudet makrot:
+
+OpRahVahS = Opintorahavähennys (Sotemuutokset, 2023 alkaen)
+AnsVahS = Ansiotulovähennys (Sotemuutokset, 2023 alkaen)
+ElTulVahS = Eläketulovähennys (Sotemuutokset, 2023 alkaen)
+PerVahS = Perusvähennys (Sotemuutokset, 2023 alkaen)
+ValtVerAnsVahS_2023 = Valtionverotuksen työtulovähennys (Sotemuutokset, 2023 alkaen)
+ValtTuloVeroS_sote =  Valtion tulovero (sotemuutosten poikkeustapauksia varten)
+
+Päivittäjä: MK
+pv. 17.3.2022
+	../SIMUL_2019/VEROsimul.sas
+	../SIMUL_2019/KOKOsimul.sas
+	../SIMUL_2019/VEROlakimakrot
+
+
+17. Tehty vuoden 2021 lakimuutoksiin liittyvät parametripäivitykset sekä indeksisidonnaisiin että 
+	ei-indeksisidonnaisiin lakiparametreihin.
+
+Päivittäjä: TO, RH, IH, JM
+pv. 14.3.2022
+
+	../PARAM/sairvak.sas7bdat
+	../PARAM/ptturva.sas7bdat
+	../PARAM/pkotihtuki.sas7bdat
+	../PARAM/pkansel.sas7bdat
+	../PARAM/popintuki.sas7bdat
+	../PARAM/pvero.sas7bdat
+	../PARAM/pkivero.sas7bdat
+	../PARAM/pllisa.sas7bdat
+	../PARAM/pelasumtuki.sas7bdat
+	../PARAM/pasumtuki.sas7bdat
+	../PARAM/pphoito.sas7bdat
+	../PARAM/ptoimtuki.sas7bdat
+	../PARAM/ptamaksu.sas7bdat
+	../PARAM/pindeksi_vuosi.sas7bdat
+
+
+16. Päivitetty pindeksi_kuuk-taulukossa indeksipistelukuja Kh51Kuuk, Ansio64Kuuk ja IndKel
+	uusien toteutumien mukaan.
+
+Päivittäjä: TO
+pv. 15.3.2022
+	../PARAM/pindeksi_kuuk.sas7bdat
+
+15. SAIRVAK-osamallin sairaus- ja vanhempainpäivärahojen perusteena olevan tulon simulointiin lisätty
+	työpanokseen perustuvat osingot (tosinktp) huomitoitavaksi lainsäädäntövuodesta 2022 alkaen.
+	Rivillä 148 tosinktp lisätty poimintaan
+	Riveillä 225-235 tosinktp lisätty sairpr laskentaan
+	Riveillä 256-280 tosinktp lisätty vanhpr laskentaan
+
+Päivittäjä: TO
+	../SIMUL_2019/SAIRVAKsimul.sas
+
+14. Työnantajan vakuutusmaksujen alaikäraja korotettu lakimuutoksen seurauksena 18 ikävuoteen tammikuusta 2022 alkaen.
+
+Päivittäjä: RH
+	../MAKROT/TAMAKSUTlakimakrot.sas
+		
+
+13. Lisätty TOIMTUKI-osamalliin mahdollisuus ottaa simuloinnissa huomioon Kelan asumistuen ohjeelliset kuntakohtaiset
+	maksimit.
+
+	Muutokset:
+
+	ALKUsimul:
+		Lisätty ohjausparametreihin ASUMKUST_MAKS
+
+	KOKOsimul:	
+		Lisätty ohjausparameti ASUMKUST_MAKS. Oletuksena 0.
+
+	TOIMTUKIsimul:
+		Lisätty ohjausparameti ASUMKUST_MAKS (rivi 51). Oletuksena 0.
+    		Lisätty datapoimintaan muuttujat jasenia ja kuntakoodi (rivi 168)
+	    	Lisätty makrokutsu AsumMenoRajat (rivit 612-616)
+
+	TOIMTUKIlakimakrot:
+		Lisätty makro AsumMenoRajat
+
+	PARAM-kansio:
+		asummenorajat_2022 -- 2026
+
+Päivittäjä: IH
+	../PARAM/asummenorajat_2022.sas7bdat
+	../PARAM/asummenorajat_2023.sas7bdat
+	../PARAM/asummenorajat_2024.sas7bdat
+	../PARAM/asummenorajat_2025.sas7bdat
+	../PARAM/asummenorajat_2026.sas7bdat
+	../MAKROT/TOIMTUKIlakimakrot.sas
+	../SIMUL_2019/ALKUsimul.sas
+	../SIMUL_2019/KOKOsimul.sas
+	../SIMUL_2019/TOIMTUKIsimul.sas
+
+
+
+13. Sotilasavustuksen makroon (SotilasAvKS, KANSELlakimakrot) lisätty 300 euron suojaosa palvelusta suorittavan työtuloille 1.1.2022 alkaen. Suojaosalle lisätty parametri
+	pkansel-tauluun. Makroa voi hyödyntää esimerkkilaskelmassa KANSELesim.
+
+Päivittäjä: RH
+	../PARAM/pkansel
+	../MAKROT/KANSELlakimakrot.sas
+	../ESIM/KANSELesim.sas
+		
+
+12. Muutettu PARAMindeksit-ohjelman PaivitaOTTuloRaja-makroa niin, että vuoden 2022 indeksikorotus siirtyy
+	lakimuutoksen mukaisesti vuodelle 2023.
+
+Päivittäjä: IH
+	../PARAM/PARAMindeksit.sas
+
+
+11. Lisätty makro KotitVahErillJakoS = Kotitalousvähennyksen lisädatan laskentamakro työn lajeittain. Makroa ajetaan
+	lainsäädäntävuodesta 2022 eteenpäin.
+
+Päivittävä: IH
+22.2.2022
+	../SIMUL_2019/VEROsimul.sas
+	../MAKROT/VEROlakimakrot.sas
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 22.00 JAETTU 21.02.2022  **************************
+*************************************************************************************************
 
 10. Muuttuja luhlomak (luottamushenkilömaksu) korvaa muuttujan vluothm (luottamushenkilömaksu) v.2019 rekisteriaineistossa.
 

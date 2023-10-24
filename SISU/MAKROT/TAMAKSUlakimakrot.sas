@@ -96,11 +96,25 @@ DROP sava temp;
 	sektori: Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
 		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
 
+
 %MACRO TyotVakMaksuKTAS (tulos, mvuosi, mkuuk, inf, ikavu, svpalkka, sektori)/
 DES = 'TAMAKSU: Työnantajan työttömyysvakuutusmaksu kuukausitasolla';
 
 %HaeParam&TYYPPI(&mvuosi, &mkuuk, &TAMAKSU_PARAM, PARAM.&PTAMAKSU);
 %ParamInf&TYYPPI(&mvuosi, &mkuuk, &TAMAKSU_MUUNNOS, &inf);
+
+IF &mvuosi >= 2022 THEN DO;
+
+	IF 18 LE &ikavu LE 65 AND &svpalkka GT 0 AND &sektori NE 8 THEN DO;
+			&tulos = (&TyVa/100) * &svpalkka;
+			END; 
+			ELSE DO;
+			&tulos =0;
+			END;
+END;
+
+ELSE DO;
+
 
 IF 17 LE &ikavu LE 65 AND &svpalkka GT 0 AND &sektori NE 8 THEN DO;
 		&tulos = (&TyVa/100) * &svpalkka;
@@ -108,7 +122,7 @@ IF 17 LE &ikavu LE 65 AND &svpalkka GT 0 AND &sektori NE 8 THEN DO;
 		ELSE DO;
 		&tulos =0;
 		END;
-
+END;
 
 %MEND TyotVakMaksuKTAS;
 

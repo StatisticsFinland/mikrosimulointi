@@ -1,7 +1,7 @@
 /******************************************************************************
 * Kuvaus: Parametritaulujen sekä indeksien hallinnointiohjelmat
 * Toimii perusvuodella 2020
-* Päivitetty viimeksi: 12.1.2021				     					      
+* Päivitetty viimeksi: 22.2.2022				     					      
 ******************************************************************************/
 
 /*=============================================================================
@@ -440,14 +440,14 @@ lisätä tauluihin päivitettäviä indeksejä, sekä muokata pyöristystarkkuutta.
 		%paivita(SRaja2, TEL8020, &PSAIRVAK, 1, 2010, 26898)
 		%paivita(SRaja2Vanh, TEL8020, &PSAIRVAK, 1, 2010, 32892)
 		%paivita(SRaja3, TEL8020, &PSAIRVAK, 1, 2010, 50606)
-		%kytkentaSVTT1(PalkVah, palkvahpros100, &PSAIRVAK)
+		%kytkentaSVTT1(PalkVah, PalkVahPros, &PSAIRVAK)
 	%end;
 
 	/*=========================================================================
 	Päivitys: kiinteistövero (ei indeksipäivitettäviä parametreja)
 	-------------------------------------------------------------------------*/
 	%if %length(&PKIVERO) > 0 %then %do;
-
+		%luo(&PKIVERO)
 	%end;
 
 	/*=========================================================================
@@ -598,7 +598,7 @@ päivitys kutsumalla ParamPaivitys-makroa. Tässä esimerkki makrokutsusta:
 		/*=====================================================================
 		Tavalliset parametritaulut
 		---------------------------------------------------------------------*/
-					%if &LUOTAULU ^= &PPHOITO AND &LUOTAULU ^= &POPINTUKI AND &LUOTAULU ^= &PVERO %then %do;
+					%if &LUOTAULU ^= &PPHOITO AND &LUOTAULU ^= &POPINTUKI AND &LUOTAULU ^= &PVERO AND &LUOTAULU ^= &PKIVERO %then %do;
 
 						create table _temp as select * from &LUOTAULU
 						where vuosi = &VUOSICHECK and kuuk = (select max(kuuk) from &LUOTAULU where vuosi = &VUOSICHECK);
@@ -611,9 +611,9 @@ päivitys kutsumalla ParamPaivitys-makroa. Tässä esimerkki makrokutsusta:
 					%end;
 
 		/*=====================================================================
-		Veromallin parametritaulun erikoistapaus
+		Vero- ja kiinteistöveromallin parametritaulujen erikoistapaukset
 		---------------------------------------------------------------------*/
-					%if &LUOTAULU = &PVERO %then %do;
+					%if &LUOTAULU = &PVERO OR &LUOTAULU = &PKIVERO %then %do;
 
 						create table _temp as select * from &LUOTAULU
 						where vuosi = &VUOSICHECK;
@@ -905,19 +905,25 @@ päivitys kutsumalla ParamPaivitys-makroa. Tässä esimerkki makrokutsusta:
 				where vuosi = &EVUOSI;
 
 		/*=====================================================================
-		Käytetään oletuksena edellisvuoden arvoa
+		Käytetään oletuksena edellisvuoden arvoa. Poikkeuksena v. 2022, jolloin
+		parametrien arvot muuttuivat erillisellä säädöksellä.
 		---------------------------------------------------------------------*/
+
+				%if &LVUOSI ^= 2022 %then %do;
 
 				update &PTAULU
 				set &PARAM = round(&UPD, &RND)
 				where vuosi = &LVUOSI;
 
+				%END;
+
 		/*=====================================================================
 		Tehdään indeksikorotus jos kyse on parillisesta vuodesta
-		(2018 eteenpäin) ja vain jos tuloraja nousisi
+		(2018 eteenpäin) ja vain jos tuloraja nousisi. Poikkeuksena vuosi 2022,
+		jonka tarkistus siirtyi vuodelle 2023 vuoden 2021 arvolla.
 		---------------------------------------------------------------------*/
 
-				%if %sysfunc(mod(&LVUOSI,2)) = 0 and &LVUOSI >= 2018 %then %do;
+				%if %sysfunc(mod(&LVUOSI,2)) = 0 and &LVUOSI >= 2018 and &LVUOSI ^= 2022 %then %do;
 
 					update &PTAULU
 					set &PARAM =
@@ -928,6 +934,16 @@ päivitys kutsumalla ParamPaivitys-makroa. Tässä esimerkki makrokutsusta:
 
 				%end;
 
+				%if &LVUOSI = 2023 %then %do;
+
+					update &PTAULU
+					set &PARAM =
+						MAX(round(&UPD, &RND), round(
+					((&&&IND.2021)/(&&&IND.2019)) * &UPD
+					, &RND))
+					where vuosi = &LVUOSI;
+
+				%end;
 		quit;
 					
 	%end;

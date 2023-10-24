@@ -1,6 +1,6 @@
 /****************************************************
 * KOKO-mallin simulointiohjelma 2018          		*
-* Viimeksi päivitetty: 29.5.2020 			  		*
+* Viimeksi päivitetty: 16.3.2022 MK 			  		*
 ****************************************************/
 
 /* 0. Yleisiä vakioiden määrittelyjä (älä muuta näitä!) */
@@ -112,6 +112,8 @@
 %LET TARKPVM = 1;    	* Jos tämän arvo = 1, VERO-mallissa sairausvakuutuksen päivärahamaksun
 						  laskentaa tarkennetaan käänteisellä päättelyllä ;
 %LET YRIT = 0; 			* Simuloidaanko toimeentulotuki myös yrittäjätalouksille (1 = Kyllä, 0 = Ei);
+%LET SOTE = 0;			* 1=VERO-mallin Sotemuutokset käyttöön, 0=ei sotemuutoksia (vanhat lait);
+%LET ASUMKUST_MAKS = 0; * Käytetäänkö TOIMTUKI-mallissa Kelan ohjeellisia asumiskustannusten maksimiarvoja = 1 vai eikö = 0;
 
 * Osamallien simuloinnissa käytettävien lakimakrotiedostojen nimet ;
 
@@ -609,12 +611,24 @@
 		/* Verotus */
 		%IF &VERO = 1 %THEN %DO;
 			TEMP.&TULOSNIMI_VE
-			(KEEP = hnro PALKVAK THANKKULUT2 PUHD_ANSIO PUHD_PO ANSIOT_VAH ELTULVAH_K ELTULVAH_V OPRAHVAH
+			%IF &LVUOSI>=2023 or (&SOTE=1 and &LVUOSI=2022) %THEN %DO;
+			/* Muuttujat sotemuutosten jälkeen */
+				(KEEP = hnro PALKVAK THANKKULUT2 PUHD_ANSIO PUHD_PO ANSIOT_VAH ELTULVAH OPRAHVAH
+				PRAHAMAKSU PERVAH KUNNVEROG KIRKVEROG SAIRVAKG KEVG
+				VALTVERTULO YHTHYV VALTVEROH VALTANSVAH ELVELV_VAH POVEROC ALIJHYV ALIJHYVERIT
+				KOTITVAH_DATA KOTITVAH ULKVAH OSINKOVAP OSINKOP OSINKOA OSINKOP1 OSINKOP2 OSINKOP3
+				OSINKOVAP1 OSINKOVAP2 OSINKOVAP3 OSINKOVAP4 ASKOROT ENSASKOROT MUU_VAH ANSIOVEROT
+				KAIKKIVEROT MAKSP_VEROT YLEVERO VERTULO VERTULO1)
+			%END;
+			%IF &SOTE=0 and &LVUOSI<2023 %THEN %DO;
+			/* Muuttujat vanhalla lainsäädännöllä */
+				(KEEP = hnro PALKVAK THANKKULUT2 PUHD_ANSIO PUHD_PO ANSIOT_VAH ELTULVAH_K ELTULVAH_V OPRAHVAH
 				INVVAH_K PRAHAMAKSU KUNNVTULO1 PERVAH KUNNVTULO2 KUNNVEROG KIRKVEROG SAIRVAKG KEVG
 				VALTVERTULO YHTHYV VALTVEROH VALTANSVAH INVVAH_V ELVELV_VAH POVEROC ALIJHYV ALIJHYVERIT
 				KOTITVAH_DATA KOTITVAH ULKVAH OSINKOVAP OSINKOP OSINKOA OSINKOP1 OSINKOP2 OSINKOP3
 				OSINKOVAP1 OSINKOVAP2 OSINKOVAP3 OSINKOVAP4 ASKOROT ENSASKOROT MUU_VAH ANSIOVEROT
 				KAIKKIVEROT MAKSP_VEROT YLEVERO LAPSIVAH)
+			%END;
 		%END;
 
 		/* Kiinteistöverotus */

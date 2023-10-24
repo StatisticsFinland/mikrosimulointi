@@ -716,9 +716,10 @@ DROP vuositulo temp3;
 	kryhma: Kuntaryhmä (1/2) (ei merkitystä vuonna 2008 ja sen jälkeisessä lainsäädännössä)
 	jasenia: Avustettavien perheenjäsenien lkm
 	asummenot: Asumismenot, e/kk
-	tulot: Henkilön muut tulot, e/kk;
+	omatulo: Henkilön omat työtulot, e/kk
+	puoltulo: Puolison työtulot, e/kk;
 
-%MACRO SotilasAvKS(tulos, mvuosi, mkuuk, minf, kryhma, jasenia, asummenot, tulot) / 
+%MACRO SotilasAvKS(tulos, mvuosi, mkuuk, minf, kryhma, jasenia, asummenot, omatulo, puoltulo) / 
 DES = 'KANSEL: Sotilasavustus kuukausitasolla';
 
 %HaeParam&TYYPPI(&mvuosi, &mkuuk, &KANSEL_PARAM, PARAM.&PKANSEL);
@@ -730,13 +731,21 @@ IF &jasenia < 1 THEN temp = 0;
 ELSE IF &jasenia < 2 THEN temp = &SotAvPros1 * taysi;
 ELSE temp = ((&jasenia - 2) * &SotAvPros3 + &SotAvPros1 + &SotAvPros2) * taysi;
 
-temp = SUM(temp, &asummenot, -&tulot);
+
+IF &mvuosi >= 2022 THEN omatulo = &omatulo - &SotAvSuoj; /*Suojaosa asevelvollisen työtuloihin 1.1.2022 alkaen*/
+ELSE omatulo = &omatulo;
+
+IF omatulo < 0 then omatulo=0;
+
+tulot = omatulo + &puoltulo;
+
+temp = SUM(temp, &asummenot, -tulot);
 
 IF &mvuosi < 1994 THEN temp = .;
 ELSE IF temp < &SotAvMinimi THEN temp = 0;
 
 &tulos = temp;
-DROP temp taysi;
+DROP temp taysi omatulo tulot;
 %MEND SotilasAvKS;
 
 
@@ -749,15 +758,16 @@ DROP temp taysi;
 	kryhma: Kuntaryhmä (1/2) (ei merkitystä vuonna 2008 ja sen jälkeisessä lainsäädännössä)
 	jasenia: Avustettavien perheenjäsenien lkm
 	asummenot: Asumismenot, e/kk
-	tulot: Henkilön muut tulot, e/kk;
+	omatulo: Henkilön omat työtulot, e/kk
+	puoltulo: Puolison työtulot, e/kk;
 
-%MACRO SotilasAvVS(tulos, mvuosi, minf, kryhma, jasenia, asummenot, tulot) / 
+%MACRO SotilasAvVS(tulos, mvuosi, minf, kryhma, jasenia, asummenot, omatulo,puoltulo) / 
 DES = 'KANSEL: Sotilasavustus kuukausitasolla vuosikeskiarvona';
 
 sotav = 0;
 
 %DO i = 1 %TO 12;
-	%SotilasAvKS(temp, &mvuosi, &i, &minf, &kryhma, &jasenia, &asummenot, &tulot);
+	%SotilasAvKS(temp, &mvuosi, &i, &minf, &kryhma, &jasenia, &asummenot, &omatulo, &puoltulo);
 	sotav = SUM(sotav, temp);
 %END;
 

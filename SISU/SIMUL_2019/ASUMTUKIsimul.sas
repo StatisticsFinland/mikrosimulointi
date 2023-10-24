@@ -32,9 +32,9 @@
 
 	%IF &EG NE 1 %THEN %DO;
 
-	%LET AVUOSI = 2018;		* Aineistovuosi (vvvv);
+	%LET AVUOSI = 2019;		* Aineistovuosi (vvvv);
 
-	%LET LVUOSI = 2018;		* Lainsäädäntövuosi (vvvv);
+	%LET LVUOSI = 2019;		* Lainsäädäntövuosi (vvvv);
 							* HUOM! Jos käytät vuotta 2017, valitse TYYPPI = SIMULX;
 							* ja haluamasi lainsäädäntökuukausi;
 
@@ -158,9 +158,9 @@
 		aslaji halpinta maksvuok kaytkorv yhtiovas hastuki hasuli
 		lisalamm lisamaks omalamm omamaks rakvuosi aslaikor svatva
 		svatvp opirake opirako tnoosvvb teinovvb tuosvvap toyjmyvvap toyjmavvap
-		teinovv hulkpa vlamm ikavu maakunta trpl trplkor tulkp tulkp6
-		tmpt tkust tepalk tmeri tlue2 tpalv trespa tpturva tpalv2 telps1 
-		telps2 telps5 ttyoltuk tutmp2 tutmp3 tutmp4 tmtatt 
+		tepalkat toptiot tosinktp teinovv hulkpa vlamm ikavu maakunta tulkp
+		telps43 tmuukust tepalk tmerile tpalv trespa tepertyok1 tepertyok2 telps41 telps42 telps8 telps1 
+		telps2 telps5 ttyoltuk tutmp235 tutmp4 tmtatt 
 		tpjta tyhtat anstukor astukivu astukiom
 		tmaat1evyr tmaat1pevyr tliik1evyr tliikpevyr tporo1evyr 
 		tyhtmatevyr tyhtateevyr tyhtmat tyhtate yrvah);
@@ -210,13 +210,13 @@
    		SET STARTDAT.START_ASUMTUKI_HENKI;
 		BY knro;
 		RETAIN AIKNROAPU;
-		TYOTULOKK = SUM(trpl, trplkor, MAX(tulkp - tulkp6, 0), tmpt, tkust, tepalk,
-			tmeri, tlue2, tpalv, trespa, tpturva, tpalv2, telps1, telps2, telps5,
-			ttyoltuk, tutmp2, tutmp3, tutmp4, 
+		TYOTULOKK = SUM(tepalkat, toptiot, tosinktp, tulkp, telps43, tmuukust, tepalk,
+			tmerile, tpalv, trespa, tepertyok1, tepertyok2, telps41, telps42, telps8, telps1, telps2, telps5,
+			ttyoltuk, tutmp235, tutmp4, 
 			tmaat1evyr, tmaat1pevyr, tpjta, tliik1evyr, 
 			tliikpevyr, tporo1evyr, tyhtmatevyr, tyhtateevyr,
 			SUM(tyhtat, -tyhtmat, -tyhtate), tmtatt,
-			anstukor, tulkp6, hulkpa) / 12;
+			anstukor, hulkpa) / 12;
 		IF FIRST.knro THEN AIKNROAPU = 0;
 		IF ikavu >= 18 THEN DO;
 			AIKNROAPU = AIKNROAPU + 1;

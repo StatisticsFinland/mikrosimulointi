@@ -31,9 +31,9 @@
 
 	%IF &EG NE 1 %THEN %DO;
 
-	%LET AVUOSI = 2018;		* Aineistovuosi (vvvv);
+	%LET AVUOSI = 2019;		* Aineistovuosi (vvvv);
 
-	%LET LVUOSI = 2018;		* Lainsäädäntövuosi (vvvv);
+	%LET LVUOSI = 2019;		* Lainsäädäntövuosi (vvvv);
 
 	%LET TYYPPI = SIMUL;	* Parametrien hakutyyppi: SIMUL (vuosikeskiarvo) tai SIMULX (parametrit haetaan tietylle kuukaudelle);
 
@@ -147,8 +147,8 @@
 			KEEP = hnro lasmu knro elak perlaji kelkan kelapu kellaps rili riyl hlepe hleto ikakk hvamtuk rvvm
 			hlaho ehtm lhtm hpelake velaji tklaji svatvp lelake tansel tmuuel ttapel tlapel tpotel
 			hrelake htperhe tuntelpe hpalktu lapper pe_perus psmk alku jatko laptay lapel takelake ikavu omalaji
-			svaltio muuttovv teanstu teleuve tkansel takuuel trpl trplkor tulkp tulkp6 tmpt tkust
-			tepalk tmeri tlue2 tpalv trespa tpturva tpalv2 telps1 tutmp2 tutmp3 tutmp4 telps2 telps5 ttyoltuk
+			svaltio muuttovv teanstu teleuve tkansel takuuel tulkp tepalkat toptiot tosinktp telps43 tmuukust
+			tepalk tmerile tpalv trespa tepertyok1 tepertyok2 telps41 telps42 telps8 telps1 tutmp235 tutmp4 telps2 telps5 ttyoltuk
 			tmtatt tpjta tyhtat anstukor yrtukor syvu
 			tmaat1evyr tmaat1pevyr tliik1evyr tliikpevyr tporo1evyr tyhtmatevyr tyhtateevyr tyhtmat tyhtate 
 			KANSEL_TULO LAPSETULO LESK_JATKOTULO KPUOLISO TAYSORPO ELAKUUK LAPSKUUK RILIKUUK EHOITOKUUK LVTUKIKUUK
@@ -193,8 +193,8 @@
 			ELSE ONTYOKYVYTE = 0;
 
 			/* Työtulo */
-			TYOTULO = SUM(trpl, trplkor, anstukor, tulkp, tmpt, tkust, tepalk, tmeri, tlue2, tpalv, trespa,
-						tpturva, tutmp2, tutmp3, tutmp4, tpalv2, telps1, telps2, telps5, ttyoltuk, tmaat1evyr,
+			TYOTULO = SUM(tepalkat, toptiot, tosinktp, anstukor, tulkp, telps43, tmuukust, tepalk, tmerile, tpalv, trespa,
+						tutmp235, tutmp4, tepertyok1, tepertyok2, telps41, telps42, telps8, telps1, telps2, telps5, ttyoltuk, tmaat1evyr,
 						tmaat1pevyr, tpjta, tliik1evyr, tliikpevyr, tporo1evyr, tyhtmatevyr, tyhtateevyr, 
 						SUM(tyhtat, -tyhtmat, -tyhtate), tmtatt, yrtukor);
 		

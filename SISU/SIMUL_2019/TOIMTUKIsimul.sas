@@ -31,9 +31,9 @@
 
 		%IF &EG NE 1 %THEN %DO;
 
-			%LET AVUOSI = 2018;		* Aineistovuosi (vvvv);
+			%LET AVUOSI = 2019;		* Aineistovuosi (vvvv);
 
-			%LET LVUOSI = 2018;		* Lainsäädäntövuosi (vvvv);
+			%LET LVUOSI = 2019;		* Lainsäädäntövuosi (vvvv);
 
 			%LET TYYPPI = SIMUL;	* Parametrien hakutyyppi: SIMUL (vuosikeskiarvo) tai SIMULX (parametrit haetaan tietylle kuukaudelle);
 
@@ -155,8 +155,8 @@
 			llmk kokorve kellaps rili riyl amstipe lbeltuki lbdpperi hsotav hasepr elasa rahsa
 			ulkelve ulkelmuu hsotvkor hastuki hasuli maksvuok kaytkorv yhtiovas lisalamm omalamm omamaks
 			tontvuok aslaikor sahko apuraha hlakav vtyomj vthmp vmatk vevm lpvma tnoosvvb teinovvb tuosvvap
-			toyjmyvvap toyjmavvap teinovv lassa muusa paasoss hulkpa trpl trplkor tulkp tulkp6 tmpt tkust
-			tepalk tmeri tlue2 tpalv trespa tpturva tpalv2 telps1 telps2 tutmp2 tutmp3 tutmp4 tmtatt
+			toyjmyvvap toyjmavvap teinovv lassa muusa paasoss hulkpa tulkp tepalkat toptiot tosinktp telps43 tmuukust
+			tepalk tmerile tpalv trespa tepertyok1 tepertyok2 telps41 telps42 telps8 telps1 telps2 tutmp235 tutmp4 tmtatt
 			telps5 ttyoltuk tyhtat hoiaikak hoimaksk hoiaikao
 			hoimakso hoiaikay hoimaksy hopila opirake opirako tukiaika optukk tpjta aemkm hoiaikap hoimaksp
 			varm lveru anstukor yrtukor vvvmk1 vvvmk3 vvvmk5 dtyhtep korosapks korosapkw yhtez korosazkg
@@ -187,15 +187,15 @@
 			ELSE ONLAPSIALLE10 = 0;
 
 			* Veronalainen työtulo;
-			VERTYOTULO = SUM(trpl, trplkor, MAX(tulkp - tulkp6, 0), tmpt, tkust,
-					tepalk, tmeri, tlue2, tpalv, trespa, tpturva, tpalv2, telps1,
-					tutmp2, tutmp3, tutmp4, telps2, telps5, ttyoltuk, 
+			VERTYOTULO = SUM(tepalkat,toptiot,tosinktp, tulkp, telps43, tmuukust,
+					tepalk, tmerile, tpalv, trespa, tepertyok1, tepertyok2, telps41, telps42, telps8, telps1,
+					tutmp235, tutmp4, telps2, telps5, ttyoltuk, 
 					tmaat1evyr, tmaat1pevyr, tpjta, tliik1evyr, tliikpevyr, tporo1evyr,
 					tyhtmatevyr, tyhtateevyr, SUM(tyhtat, -tyhtmat, -tyhtate),
 					tmtatt, anstukor, yrtukor);
 
 			* Verovapaa työtulo;
-			VEROTTYOTULO = SUM(tulkp6, hulkpa);
+			VEROTTYOTULO = SUM(hulkpa);
 
 			* Toimeentulotukeen vaikuttavat muut verovapaat tulot;
 			VEROTTUL_MUU = SUM(kokorve, -lahdever, amstipe, apuraha, hlakav,	

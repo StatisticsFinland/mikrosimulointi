@@ -41,7 +41,7 @@ OPTIONS VALIDVARNAME = V7;
 
 %GLOBAL HAKEM LEVY KENO MVUOSI MUISTISSA TEMPTYHJ;
 
-%LET MVUOSI = 2018; /* Mallivuosi (aineiston perusvuosi) */
+%LET MVUOSI = 2019; /* Mallivuosi (aineiston perusvuosi) */
 
 %LET MUISTISSA = 0; /* Käytetäänkö muistia simuloinnin nopeuttamiseksi
 					   0 = ei (suositus työasemakäytössä)

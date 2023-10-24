@@ -1,7 +1,7 @@
 /* ******************************************************************
 * Kuvaus: Simulointiohjelmien käyttämien formaattien määrittäminen	*
 *		  OHJAUS-kansioon.											*
-* Viimeksi päivitetty: 13.1.2021									*
+* Viimeksi päivitetty: 11.3.2021									*
 ********************************************************************/
 
 /* Formaatit luodaan seuraavalla koodilla */
@@ -337,11 +337,11 @@ VALUE elakelaji (NOTSORTED MULTILABEL)
 1 = 'Vanhuuseläke'
 2 = 'Työkyvyttömyyseläke (täysi ja osaeläke)'
 3 = 'Perhe-eläke (edunsaajan mukaan)'
-4 = 'Työttömyyseläke'
+4 = 'Osittainen varhennettu vanhuuseläke (ennen vuotta 2017 työttömyyseläke)'
 5 = 'Maatalouden erityiseläkkeet'
 6 = 'Osa-aikaeläke'
 7 = 'Varhennettu vanhuuseläke'
-8 = 'Yksilöllinen varhaiseläke (työkyvyttömyyseläke)'
+8 = 'Työuraeläke (ennen vuotta 2018 yksilöllinen varhaiseläke)'
 9 = 'Kuntoutustuki (määräaikainen työkyvyttömyyseläke)';
 
 /* VUOKRA-ASUNNON HALLINTAPERUSTE */
@@ -513,6 +513,24 @@ RUN;
 
 PROC FORMAT CNTLIN=_ftemp_ammatti1;
 RUN;
+
+/* TOIMIALA (Toimialaluokitus 2008)   */
+DATA _ftemp_toimiala;
+	SET OHJAUS.ftoimiala(keep=koodi toimiala rename=(koodi=start toimiala=label));
+	fmtname= '$toimiala';
+RUN; 
+
+PROC FORMAT CNTLIN=_ftemp_toimiala;
+RUN; 
+
+/* TOIMIALA  (toimialaluokitus 2008 ylätaso) */
+DATA _ftemp_toimialak;
+	SET OHJAUS.ftoimiala(keep=koodi toimialak rename=(koodi=start toimialak=label));  
+	fmtname= '$toimialak';
+RUN;
+
+PROC FORMAT CNTLIN=_ftemp_toimialak; 
+RUN; 
 
 /* Poistetaan väliaikaistaulut */
 

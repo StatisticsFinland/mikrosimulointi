@@ -31,9 +31,9 @@
 
 	%IF &EG NE 1 %THEN %DO;
 	
-	%LET AVUOSI = 2018;		* Aineistovuosi (vvvv);
+	%LET AVUOSI = 2019;		* Aineistovuosi (vvvv);
 
-	%LET LVUOSI = 2018;		* Lainsäädäntövuosi (vvvv);
+	%LET LVUOSI = 2019;		* Lainsäädäntövuosi (vvvv);
 
 	%LET TYYPPI = SIMUL;	* Parametrien hakutyyppi: SIMUL (vuosikeskiarvo) tai SIMULX (parametrit haetaan tietylle kuukaudelle);
 

@@ -37,9 +37,9 @@
 
 %IF &EG NE 1 %THEN %DO;
 
-%LET AVUOSI = 2018;		* Aineistovuosi (vvvv);
+%LET AVUOSI = 2019;		* Aineistovuosi (vvvv);
 
-%LET LVUOSI = 2018;		* Lainsäädäntövuosi (vvvv);
+%LET LVUOSI = 2019;		* Lainsäädäntövuosi (vvvv);
 						* HUOM! Jos käytät vuotta 2017 ja ASUMTUKI-mallia;
 						* valitse TYYPPI_KOKO = SIMULX ja haluamasi lainsäädäntökuukausi;
 
@@ -278,13 +278,13 @@
 
 	DATA STARTDAT.START_KOKO;
 	SET POHJADAT.&AINEISTO&AVUOSI
-	(KEEP = hnro knro asko trpl trplkor anstukor tapur tulkp tmpt tkust tepalk
-	 tmeri tlue2 tpalv trespa tpturva vthmp tpjta
-	 tyhtat yrtukor tpalv2 telps1 telps2 telps5 ttyoltuk tlakko tpalv2a
-	 tmuut tomlis telvpal tsuurpu tutmp2 tutmp3 tutmp4
-	 tyhtpot tmetsp tmetspp tvaksp tvuokr tvuokr1 tpalv2p tjvkork  tmuukor tjmark tmuutp
+	(KEEP = hnro knro asko tepalkat toptiot tosinktp anstukor tapur tulkp telps43 tmuukust tepalk
+	 tmerile tpalv trespa vthmp tpjta
+	 tyhtat yrtukor tepertyok1 tepertyok2 telps41 telps42 telps8 telps1 telps2 telps5 ttyoltuk tlakko tpalv2a
+	 tmuut tomlis telvpal tsuurpu tutmp235 tutmp4
+	 tyhtpot tmetsp tmetspp tvaksp tvuokr tvuokr1 tjvkork  tmuukor tjmark tmuutp
 	 tsiraho tmyynt tmyynt1 fluotap tvahevas tptmuu tulkyhp ttapel tlapel ttappr tmuupr
-	 tvakpr kokorve hlakav tpotel tmuuel teanstu tmluoko tmtatt hkuto amstipe
+	 tvakpr kokorve hlakav tpotel tmuuel teanstu tmtatt hkuto amstipe
 	 hsotav hasepr hsotvkor vaklis korav elasa rahsa apuraha lassa lahdever omakkiiv vevm
 	 verokor lveru elama astulone muastulo hsaiprva haiprva hwmky htkapr tmtukimk vvvmk1
 	 vvvmk3 vvvmk5 yhtez tkoultuk hvamtuk kelapu hlaho rvvm kellaps rili riyl kthr kthl ktku
@@ -305,7 +305,7 @@
 
 	/* Palkkatulot */
 
-	PALKAT = SUM(trpl, trplkor, anstukor, tulkp, tmpt, tkust, tepalk, tmeri, tlue2, tpalv, trespa, tpturva, tutmp2, tutmp3, tutmp4);
+	PALKAT = SUM(tepalkat, toptiot, tosinktp, anstukor, tulkp, telps43, tmuukust, tepalk, tmerile, tpalv, trespa, tutmp235, tutmp4);
 
 	PALKAT = MAX(SUM(PALKAT, -vthmp), 0);
 
@@ -319,7 +319,7 @@
 
 	/* Muita sekalaisia ansiotuloja */
 
-	MUU_ANSIO = SUM(tpalv2, telps1, telps2, telps5, ttyoltuk, tlakko, tpalv2a, tmuut, tomlis, telvpal, tmluoko, tsuurpu, SUM(MAX(tkoultuk, 0)), tkapite, tapur);
+	MUU_ANSIO = SUM(tepertyok1, tepertyok2, telps41, telps42, telps8, telps1, telps2, telps5, ttyoltuk, tlakko, tpalv2a, tmuut, tomlis, telvpal, tsuurpu, SUM(MAX(tkoultuk, 0)), tkapite, tapur);
 
 	/* Yritystuloja ansiotuloina (yrittäjävähennystä ei ole tehty) */
 
@@ -331,7 +331,7 @@
 
 	/* Sekalaisia pääomatuloja */
 
-	SEKAL_POTULO = SUM(tvuokr, tvuokr1, tpalv2p, tjvkork, tmuukor, tjmark, tmuutp, tsiraho, 
+	SEKAL_POTULO = SUM(tvuokr, tvuokr1, tjvkork, tmuukor, tjmark, tmuutp, tsiraho, 
 		MAX(SUM(tmyynt, tmyynt1, -fluotap), 0), tvahevas, tptmuu, MAX(SUM(tulkyhp, -tuosvv), 0), tvahep50, tptvs, tvahep20, tptsu50);
 
 	/* Sekalaisia, ei-simuloituja, verottomia tuloja */

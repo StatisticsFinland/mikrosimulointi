@@ -32,9 +32,9 @@
 
 	%IF &EG NE 1 %THEN %DO;
 	
-	%LET AVUOSI = 2018;		/* Aineistovuosi (vvvv)*/
+	%LET AVUOSI = 2019;		/* Aineistovuosi (vvvv)*/
 
-	%LET LVUOSI = 2018;		/* Lainsäädäntövuosi (vvvv) */
+	%LET LVUOSI = 2019;		/* Lainsäädäntövuosi (vvvv) */
 
 	%LET AINEISTO = REK; 	/* Käytettävä aineisto (PALV = tulonjaon palveluaineisto, REK = mikrosimuloinnin rekisteriaineisto) */
 
@@ -157,22 +157,21 @@
 	 ftappm ftappmp ftvuora ftyhmt ikakk ikavu
 	 lapsiev lelvak lkive lkuve lpvma lshma ltva ltvp lveru svatva svatvap
 	 svatpp tansel tapur teanstu teinova teinovv teinovvb teleuve telps1
-	 telps2 telps5 telvpal tenosve tepalk tjmark tjvkork tkansel tkust
-	 tlakko tlue2 tmeri tmetsp tmetspp tmluoko tmpt tmtatt tmuuel tmuukor tmuut
+	 telps2 telps5 telvpal tenosve tepalk tjmark tjvkork tkansel telps43 tmuukust
+	 tlakko tmerile tmetsp tmetspp tepalkat toptiot tosinktp tmtatt tmuuel tmuukor tmuut
 	 tmuutp tmyynt tmyynt1 tnoosvab tnoosvvb tomlis toyjmav toyjmavvap
-	 toyjmyv toyjmyvvap treitosva toptio tpalv tpalv2 tpalv2a tpalv2p
-	 tpeito tperhel tpjta tpotel tpturva trespa trpl trplkor
-	 anstukor tsiraho tsuurpu ttapel tkuntra tlapel ttappr ttyoltuk
-	 tulk tulkp tulkp6 tulkya2 tulkyhp tuosvv tuosvvap tutmp2
-	 tutmp3 tutmp4 tvahevas tptelak tptmuu tvakpr tvaksp tvuokr tvuokr1 tyhtat
+	 toyjmyv toyjmyvvap treitosva tpalv tepertyok1 tepertyok2 telps41 telps42 telps8 tpalv2a
+	 tpeito tperhel tpjta tpotel trespa anstukor tsiraho tsuurpu ttapel tkuntra tlapel ttappr ttyoltuk
+	 tulk tulkp tulkya2 tulkyhp tuosvv tuosvvap tutmp235
+	 tutmp4 tvahevas tptelak tptmuu tvakpr tvaksp tvuokr tvuokr1 tyhtat
 	 tyhtpot tyot velatk vevm vkoras vkorep vkortu vkotita
-	 vkotitki vkotitku vkotitp vkotitsv vlahj vluothm vmatk vmuut1
+	 vkotitki vkotitku vkotitp vkotitsv vlahj luhlomak vmatk vmuut1
 	 vmuutk vmuutv vohvah vopintov vthmp vthm2 vthm4 vtyasv vtyomj
 	 vvevah vvvmk1 vvvmk3 vvvmk5 yhtez yrtukor hsaiprva haiprva tkotihtu
 	 hwmky tkoultuk tmtukimk tkopira ktku htkapr hkotihm takuuel oplaikor
 	 tjmarkh tvahep50 tptvs tvahep20 tptsu50 korosazkg korosazkf korosatkg
 	 korosatkf dtyhtep korosapks korosapkw elivtu lylen tkapite tsijova
-	 vthmkor palksiku palkomos tyonosuu 
+	 vthmkor palksiku_yht palkomos_yht tyonosuu_yht 
 	 tosmetpt tyhtmat tyhtate tyhtmpot tyhtpote
 	 tmaat1evyr tmaat1pevyr tliik1evyr tliikpevyr tporo1evyr tyhtmatevyr
      tyhtateevyr tmaat2evyr tmaat2pevyr tliik2evyr tliik2pevyr tporo2evyr
@@ -251,15 +250,15 @@
 	ELSE IF PSOTX = . OR asko > 2 THEN VEROPUOL = 0;
 	
 	/* Eräiden tuloerien summia */
-	ULKPALKKA = MAX(SUM(tulkp, -tulkp6), 0);
-	PALKKA1 = SUM(trpl, trplkor, anstukor, ULKPALKKA, tmpt, tkust, tepalk, tmeri, tlue2, tpalv, trespa, tpturva, tutmp2, tutmp3, tutmp4);
-	MUU_TYO = SUM(tpalv2, telps1, telps2, telps5, ttyoltuk);
+	ULKPALKKA = tulkp;
+	PALKKA1 = SUM(tepalkat,toptiot,tosinktp, anstukor, ULKPALKKA, telps43, tmuukust, tepalk, tmerile, tpalv, trespa, tutmp235, tutmp4);
+	MUU_TYO = SUM(tepertyok1, tepertyok2, telps41, telps42, telps8, telps1, telps2, telps5, ttyoltuk);
 	YRITYSTA = SUM(tmaat1evyr, tmaat1pevyr, tpjta, tliik1evyr, tliikpevyr, tporo1evyr, tyhtmatevyr, tyhtateevyr, SUM(tyhtat, -tyhtmat, -tyhtate), tmtatt, yrtukor);
 	TYOTULOA = SUM(PALKKA1, MUU_TYO, YRITYSTA);
 	YRITYSTP = SUM(tmaat2evyr, tmaat2pevyr, tliik2evyr, tliik2pevyr, tporo2evyr, tyhtmpotevyr, tyhtpoteevyr, SUM(tyhtpot, -tyhtmpot, -tyhtpote), MAX(tmetsp, 0), MAX(tmetspp, 0), MAX(tosmetpt, 0), tvaksp);
-	VAKPALK = SUM(MAX(SUM(trpl, -toptio), 0), tmpt, tmeri, tlue2);
+	VAKPALK = SUM(tepalkat,tosinktp, tmerile);
 	MUUT_EL = MAX(SUM(tansel, ttapel, tlapel, tpotel, teanstu, tmuuel, teleuve), 0);
-	MUU_ANSIO = SUM(tlakko, tpalv2a, tmuut, tomlis, telvpal, tmluoko, tsuurpu, MUU_TTURVA_DATA, tkapite, tapur);
+	MUU_ANSIO = SUM(tlakko, tpalv2a, tmuut, tomlis, telvpal, tsuurpu, MUU_TTURVA_DATA, tkapite, tapur);
 	THANKK = SUM(vthm4);
 	MUU_VAH_VALT2 = SUM(vmuut1, vmuutv, MAX(SUM(vevm, -lelvak),0));
 	MUU_VAH_KUNN2 = SUM(vmuut1, vmuutk, ftapakk,  MAX(SUM(vevm, -lelvak),0));
@@ -267,7 +266,7 @@
 	/* Muodostetaan muuttuja ULK_OSUUS niille henkilöille, joille ulkomaan tuloihin on käytetty vapautusmenetelmää */
 	IF svatva > 0 AND tulkya2 > 0 THEN ULK_OSUUS = tulkya2 / svatva; ELSE ULK_OSUUS = 0;
 	VUOKRAT = SUM(tvuokr, tvuokr1);
-	MUU_PO = SUM(tpalv2p, tjvkork, tmuukor, tjmark, tmuutp, tsiraho, 
+	MUU_PO = SUM(tjvkork, tmuukor, tjmark, tmuutp, tsiraho, 
 				MAX(SUM(tmyynt, tmyynt1, -fluotap), 0), tvahevas, tptmuu, MAX(SUM(tulkyhp, -tuosvv),0),
 					tvahep50, tptvs, tvahep20, tptsu50, tptelak);
 
@@ -336,10 +335,10 @@
 	DROP csivs fluotap fluotmu ftapakk ftapep ftapepp ftappm ftappmp
 		ftvuora ftyhmt lkive lkuve lpvma lshma ltva ltvp svatva svatvap svatpp
 		tansel tapur teanstu teleuve telps1 telps2 telps5 telvpal tepalk tjmark
-		tjvkork tkansel tkust tlakko tlue2 tmluoko tmpt tmtatt tmuuel tmuukor
-		tmuut tmuutp tmyynt tmyynt1 tomlis toptio tpalv tpalv2 tpalv2a tpalv2p
-		tperhel tpjta tpotel tpturva trespa trpl trplkor anstukor tsiraho
-		tsuurpu ttapel tlapel ttyoltuk tulkp6 tulkya2 tutmp2 tutmp3
+		tjvkork tkansel telps43 tmuukust tlakko tepalkat toptiot tosinktp tmtatt tmuuel tmuukor
+		tmuut tmuutp tmyynt tmyynt1 tomlis tpalv tepertyok1 tepertyok2 telps41 telps42 telps8 tpalv2a
+		tperhel tpjta tpotel trespa anstukor tsiraho
+		tsuurpu ttapel tlapel ttyoltuk tulkya2 tutmp235
 		tutmp4 tvahevas tptelak tptmuu tvaksp tvuokr tvuokr1 vevm
 		vkotita vkotitki vkotitku vkotitp vkotitsv vlahj vmuut1 vmuutk
 		vmuutv vthm4 vvvmk1 vvvmk3 vvvmk5 yhtez yrtukor hsaiprva haiprva
@@ -622,8 +621,8 @@
 	DROP TYOTMAKSU TYOTMAKSU1 TYOTMAKSU2 ELVAK ELVAK1 ELVAK2;
 
 	/* Tulonhankkimisvähennys, työmatkakuluvähennys, ay-jäsenmaksujen vähennys */
-	%TulonHankKulutS(THANKKULUT, &LVUOSI, &INF, SUM(PALKKA1, -tmeri), SUM(vthmp, vluothm, vthmkor), vtyomj, vmatk, tyot); 
-	%TulonHankKulutS(THANKKULUTM, &LVUOSI, &INF, tmeri, SUM(vthmp, vluothm, vthmkor), 0, 0, tyot);
+	%TulonHankKulutS(THANKKULUT, &LVUOSI, &INF, SUM(PALKKA1, -tmerile), SUM(vthmp, luhlomak, vthmkor), vtyomj, vmatk, tyot); 
+	%TulonHankKulutS(THANKKULUTM, &LVUOSI, &INF, tmerile, SUM(vthmp, luhlomak, vthmkor), 0, 0, tyot);
 	THANKKULUT2 = SUM(THANKKULUT, THANKKULUTM, vtyasv, THANKK);
 	PUHD_ANSIO = MAX(SUM(ANSIOT, -YRVAHA, - THANKKULUT2), 0);
 
@@ -658,8 +657,8 @@
 	ELSE ELTULVAH_V = 0;
 
 	/* Kunnallisverotuksen merityötulovähennys */
-	IF tmeri > 0 THEN DO;
-		%KunnVerMeriVahS(MERIVAHKUN, &LVUOSI, &INF, tmeri);
+	IF tmerile > 0 THEN DO;
+		%KunnVerMeriVahS(MERIVAHKUN, &LVUOSI, &INF, tmerile);
 	END;
 	ELSE MERIVAHKUN = 0;
 
@@ -709,8 +708,8 @@
 	ELSE KEVA = 0;
 
 	/* Valtionverotuksen merityötulovähennys */
-	IF tmeri > 0 THEN DO;
-		%ValtVerMeriVahS(MERIVAHVAL, &LVUOSI, &INF, tmeri); 
+	IF tmerile > 0 THEN DO;
+		%ValtVerMeriVahS(MERIVAHVAL, &LVUOSI, &INF, tmerile); 
 	END;
 	ELSE MERIVAHVAL = 0;
 
@@ -776,8 +775,8 @@
 	ELSE ALIJHYVERIT = 0;
 
 	/* Kotitalousvähennys */
-	IF SUM(palksiku, palkomos, tyonosuu) > 0 THEN DO;
-		%KotitVahErillS(KOTITVAH, &LVUOSI, &INF, palksiku, palkomos, tyonosuu);
+	IF SUM(palksiku_yht, palkomos_yht, tyonosuu_yht) > 0 THEN DO;
+		%KotitVahErillS(KOTITVAH, &LVUOSI, &INF, palksiku_yht, palkomos_yht, tyonosuu_yht);
 	END;
 	ELSE KOTITVAH = 0;
 

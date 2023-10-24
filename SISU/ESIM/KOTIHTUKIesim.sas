@@ -1,6 +1,6 @@
 /***********************************************************
 * Kuvaus: Kotihoidontuen esimerkkilaskelmien pohja         *
-* Viimeksi päivitetty: 12.1.2021			     		   *
+* Viimeksi päivitetty: 10.3.2021			     		   *
 ***********************************************************/ 
 
 /* 1. Esimerkkilaskentaa ohjaavat makromuuttujat */
@@ -277,17 +277,8 @@ KEEP &VALITUT;
 
 RUN;
 
-%IF &EXCEL = 1 %THEN %DO;
-	ODS HTML3 BODY = "&LEVY&KENO&HAKEM&KENO.TULOS&KENO.OUTPUT&KENO&TULOSNIMI_KT..xls" STYLE = MINIMAL;
-%END;
-
-PROC PRINT NOOBS LABEL DATA = OUTPUT.&TULOSNIMI_KT;
-TITLE "ESIMERKKILASKELMA, KOTIHTUKI";
-RUN;
-
-%IF &EXCEL = 1 %THEN %DO;
-	ODS HTML3 CLOSE;
-%END;
+* Tulosten printtaus ja vienti exceliin riippuen valinnasta; 
+%EsimTulokset(&TULOSNIMI_KT, KOTIHTUKI);
 
 %MEND KotihTuki_Simuloi_Esimerkki;
 

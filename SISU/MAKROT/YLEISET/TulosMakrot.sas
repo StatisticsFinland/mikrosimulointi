@@ -1,7 +1,7 @@
 /********************************************************************
 *  Kuvaus: Aineistosimuloinnin tulosten tuottamiseen liittyviä		*
 *		   makroja													*
-*  Viimeksi päivitetty: 4.8.2020		   					       	*
+*  Viimeksi päivitetty: 10.3.2021	   					       	    *
 ********************************************************************/
 
 /*
@@ -738,3 +738,33 @@ PROC DATASETS LIBRARY = WORK NOLIST;
 QUIT;
 
 %MEND KoyhInd;
+
+
+
+/* Esimerkkilaskelmien tulosten tulostaminen ja tulokset exceliin
+
+Parametrit
+
+tulosnimi: saa ohjelmassa arvon makromuuttujasta TULOSNIMI_X [ X = (osa)mallin kirjainlyhenne ]. 
+otsikko: (osa)mallin nimi. Kovakoodattu jokaiseen esimerkkilaskelmat-osamalliin. 
+
+*/ 
+
+%MACRO EsimTulokset(tulosnimi, otsikko);
+
+%IF &EXCEL = 1 %THEN %DO;
+	ODS HTML3 PATH = "&LEVY&KENO&HAKEM&KENO.TULOS&KENO.OUTPUT" FILE = "&KENO&TULOSNIMI..xls"  STYLE = MINIMAL;
+%END;
+
+PROC PRINT NOOBS LABEL DATA = OUTPUT.&TULOSNIMI;
+TITLE "ESIMERKKILASKELMA, &otsikko";
+RUN;
+
+
+%IF &EXCEL = 1 %THEN %DO;
+	ODS HTML3 CLOSE;
+%END;
+
+
+%MEND EsimTulokset;  
+

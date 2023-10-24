@@ -8,6 +8,103 @@
 *												*
 *************************************************************************************************
 
+
+41. Korjattu työttömyysturvan suojaosan korotuksen voimassaoloa (kesäkuun 2021 loppuun saakka) 
+	ajantasaistuksessa päivittyneeseen työttömyysturvan parametritauluun.
+
+Päivittäjä: MW
+pv. 25.5.2021
+
+	../PARAM/ptturva.sas7bdat
+
+40. Päivitetty AJANTASAISTUS-kansion sisältö sekä PARAM-kansion parametritaulut vastaamaan
+        uusinta VM:n maaliskuun 2021 ennusteeseen perustuvaa ajantasaistusta (AJANT_2018.40).
+
+Päivittäjä: MW
+pv. 25.5.2021
+
+        ../AJANTASAISTUS/...
+        ../PARAM/pindeksi_vuosi.sas7bdat
+        ../PARAM/pasumtuki.sas7bdat
+        ../PARAM/pelasumtuki.sas7bdat
+        ../PARAM/pkansel.sas7bdat
+        ../PARAM/pkotihtuki.sas7bdat
+        ../PARAM/pllisa.sas7bdat
+        ../PARAM/popintuki.sas7bdat
+        ../PARAM/pphoito.sas7bdat
+        ../PARAM/psairvak.sas7bdat
+        ../PARAM/ptoimtuki.sas7bdat
+        ../PARAM/ptturva.sas7bdat
+        ../PARAM/pvero.sas7bdat
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 21.01 JAETTU 30.03.2021  **************************
+*************************************************************************************************
+
+39. Jatkettu työttömyysturvan suojaosan korotusta (300 e/kk -> 500 e/kk) kesäkuun 2021 loppuun
+	saakka.
+
+Päivittäjä: EA
+pv. 19.3.2021
+
+	../PARAM/ptturva.sas7bdat
+
+38. Lisätty kaikki_param-taulun pysyvat-sarakkeeseen globaali makromuuttuja SYSSTREAMINGLOG, 
+	jotta SAS EG 8.3 -versiossa ei tule virheilmoitusta siitä, että tämä uusi SAS:n 
+	automaattinen makromuuttuja yritetään tuhota. Muutoksella ei ole vaikutusta muita 
+	vanhempia SAS-versioita käytettäessä.
+
+Päivittäjä: MW
+pv. 15.3.2021
+
+	../OHJAUS/kaikki_param.sas7bdat 
+
+37. Lisätty formaatit toimiala ja toimialak liittyen rekisteriaineistoon lisättyyn 
+	toimiala-muuttujaan.
+
+Päivittäjä: IK
+pv. 11.3.2021
+
+	../OHJAUS/SisuFormaatit.sas
+	
+	Muutokset riveillä 517-533.
+
+	../OHJAUS/ftoimiala.sas7bdat
+
+	Lisätty uusi formaattitaulu ftoimiala.
+
+36. Korjattu esimerkkilaskelmien tulosten vieminen exceliin. Korjauksen yhteydessä on lisätty
+	TulosMakrot.sas-tiedostoon uusi EsimTulokset-makro esimerkkilaskelmien tulosten 
+	tulostamista ja tulosten exceliin vientiä varten. 
+
+Päivittäjä: AS
+pv. 10.3.2021
+
+	../MAKROT/YLEISET/TulosMakrot.sas
+
+	Muutokset riveillä 753-769.
+
+	../ESIM/ASUMTUKIesim.sas
+	../ESIM/ELASUMTUKIesim.sas
+	../ESIM/KANSELesim.sas
+	../ESIM/KIVEROesim.sas
+	../ESIM/KOTIHTUKIesim.sas
+	../ESIM/LLISAesim.sas
+	../ESIM/OPINTUKIesim.sas
+	../ESIM/PHOITOesim.sas
+	../ESIM/SAIRVAKesim.sas
+	../ESIM/TOIMTUKIesim.sas
+	../ESIM/TTURVAesim.sas
+	../ESIM/VANHRAHAesim.sas
+	../ESIM/VEROesim.sas
+
+	Uusi makrokutsu lisätty jokaisen esimerkkilaskelmaohjelman loppupuolelle. Makrokutsulla 
+	on korvattu aiempi kovakoodattu tulosten käsittely. 
+
+	../ESIM/KOKOesim.sas
+
+	Muutos rivillä 1855. Makrokutsulla on korvattu aiempi kovakoodattu tulosten käsittely. 
+
 *************************************************************************************************
 **************************   UUSI MALLIVERSIO 21.00 JAETTU 15.01.2021   *************************
 *************************************************************************************************

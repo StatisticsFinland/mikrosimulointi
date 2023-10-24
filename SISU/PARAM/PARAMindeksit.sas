@@ -522,6 +522,9 @@ päivitys kutsumalla ParamPaivitys-makroa. Tässä esimerkki makrokutsusta:
 	);
 
 -----------------------------------------------------------------------------*/
+
+
+
 %macro ParamPaivitys (PVUOSI, TVUOSI, INDTAULU,
 		POPINTUKI, PTOIMTUKI, PTTURVA, PASUMTUKI, PELASUMTUKI, PKANSEL, 
 		PKOTIHTUKI, PPHOITO, PLLISA, PSAIRVAK, PKIVERO, PVERO) /

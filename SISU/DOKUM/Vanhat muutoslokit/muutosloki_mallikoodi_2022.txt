@@ -1,0 +1,318 @@
+﻿*************************************************************************************************
+* SISU-MALLIN MUUTOSLOKI                                                                        *
+* AINEISTOVUOSI 2022  	                                                                        *	
+*                                                                                               *	
+* Tähän dokumenttiin merkitään SISU-malliin tehdyt muutokset.					*
+* Lokista ilmenee yleiskuvaus muutoksesta ja tiedostot, joihin muutoksia on tehty.      	*
+*				                                                                *
+*************************************************************************************************
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 25.10 JAETTU 30.4.2025  ***************************
+*************************************************************************************************
+
+35.	Julkaistu VM:n kevään 2025 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
+	parametritaulut vuosille 2023-2029.
+
+34.	Lisätty vuosiehdot ASUMTUKIsimul-osamalliin (rivit 150 ja 209), mikä mahdollistaa
+	aineistosimuloinnin erillisajon niille vuosille, joilla opintotuen asumislisän saaminen 
+	ei rajaa henkilöitä pois yleisen asumistuen piiristä.
+	
+	../SIMUL_2022/ASUMTUKIsimul.sas
+
+33.	Lisätty TTURVA_KK_simul-osamalliin kolme (>0)-ehtoa, jottei keston simuloinnissa tapahdu
+	nollalla jakamista (rivit 361 ja 378). Lisäksi lisätty kyseiseen osamalliin
+	simuloinnin kestoa mittaavat aikaleimat.
+
+	../SIMUL_2022/TTURVA_KK_simul.sas
+
+32.	Tehty korjauksia TOIMTUKIsimul-osamalliin. Lisätty starttidatan muodostukseen sieltä
+	puuttunut lelvak-muuttuja (rivi 183). Siirretty PRAHAMAKSU_DATA-muuttujan luonti
+	aikaisemmaksi (riville 267), sillä kyseistä muuttujaa käytetään MAKSVEROT_DATA-muuttujan
+	luonnissa (rivi 270). Lisäksi poistettu vanha kovakoodattu työmatkakulujen rajoite. 
+
+	../SIMUL_2022/TOIMTUKIsimul.sas
+
+31.	Työtulovähennyksen lapsi- ja yksinhuoltajakorotus korjattu. VEROsimul-osamallissa 
+	työtulovähennyksen makrokutsussa (TyotVahS kutsu rivillä 808) oli parametrit ”cllkm” 
+	(alaikäisten lasten lukumäärä) ja ”YKSINHUOLTAJA” (yksinhuoltajastatus, 0/1) väärin päin.
+	Makrokutsuun korjattu parametrit oikein päin.
+
+	../SIMUL_2022/VEROsimul.sas
+
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 25.00 JAETTU 27.1.2025  ***************************
+*************************************************************************************************
+Malliversio 25.00 toimii viimeisimmällä aineistovuoden 2022 rekisteriaineistolla.
+
+Viimeisin rekisteriaineisto sijainnissa:
+D:\mikrosimulointi\data\rek\rek2022\rek2022.30\
+*************************************************************************************************
+
+30.	Tehty vuoden 2025 alkuun mennessä vahvistettuihin lakimuutoksiin liittyvät parametripäivitykset. 
+
+	../PARAM/pindeksi_vuosi.sas7bdat
+	../PARAM/pindeksi_kuuk.sas7bdat
+        ../PARAM/pasumtuki.sas7bdat
+        ../PARAM/pelasumtuki.sas7bdat
+        ../PARAM/pkansel.sas7bdat
+        ../PARAM/pkivero.sas7bdat
+        ../PARAM/pkotihtuki.sas7bdat
+        ../PARAM/pllisa.sas7bdat
+        ../PARAM/popintuki.sas7bdat
+        ../PARAM/pphoito.sas7bdat
+        ../PARAM/psairvak.sas7bdat
+        ../PARAM/ptoimtuki.sas7bdat
+        ../PARAM/ptturva.sas7bdat
+        ../PARAM/pvero.sas7bdat
+        ../PARAM/ptamaksu.sas7bdat
+        ../PARAM/PARAMindeksit.sas
+	../OHJAUS/kaikki_param.sas7bdat
+
+29.	Liitetty työttömyysturvan kuukausisimulointi osaksi mallia.
+
+	../MAKROT/YLEISET/YleisMakrot.sas
+	../MAKROT/TTURVAlakimakrot.sas
+	../OHJAUS/kaikki_param.sas7bdat
+	../SIMUL_2022/ALKUsimul.sas
+	../SIMUL_2022/KOKOsimul.sas
+	../SIMUL_2022/TOIMTUKIsimul.sas
+	../SIMUL_2022/VEROsimul.sas
+	../SIMUL_2022/TTURVA_KK_simul.sas
+
+28.	Päivitetty malliin opiskelijoiden siirto yleiseltä asumistuelta opintotuen asumislisän piiriin ja
+	selkeytetty ASUMTUKIsimul-ohjelman starttidatan muodostusta. Lakimuutoksen seurauksena ASUMTUKIsimul-
+	ohjelmaa ei ole mahdollista ajaa, jos opintotukea ei ole simuloitu. ASUMTUKIsimul-ohjelmaa ei ole 
+	mahdollista simuloida lainsäädäntövuoden 2025 vuosikeskiarvolla (LVUOSI = 2025, TYYPPI_KOKO = SIMUL). 
+	Käyttäjän täytyy määrittää lainsäädäntökuukausi ja valita parametrien hakutyypiksi SIMULX. 
+
+	Jos henkilölle on simuloitu opintotuen asumislisää, niin hänelle ei simuloida yleistä asumistukea. 
+	Tämän seurauksena malli todennäköisesti alisimuloi yleistä asumistukea henkilöille, jotka ovat 
+	oikeutettuja opintotuen asumislisään vain osan vuodesta. 
+
+	../SIMUL_2022/ASUMTUKIsimul.sas
+	../SIMUL_2022/OPINTUKIsimul.sas
+	../SIMUL_2022/KOKOsimul.sas
+	../MAKROT/OPINTUKIlakimakrot.sas
+	../ESIM/ASUMTUKIesim.sas
+	../ESIM/OPINTUKIesim.sas
+
+27.	Muutettu VEROsimul ohjelman koodia (rivit 190, 199 ja 200) niin, että lainsäädäntövuodesta 2025 alkaen 
+	käytetään uutta kunnallis- ja kirkollisveroprosentin muuttujaa (ayri25 & kayri25).
+	
+	../SIMUL_2022/VEROsimul.sas
+
+26.	Lisätty simulointikoodiin uusien asumistuen kuntaryhmien (astukikr_l25) käyttö vuodesta 2025 alkaen.
+
+	../SIMUL_2022/ASUMTUKIsimul.sas
+	../SIMUL_2022/OPINTUKIsimul.sas
+
+25.	Lisätty mahdollisuus hyödyntää varallisuustietoja simuloinnissa. Luotu makromuuttujat 
+	VARALLISUUSDATA	ja VARALLISUUSKATTO, joiden avulla käyttäjä voi päättää huomioidaanko varallisuustietoja 
+	simuloinnissa vai ei. Varallisuustiedot eivät ole kattavat, niistä puuttuvat mm. talletukset. Tämän takia 
+	oletusarvoisesti varallisuustietoja ei käytetä simuloinnissa (VARALLISUUSDATA = 0). Lisätty mahdollisuus
+	huomioida varallisuus myös esimerkkilaskuissa.
+
+	../SIMUL_2022/ALKUsimul.sas
+	../SIMUL_2022/KOKOsimul.sas
+	../SIMUL_2022/ASUMTUKIsimul.sas
+	../SIMUL_2022/ELASUMTUKIsimul.sas
+	../SIMUL_2022/TOIMTUKIsimul.sas
+	../SIMUL_2022/KOKOesim.sas
+	../ESIM/ASUMTUKIesim.sas
+
+24. 	Lisätty varallisuusharkinta yleiseen asumistukeen. Simuloinnissa varallisuusharkinta huomioi aineiston 
+	varallisuustiedot vain jos käyttäjä määrittää, että makromuuttuja VARALLISUUSDATA = 1.
+	
+	../SIMUL_2022/ASUMTUKIsimul.sas
+	../MAKROT/ASUMTUKIlakimakrot.sas
+     	../PARAM/pasumtuki.sas7bdat
+	../ESIM/ASUMTUKIesim.sas
+	../ESIM/KOKOesim.sas
+
+23.	Lisätty alaikäraja (AlaIkaRaja) kansaneläkkeen ja takuueläkkeen simulointiin.
+
+	../SIMUL_2022/KANSELsimul,sas
+	../MAKROT/KANSELlakimakrot.sas 
+	../ESIM/KANSELesim.sas
+	../ESIM/ KOKOesim.sas
+
+22.	Lisätty ohjelma kaikki_param_muokkaus.sas, jolla voi lisätä muuttujia kaikki_param-
+	tauluun. 
+
+	../OHJAUS/kaikki_param_muokkaus.sas
+	
+21.	Työttömyysturvan korotusosien poistuminen huomioitu nollaamalla korotusparametrit sekä
+	asettamalla vuosirajaukset lakimakroihin.
+
+	../MAKROT/TTURVAlakimakrot.sas
+
+20.	Lisätty TTURVA-osamallin starttidatan poimintaan ylläpitokorvausten muuttuja dtyllaep,
+	jotta se voidaan vähentää työmarkkinatuen kokonaismäärästä.
+
+	../SIMUL_2022/TTURVA_simul.sas
+
+19.	Lisätty REK2022 aineistoon vanhempien omaishoidon tuen hoitopalkkio muuttuja dtoomaishp,
+	jotta se voidaan vähentää vanhempien saamista tuloista osittaisen tm-tuen laskennassa
+	TTURVA-osamallissa.
+
+	../SIMUL_2022/TTURVA_simul.sas
+	../SIMUL_2022/TTURVA_KK_simul.sas
+	../MAKROT/TTURVAlakimakrot.sas	
+
+18.	Työtulovähennyksen lapsikorotus huomioitu lisäämällä pvero-tauluun uusi parametri
+	TyotVahLapKor (Työtulovähennyksen lapsikorotus (2025-)), ja muokkaamalla TyotVahS-makroa
+	ja makron kutsuja aineistosimuloinnin esimerkkilaskelmien koodeissa.
+
+	../SIMUL_2022/VEROsimul.sas
+	../ESIM/VEROesim.sas
+	../ESIM/KOKOesim.sas
+	../MAKROT/VEROlakimakrot.sas
+	../PARAM/pvero.sas7bdat
+	../OHJAUS/kaikki_param.sas7bdat
+
+17.	Ansiotulovähennyksen poiston myötä asetettu kaikki ansiotulovähennyksen muuttujat
+	nolliksi ja kommentoitu koodia niin, että vähennyksen poistuma selviää kommentoinnista.
+	
+	../SIMUL_2022/VEROsimul.sas
+	../ESIM/VEROesim.sas
+	../ESIM/KOKOesim.sas
+	../MAKROT/VEROlakimakrot.sas
+	../PARAM/pvero.sas7bdat
+
+16.	Päivitetty vvero-osamallin parametritaulut arvonlisäveromuutosten mukaisiksi.
+
+	../PARAM/pvvero_tuotteet.sas7bdat
+	../PARAM/pvvero.sas7bdat
+
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 24.50 JAETTU 19.12.2024  **************************
+*************************************************************************************************
+
+15.	Julkaistu VM:n talven 2024 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
+	parametritaulut vuosille 2023-2029.
+
+14.	Korjattu mallissa datan muuttujien työmarkkinatuen ja peruspäivärahan muuttujien laskenta
+	poistamalla aikaisempi korotusosien kaksinkertainen sisällyttäminen eriin ohjelmissa 
+	KOKOsimul, TTURVAsimul, VEROsimul ja TOIMTUKIsimul. TTURVAsimul-ohjelmassa poistettu 
+	datan muuttujista myös niihin aiemmin sisällytetyt kulukorvaukset. Ohjelmissa on myös 
+	täsmennetty työmarkkinatuen ja peruspäivärahan muuttujien selitteitä.
+
+	.../SIMUL_2022/TTURVAsimul.sas
+	.../SIMUL_2022/KOKOsimul.sas
+	.../SISU/SIMUL_2022/TOIMTUKIsimul.sas
+	.../SISU/SIMUL_2022/VEROsimul.sas
+	.../AJANTASAISTUS/REK/korot_rek.sas
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 24.40 JAETTU 23.9.2024  ****************************
+*************************************************************************************************
+Uusin malliversio toimii aineistovuoden 2022 rekisteriaineistolla.
+
+Viimeisin rekisteriaineisto sijainnissa:
+D:\mikrosimulointi\data\rek\rek2022\rek2022.20\
+*************************************************************************************************
+
+13.	Julkaistu VM:n syksyn 2024 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
+	parametritaulut vuosille 2023-2028.
+
+12.	Korvattu muuttujat tulosrt ja tuloprt muuttujilla TULOSRT_PALKVAH ja TULOPRT_PALKVAH,
+	joihin on lisätty aineistovuoden mukainen palkansaajan vakuutusmaksujen perusteella
+	tehtävä vähennys. Aikaisemmin vähennys lisättiin lainsäädäntövuoden mukaisesti.
+
+	.../SIMUL_2022/SAIRVAKsimul.sas
+
+11.	Päivitetty TAMAKSUsimul ja TAMAKSUlakimakrot toimimaan vuoden 2022 aineistolla. 
+	Simuloinnista poistettu pros-muuttuja.
+	
+	../SIMUL_2022/TAMAKSUsimul.sas
+	../MAKROT/TAMAKSUlakimakrot.sas
+
+10.	Lisätty tavainh-muuttuja (Avainhenkilölain mukainen palkka) huomioitavaksi tuloksi 
+	toimeentulotuen simuloinnissa.
+
+	../SIMUL_2022/TOIMTUKIsimul.sas
+	../SIMUL_2022/KOKOsimul.sas
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 24.30 JAETTU 19.6.2024  **************************
+*************************************************************************************************
+
+9.	Julkaistu VM:n kesäkuun 2024 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
+   	parametritaulut vuosille 2023-2028.
+
+8.	Lisätty ansiopäivärahan porrastus makroon "AnsioSidKS" ja päivitetty siihen viittaavat 
+	makrokutsut. Lisätty ptturva-tauluun parametrit "PorrasPv1", "PorrasPv2", "PorrasKerroin1" 
+	ja "PorrasKerroin2". 
+
+	../MAKROT/TTURVAlakimakrot.sas
+	../SIMUL_2022/TTURVAsimul.sas
+	../SIMUL_2022/SAIRVAKsimul.sas
+	../PARAM/ptturva.sas7bdat
+	../ESIM/TTURVAesim.sas
+	../ESIM/KOKOesim.sas
+	../OHJAUS/kaikki_param.sas7bdat	
+
+7.	Vuorottelukorvauksen poistumisen myötä nollattu vuorattelukorvauksen parametreja ja 
+	muokattu muuttujien MUU_TTURVA_DATA (VEROsimul) ja MUU_ANSIO (KOKOsimul) muodostamista
+	lainsäädäntövuodesta 2025 lähtien.
+	
+	../PARAM/ptturva.sas7bdat
+	../SIMUL_2022/VEROsimul.sas
+	../SIMUL_2022/KOKOsimul.sas
+
+
+6.	Aikuskoulutustuen poistumisen myötä nollattu aikuiskoulutustukien parametrien arvoja
+	ja poistettu aikuiskoulutustuen indeksisidonnaiset muuttujat ohjelmasta PARAMindeksit.sas
+
+	../PARAM/popintuki.sas7bdat
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 24.20 JAETTU 31.5.2024  **************************
+*************************************************************************************************
+
+5.	Päivitetty vvero-osamallin simulointiohjelma ja parametritaulut sopimaan vuoden 2022 ku-
+	lutustutkimuksen aineistoon.
+
+	../SIMUL_2022/VVEROsimul.sas
+	../PARAM/pvvero_tuotteet.sas7bdat
+	../PARAM/pvvero.sas7bdat
+
+4.	Tarkennettu kiinteistöverotuksen simulointia. Vuoden 2022 kiinteistöveroaineisto sisältää 
+	ensimmäistä kertaa tiedon asunnon valmistumisastesta ja vapaa-ajan asunnon kuistista.
+	
+	../SIMUL_2022/KIVEROsimul.sas
+	../MAKROT/KIVEROlakimakrot.sas
+	../ESIM/KIVEROesim.sas
+
+3.	Tarkennettu kotitalousvähennyksen simulointia. Vuoden 2022 rekisteriaineisto sisältää 
+	ensimmäistä kertaa tietoa öljylämmityksestä luopumisesta, mikä mahdollistaa siihen liittyvien 
+	poikkeusten huomioimisen simuloinnissa. Lisätty pvero-tauluun parametrit "KotitVahEnimmOljy", 
+	"KotitVahPalKerroinOljy" ja "KotitVahTyoKerroinOljy".
+
+	../SIMUL_2022/VEROsimul.sas
+	../MAKROT/VEROlakimakrot.sas
+	../PARAM/pvero.sas7bdat
+	../OHJAUS/kaikki_param.sas7bdat
+
+2.	Päivitetty verotietojen lähdeaineistossa tapahtuneiden nimimuutosten takia muuttujien nimiä mallissa.
+	Tarkempi listaus nimimuutoksista DOKUM-kansiossa tiedostossa "rek2022_muuttujien_nimimuutokset.xlsx".
+
+	../SIMUL_2022/ASUMTUKIsimul.sas
+	../SIMUL_2022/ELASUMTUKIsimul.sas
+	../SIMUL_2022/KANSELsimul.sas
+	../SIMUL_2022/KOKOsimul.sas
+	../SIMUL_2022/OPINTUKIsimul.sas
+	../SIMUL_2022/TOIMTUKIsimul.sas
+	../SIMUL_2022/VEROsimul.sas
+
+1.	Poistettu mallista mahdollisuus simuloida vanhempainpäivärahoja uuden lain mukaisilla
+	korotetuilla päivillä (PERHEVAP=1). Muutos johtuu siitä, että vuoden 2022 rekisteriaineistossa
+	on mukana uuden lain mukaisia päiviä.
+	
+	../SIMUL_2022/SAIRVAKsimul.sas
+	../SIMUL_2022/KOKOsimul.sas
+	../SIMUL_2022/ALKUsimul.sas
+	../MAKROT/SAIRVAKlakimakrot.sas

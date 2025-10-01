@@ -1,0 +1,53 @@
+﻿*************************************************************************************************
+* SISU-MALLIN MUUTOSLOKI                                                                        *
+* AINEISTOVUOSI 2023  	                                                                        *	
+*                                                                                               *	
+* Tähän dokumenttiin merkitään SISU-malliin tehdyt muutokset.					*
+* Lokista ilmenee yleiskuvaus muutoksesta ja tiedostot, joihin muutoksia on tehty.      	*
+*				                                                                *
+*************************************************************************************************
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 25.30 JAETTU 16.06.2025  **************************
+*************************************************************************************************
+
+6.	Julkaistu VM:n kesän 2025 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
+	parametritaulut vuosille 2024-2029.
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 25.20 JAETTU 28.5.2025  ***************************
+*************************************************************************************************
+
+5. 	Lisätty aineistoon uutena tulleet päivähoitomaksut KOKOsimul-, PHOITOsimul ja TOIMTUKIsimul-
+	ohjelmiin. Muutos mahdollistaa päivähoitomaksujen huomioinnin toimeentulotuessa ja simuloitujen 
+	päivähoitomaksujen eurojen vertaamisen datan euroihin.
+
+	../SIMUL_2023/KOKOsimul.sas
+	../SIMUL_2023/PHOITOsimul.sas
+	../SIMUL_2023/TOIMTUKIsimul.sas
+
+4. 	Lisätty ulkomaan palkkojen muuttujat tpalk5, tulmuuh, tulmuuv ja tulmuusu ASUMTUKIsimulin 
+	ja TOIMTUKIsimulin työtulon laskentaan. TOIMTUKIsimulissa muuttujat tulmuuh ja tulmuusu
+	on lisätty veronalaiseen työtuloon ja tpalk5 ja tulmuuv verottomaan
+
+3.	Tarkennettu opintolainan valtiontakauksen simulointia uusien muuttujien myötä. Siirrytään
+	käyttämään simuloinnissa lainatakauskuukausia opintorahan tukikuukausien sijaan. Muutos kasvattaa
+	yhteenlasketun simuloidun lainatakauksen määrää, mutta pienentää sen saajien määrää. Tämä on seurausta
+	siitä, ettei keskiasteen opiskelijoille enää simuloida automaattisesti lainatakausta kaikille
+	tukikuukausille.
+
+	../SIMUL_2023/OPINTUKIsimul.sas
+
+2.	Lisätty tturva_kk-aineiston vuorottelukorvauksen määrä TTURVA_KK-osamallin tulosmuuttujiin
+	sekä KOKOsimulin tulosmuuttujaan TTURVA_SIMUL, kun käytetään TTURVA_KK_simul-osamallia.
+	Tämä yhtenäistää KOKOsimul-ajojen TTURVA_SIMUL-muuttujan sisällöt riippumatta siitä, käytetäänkö
+	TTURVA-osamallista vuosi- vai kuukausiversiota.
+
+	../SIMUL_2023/TTURVA_KK_simul.sas
+	../SIMUL_2023/KOKOsimul.sas
+
+1.	Korjattu tulonhankkimisvähennyksen laskennassa havaittu virhe. Vähennystä oli aiemmin simuloitu
+	henkilöille liikaa, jos ilmoitettuja tulonhankkimiskuluja oli aineistossa tai esimerkkilaskelmissa.
+	Korjaus on tehty VEROlakimakroon (riville 102) lisäämäällä min-funktio tulos-muuttujan laskentaan.
+	
+	../MAKROT/VEROlakimakrot.sas

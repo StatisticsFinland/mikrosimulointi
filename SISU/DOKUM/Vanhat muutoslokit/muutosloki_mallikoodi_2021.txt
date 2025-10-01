@@ -1,0 +1,188 @@
+﻿*************************************************************************************************
+* SISU-MALLIN MUUTOSLOKI                                                                        *
+* AINEISTOVUOSI 2021  	                                                                        *	
+*                                                                                               *	
+* Tähän dokumenttiin merkitään SISU-malliin tehdyt muutokset.					*
+* Lokista ilmenee yleiskuvaus muutoksesta ja tiedostot, joihin muutoksia on tehty.      	*
+*				                                                                *
+*************************************************************************************************
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 24.10 JAETTU 25.4.2024  **************************
+*************************************************************************************************
+Uusin malliversio toimii vain viimeisimmällä rekisteriaineistolla, ellei käyttäjä tee itse muutoksia
+mallin koodiin.
+
+Viimeisin rekisteriaineisto sijainnissa:
+D:\mikrosimulointi\data\rek\rek2021\rek2021.20\	
+*************************************************************************************************
+
+18. 	Julkaistu VM:n maaliskuun 2024 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
+   	parametritaulut vuosille 2022-2028.
+
+17.	Päivitetty toimeentulotuessa huomioitavat asumismenorajat.
+	
+	../PARAM/asummenorajat_2024.sas7bdat
+	../PARAM/asummenorajat_2025.sas7bdat
+	../PARAM/asummenorajat_2026.sas7bdat
+	../PARAM/asummenorajat_2027.sas7bdat
+	../PARAM/asummenorajat_2028.sas7bdat
+
+16.	Korjattu ASUMTUKIsimul-ohjelmassa datan tulotietojen OPTUKI_DATA/OPTUKI_DATA18 muokkaus riveiltä 501, 502, 505 ja 506.
+	
+	../SIMUL_2021/ASUMTUKIsimul.sas
+
+15.	Korjattu VEROesim-ohjelman makrokutsua rivillä 1043, jotta tulosmuuttuja VALTIO ('Veronsaajien osuudet: Valtio) 
+	ei saa tietyillä ehdoilla virheellisesti arvoksi pelkkiä nollia.
+
+	../ESIM/VEROesim.sas
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 24.00 JAETTU 29.1.2024  ***************************
+*************************************************************************************************
+Malliversion julkaisun yhteydessä on myös julkaistu päivitetty rekisteriaineisto, johon on lisätty
+vuoden 2024 kunnallis- ja kirkollisveroprosentit ja uusi kuntaryhmämuuttuja. Uusin malliversio
+toimii vain päivitetyllä rekisteriaineistolla, ellei käyttäjä tee itse muutoksia mallin
+koodiin. Tarkemmat tiedot malliin tehdyistä muutoksista alempana.
+
+Uusi rekisteriaineisto sijainnissa:
+D:\mikrosimulointi\data\rek\rek2021\rek2021.20\							
+*************************************************************************************************
+	
+14.	Tehty vuoden 2024 alkuun mennessä vahvistetuihin lakimuutoksiin liittyvät parametripäivitykset. 
+	Huomioitu laissa määritetyt poikkeukset indeksikorotuksiin vuosille 2024-2027. Indeksikorotuksiin 
+	liittyvät poikkeukset päivitetty ohjelmaan PARAMindeksit.
+
+	../PARAM/pindeksi_vuosi.sas7bdat
+	../PARAM/pindeksi_kuuk.sas7bdat
+        ../PARAM/pasumtuki.sas7bdat
+        ../PARAM/pelasumtuki.sas7bdat
+        ../PARAM/pkansel.sas7bdat
+        ../PARAM/pkivero.sas7bdat
+        ../PARAM/pkotihtuki.sas7bdat
+        ../PARAM/pllisa.sas7bdat
+        ../PARAM/popintuki.sas7bdat
+        ../PARAM/pphoito.sas7bdat
+        ../PARAM/psairvak.sas7bdat
+        ../PARAM/ptoimtuki.sas7bdat
+        ../PARAM/ptturva.sas7bdat
+        ../PARAM/pvero.sas7bdat
+        ../PARAM/ptamaksu.sas7bdat
+        ../PARAM/PARAMindeksit.sas
+
+13.	Muutettu VEROsimul ohjelman koodia (rivit 190, 199 ja 200) niin, että lainsäädäntövuodesta 2024 alkaen 
+	käytetään uutta kunnallis- ja kirkollisveroprosentin muuttujaa (ayri24 & kayri24).
+	
+	../SIMUL_2021/VEROsimul.sas
+
+12. 	Muutettu asumistuen makrokutsuja (rivit 557, 561 ja 565) niin, että lainsäädäntövuodesta 2024 alkaen 
+	käytetään uutta kuntaryhmämuuttujaa astukikr_l24.
+		
+	../SIMUL_2021/ASUMTUKIsimul.sas
+
+11.	Tarkennettu Kelan ohjeellisten asumismenorajojen soveltamista toimeentulotuessa ohjelmassa TOIMTUKIsimul 
+	ja makrossa "AsumMenoRajat". Lisätty uusi parametri "AsumnormiSovAika". Päivitetty mukaan myös viimeisimmät 
+	toimeentulotukea koskevat lakimuutokset. Mallissa käytetään asumismenorajoja vain, jos käyttäjä on asettanut 
+	arvoksi ASUMKUST_MAKS=1.
+	
+	../SIMUL_2021/TOIMTUKIsimul.sas
+	../MAKROT/TOIMTUKIlakimakrot.sas
+	../PARAM/ptoimtuki.sas7bdat
+	../OHJAUS/kaikki_param.sas7bdat
+
+10.	Maapohjan kiinteistöveroprosentti on vuodesta 2024 alkaen eriytetty yleisestä kiinteistöveroprosentista ja 
+	korotetty sen alarajaa.	Lisätty tämän laskentaa varten uusi makro "KiVeroMaaS" ja parametri "MaaPohjaAlaraja".
+
+	../SIMUL_2021/KIVEROsimul.sas
+	../MAKROT/KIVEROlakimakrot.sas
+	../PARAM/pkivero.sas7bdat
+
+9.	Yhdistetty työtulovähennyksen laskenta yhteen makroon "TyotVahS". Viety parametritauluun kolmelle portaalle 
+	työtulovähennyksen ikäkorotuksen muuttujat "TyotVahKorIka" ja "TyotVahKorEuro".
+
+	../SIMUL_2021/VEROsimul.sas
+	../ESIM/VEROesim.sas
+	../MAKROT/VEROlakimakrot.sas
+	../PARAM/pvero.sas7bdat
+	../OHJAUS/kaikki_param.sas7bdat
+
+8.	Yksinkertaistettu verotuksen simulointia poistamalla sote-haaroitus ja siitä syntyvät toisteisuudet koodista. 
+	Yhdistetty kaikkien maakuntien valtion tuloveron laskenta makroon "ValtTuloVeroS", lisätty uusi parametri 
+	"AhvenanmaaProsEro" ja poistettu pvero-taulusta ylimääräiset tuloveroasteikot. Siivottu pvero-taulua ja 
+	tarkennettu parametrien kuvauksia. Lisätty tarkentavia kommentteja ohjelmiin ja makroihin.
+
+	../SIMUL_2021/KOKOsimul.sas
+	../SIMUL_2021/VEROsimul.sas
+	../ESIM/VEROesim.sas
+	../ESIM/KOKOesim.sas
+	../MAKROT/VEROlakimakrot.sas
+	../PARAM/pvero.sas7bdat
+
+	
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 23.20 JAETTU 20.12.2023  **************************
+*************************************************************************************************
+
+7. 	Julkaistu VM:n joulukuun 2023 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
+   	parametritaulut vuosille 2022-2028.
+
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 23.10 JAETTU 10.10.2023  **************************
+*************************************************************************************************
+
+6. 	Korjattu SAIRVAKsimul:issa väärä vuosirajaus sairauspäivärahojen laskennassa datan tulotiedoilla laskettaessa riviltä 236.
+
+Päivittäjä: IH
+pv. 18.9.2023
+
+	../SIMUL_2021/SAIRVAKsimul.sas
+
+5. 	Korjattu KOKOesim:issä soviteltujen päivärahojen väärä lapsikorotusrajaus riveillä 787 ja 790.
+
+Päivittäjä: IH
+pv. 28.8.2023
+
+	../ESIM/KOKOesim.sas
+
+4. 	Lisätty makron AsumMenoRajat makrokutsusta puuttunut "&INF".
+
+Päivittäjä: IH
+pv. 17.8.2023
+
+	../SIMUL_2021/TOIMTUKIsimul.sas
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 23.00 JAETTU 30.06.2023  **************************
+*************************************************************************************************
+
+3. 	Poistettu VEROsimul-ohjelmasta riveiltä 435-437 ja 694 kunnallisveroprosenttien korjaus
+	kohti keskimääräistä kunnallisveroprosenttia sekä Ahvenanmaan kunnallisveroprosenttien
+	poikkeus. Tämä siitä syystä, että vuoden 2021 data sisältää tuoreimmat sote-uudistuksen
+	mukaiset kunnalisveroprosentit vuodelta 2023.
+
+Päivittäjä: IH
+pv. 21.6.2023
+
+	../SIMUL_2021/VEROsimul.sas
+
+
+2.	Poistettu pohja-ainestosta poistunut veromuuttuja FTYHMT ohjelmasta VEROsimul 
+	starttimuuttujien poiminnasta riveiltä 169 ja 351 sekä riviltä 278 lauseesta 
+	POTAPP = SUM(ftappm, ftapep, ftappmp, ftapepp, ftyhmt, ftvuora);.
+
+Päivittäjä: IH
+pv. 20.6.2023
+
+	../SIMUL_2021/VEROsimul.sas
+
+
+1.	Lisätty pohjadatan uudet veromuuttujat TTYOSUHDEMATKAL ("Työsuhdematkalippu verovapaa 
+	osuus") ja TPOLKUPYORAETUV ("Polkupyöräedun verovapaa osuus") ohjelmiin KOKOsimul ja
+	TOIMTUKIsimul verottomien tulojen summiin.
+
+Päivittäjä: IH
+pv. 20.6.2023
+
+	../SIMUL_2021/KOKOsimul.sas
+	../SIMUL_2021/TOIMTUKIsimul.sas

@@ -8,12 +8,14 @@
 /* Tiedosto sisältää seuraavat makrot */
 
 /*
-2.  PtVerotusArvoS	= Pientalon verotusarvo
-3.  VapVerotusArvoS	= Vapaa-ajan asunnon verotusarvo
-4.  KiVeroPtS		= Pientalon kiinteistövero
-5.  KiVeroVapS		= Vapaa-ajan asunnon kiinteistövero
-6.  KiMinimi		= Kiinteistöveron pienimmän määrättävän veron huomioon ottaminen
-7.	KiVeroMaaS		= Maapohjan kiinteistövero (2024-)
+2.  PtVerotusArvoS		= Pientalon verotusarvo
+3.  VapVerotusArvoS		= Vapaa-ajan asunnon verotusarvo
+4.  KiVeroPtS			= Pientalon kiinteistövero
+5.  KiVeroVapS			= Vapaa-ajan asunnon kiinteistövero
+6.  KiMinimi			= Kiinteistöveron pienimmän määrättävän veron huomioon ottaminen
+7.	KiVeroMaaS			= Maapohjan kiinteistövero (2024-)
+8.	TalVerotusArvoS 	= Talousrakennuksen verotusarvo
+9.	KiVeroTalS			= Talousrakennuksen kiinteistövero
 */
 
 
@@ -33,9 +35,10 @@
 	lammitysk:		Lämmityskoodi (1=keskuslämmitys, 2=ei keskuslämmitystä, 3=sähkölämmitys)
 	sahkok:			Sähkökoodi (0=ei, 1=kyllä)
 	jhvalarvokoodi:	Jälleenhankinta-arvon valmiskoodi (1 = laskettu, 2 = annettu valmisarvona verovuodeksi, 3 = annettu valmisarvona pysyvästi)
-	valmiusaste:	Keskeneräisen rakennuksen valmiusaste;
+	valmiusaste:	Keskeneräisen rakennuksen valmiusaste
+	valopullinen:	Datassa oleva rakennuksen verotusarvo;
 
-%MACRO PtVerotusArvoS(tulos, mvuosi, minf, raktyyppi, valmvuosi, ikavuosi, kantarakenne, rakennuspa, kellaripa, vesik, lammitysk, sahkok, jhvalarvokoodi, valmiusaste)/ 
+%MACRO PtVerotusArvoS(tulos, mvuosi, minf, raktyyppi, valmvuosi, ikavuosi, kantarakenne, rakennuspa, kellaripa, vesik, lammitysk, sahkok, jhvalarvokoodi, valmiusaste, valopullinen)/ 
 DES = 'KIVERO: Pientalon verotusarvo';
 
 %HaeParam&TYYPPI(&mvuosi, 1, &KIVERO_PARAM, PARAM.&PKIVERO);
@@ -43,86 +46,64 @@ DES = 'KIVERO: Pientalon verotusarvo';
 
 IF &raktyyppi = 1 THEN DO;
 
-	/* Rakennuksen pinta-alasta erotetaan kellarin pinta-ala */
+	/* Rakennuksen pinta-alasta erotetaan kellarin pinta-ala, paitsi jos kellarin pinta-ala on suurempi */
+	IF &kellaripa > &rakennuspa THEN asuinpa = &rakennuspa;
+	ELSE asuinpa = SUM(&rakennuspa, -&kellaripa);
 
-	asuinpa = &rakennuspa - &kellaripa;
-	IF &rakennuspa LT &kellaripa THEN asuinpa = &rakennuspa;
-
-	/* Ensimmäiseksi lasketaan pientalon perusarvo */
-
-	IF &kantarakenne = 1 AND &valmvuosi LT 1960 THEN ptperarvo = &PtPuuVanh;
-	ELSE IF &kantarakenne = 1 AND (1960 LE &valmvuosi LT 1970) THEN ptperarvo = &PtPuuUusi;
+	/* Ensimmäiseksi lasketaan pientalon perusarvo: Eri arvo jos kyseessä puutalo, joka on valmistunut ennen 1960 tai vuosien 1960-1969 välillä. */
+	IF &kantarakenne = 1 AND &valmvuosi < 1970 THEN DO;
+		IF &valmvuosi < 1960 THEN ptperarvo = &PtPuuVanh;
+		ELSE ptperarvo = &PtPuuUusi;
+	END;
 	ELSE ptperarvo = &PtPerusArvo;
 
-		/* Silloin kun valmistumisvuosi puuttuu, perusarvoksi annetaan korkein perusarvo */
-	IF &valmvuosi = 0 THEN ptperarvo = &PtPerusArvo;
-
-	/* Toiseksi lasketaan vesijohdon/viemärin, keskuslämmityksen ja sähkön 
-	   puuttumisesta ja rakennuksen koosta tehtävät perusarvon vähennykset */
-
+	/* Toiseksi lasketaan vesijohdon/viemärin, keskuslämmityksen ja sähkön puuttumisesta tehtävät perusarvon vähennykset */
 	IF &vesik = 0 THEN vahvesi = &PtEiVesi;
 	IF &vesik = 1 THEN vahvesi = 0;
 
-	IF &lammitysk GT 1 THEN vahkesk = &PtEiKesk;
+	IF &lammitysk > 1 THEN vahkesk = &PtEiKesk;
 	IF &lammitysk = 1 THEN vahkesk = 0;
 
 	IF &sahkok = 0 THEN vahsahko = &PtEiSahko;
 	IF &sahkok = 1 THEN vahsahko = 0;
 
-	IF &PtNelioRaja1 LT &rakennuspa LE &PtNelioRaja2 THEN DO;
-	vahpapala = (&rakennuspa - &PtNelioRaja1);
-	vahpap = vahpapala * &PtVahPieni;
-	END;
+	/* Lasketaan rakennuksen pinta-alasta riippuvat vähennykset */
+	/* Jos rakennuksen pinta-ala = [&PtNelioRaja1, &PtNelioRaja2], niin vähennyksen määrä on riippuvainen pinta-alasta ja vähennyksen euromäärästä per neliö: */
+	IF &PtNelioRaja1 < &rakennuspa <= &PtNelioRaja2 THEN vahpa = SUM(&rakennuspa, -&PtNelioRaja1) * &PtVahPieni;
+	/* Jos taas rakennuksen pinta-ala > &PtNelioRaja2, niin vähennyksen määrä on kiinteä euromäärä */
+	ELSE IF &rakennuspa > &PtNelioRaja2 THEN vahpa = &PtVahSuuri;
 
-	IF &rakennuspa GT &PtNelioRaja2 THEN vahpas = &PtVahSuuri;
+	/* Lasketaan jälleenhankinta-arvo vähentämällä perusarvosta vähennykset	ja lisätään jälleenhankinta-arvoon viimeistelemättömän kellarin arvo*/
+	pthankarvo = asuinpa * SUM(ptperarvo, -vahvesi, -vahkesk, -vahsahko, -vahpa) + &kellaripa * &KellArvo;
 
-	/* Kolmanneksi lasketaan jälleenhankinta-arvo vähentämällä perusarvosta ed. vähennykset
-	ja lisätään jälleenhankinta-arvoon viimeistelemättömän kellarin arvo*/
+	/* Lasketaan verotusarvo vähentämällä jälleenhankinta-arvosta ikäalennukset */
+	/* Lasketaan aluksi rakennuksen korjattu ikä, oltava > 0 */
+	IF &ikavuosi > &valmvuosi THEN korjvuosi = &ikavuosi;
+	ELSE korjvuosi = &valmvuosi; 
 
-	vahsum = SUM(vahvesi, vahkesk, vahsahko, vahpap, vahpas);
-
-	pthankarvoala = SUM(ptperarvo, -vahsum);
-
-	kelparvo = &kellaripa * &KellArvo;
-
-	pthankarvo = pthankarvoala * asuinpa + kelparvo;
-
-	/* Neljänneksi lasketaan verotusarvo vähentämällä jälleenhankinta-arvosta ikäalennukset */
-	/* Lasketaan rakennuksen korjattu ikä */
-
-	IF &ikavuosi GT &valmvuosi THEN korjvuosi = &ikavuosi;
-	ELSE IF &valmvuosi GE &ikavuosi THEN korjvuosi = &valmvuosi;
-	IF korjvuosi GE &mvuosi THEN korjvuosi = &valmvuosi;
-	IF &ikavuosi = 0 AND &valmvuosi = 0 THEN korjvuosi = 0; 
-
-	rakika = max((&mvuosi - korjvuosi + 1), 0);
 	IF korjvuosi = 0 THEN rakika = 0;
+	ELSE rakika = max((&mvuosi - korjvuosi + 1), 0);
 
 	/* Lasketaan ikävähennykset puu- ja kivirakenteisille rakennuksille */
-
 	IF &kantarakenne = 1 THEN ikavahpt = &IkaAlePuu / 100 * rakika;
-	
 	IF &kantarakenne = 2 THEN ikavahpt = &IkaAleKivi / 100 * rakika;
 	
-	IF ikavahpt GE (1 - &IkaVahRaja) THEN ikavahpt2 = &IkaVahRaja;
-	IF ikavahpt LT (1 - &IkaVahRaja) THEN ikavahpt2 = 1 - ikavahpt;
-
-	/* Keskeneräisen rakennuksen valmiusaste */ 
-
-	IF korjvuosi GT &mvuosi THEN valmaste = &valmiusaste;
+	/* Huomioidaan ikävähennyksen alaraja. ikavahpt2 voi saada arvoja väliltä: [&IkaVahRaja, 1] */
+	ikavahpt2 = MAX(&IkaVahRaja, SUM(1, -ikavahpt));
 
 	/* Lopuksi lasketaan verotusarvo */
-
-	IF korjvuosi GT &mvuosi THEN temp = (valmaste * pthankarvo);
-	IF &jhvalarvokoodi > 1 then temp = valopullinen;
+	/* Jos rakennusta korjataan, niin arvo määritetään valmiusasteen avulla	*/
+	IF korjvuosi > &mvuosi THEN temp = (&valmiusaste/100 * pthankarvo);
+	/* Jos jälleenhankinta-arvon koodi > 1, käytetään datan verotusarvoa */
+	ELSE IF &jhvalarvokoodi > 1 then temp = &valopullinen;
+	/* Muissa tapauksissa arvo määritetään huomioimalla ikävähennys */
 	ELSE temp = pthankarvo * ikavahpt2;
 
 END;
 
 &tulos = temp;
 
-DROP asuinpa ptperarvo vahvesi vahkesk vahsahko vahpapala vahpap vahpas vahsum pthankarvoala kelparvo pthankarvo 
-korjvuosi rakika ikavahpt ikavahpt2 valmaste temp;
+DROP asuinpa ptperarvo vahvesi vahkesk vahsahko vahpa pthankarvo korjvuosi rakika ikavahpt ikavahpt2 temp;
 %MEND PtVerotusArvoS;
 
 
@@ -145,10 +126,11 @@ korjvuosi rakika ikavahpt ikavahpt2 valmaste temp;
 	wck:			Vapaa-ajan asunnon wc-tieto (0 = ei, 1=kyllä)
 	saunak:			Vapaa-ajan asunnon saunatieto (0=ei, 1=kyllä)
 	jhvalarvokoodi:	Jälleenhankinta-arvon valmiskoodi (1 = laskettu, 2 = annettu valmisarvona verovuodeksi, 3 = annettu valmisarvona pysyvästi)
-	valmiusaste:	Keskeneräisen rakennuksen valmiusaste;
+	valmiusaste:	Keskeneräisen rakennuksen valmiusaste
+	valopullinen:	Datassa oleva rakennuksen verotusarvo;
 
 %MACRO VapVerotusArvoS(tulos, mvuosi, minf, raktyyppi, valmvuosi, ikavuosi, kantarakenne, rakennuspa, 
-talviask, kuistipa, sahkok, viemarik, vesik, wck, saunak, jhvalarvokoodi, valmiusaste)/  
+talviask, kuistipa, sahkok, viemarik, vesik, wck, saunak, jhvalarvokoodi, valmiusaste, valopullinen)/  
 DES = 'KIVERO: Vapaa-ajan asunnon verotusarvo';
 
 %HaeParam&TYYPPI(&mvuosi, 1, &KIVERO_PARAM, PARAM.&PKIVERO);
@@ -156,21 +138,17 @@ DES = 'KIVERO: Vapaa-ajan asunnon verotusarvo';
 
 IF &raktyyppi = 7 THEN DO;
 
-	/* Ensimmäiseksi lasketaan vapaa-ajan asunnon perusarvo */
+	/* Lasketaan vapaa-ajan asunnon perusarvo */
+	vapperarvo = &VapPerusArvo;
 
-	vapperarvo = &VapPerusArvo * &rakennuspa;
+	/* Lasketaan rakennuksen pinta-alasta riippuvat vähennykset*/
+	/* Jos rakennuksen pinta-ala = [&VapNelioRaja1, &VapNelioRaja2], niin vähennyksen määrä on riippuvainen pinta-alasta ja vähennyksen euromäärästä per neliö: */
+	IF &VapNelioRaja1 < &rakennuspa <= &VapNelioRaja2 THEN vahpa = SUM(&rakennuspa, -&VapNelioRaja1) * &VapVahPieni;
+	/* Jos taas rakennuksen pinta-ala > &VapNelioRaja2, niin vähennyksen määrä on kiinteä euromäärä */
+	ELSE IF &rakennuspa > &VapNelioRaja2 THEN vahpa = &VapVahSuuri;
 
-	/*Toiseksi lasketaan vapaa-ajan asunnon lisäarvo talviasuttavuudesta, kuistista, sähköstä, viemäristä, 
-	  vesijohdosta, WC:stä ja saunasta sekä rakennuksen koosta tehtävät vähennykset */
-
-	IF (&VapNelioRaja1 LT &rakennuspa LE &VapNelioRaja2) THEN DO;
-		vahvraja = &rakennuspa - &VapNelioRaja1;
-		vahvpap = vahvraja * &VapVahPieni * &rakennuspa;
-	END;
-
-	IF &rakennuspa GT &VapNelioRaja2 THEN vahvpas = &rakennuspa * &VapVahSuuri;
-
-	IF &talviask = 1 THEN listalvi = &rakennuspa * &VapLisTalvi;
+	/*	Lasketaan vapaa-ajan asunnon lisäarvo talviasuttavuudesta, kuistista, sähköstä, viemäristä, vesijohdosta, WC:stä ja saunasta*/
+	IF &talviask = 1 THEN listalvi = &VapLisTalvi;
 	ELSE listalvi = 0;
 
 	IF &kuistipa > 0 THEN liskuisti = &kuistipa * &VapLisKuis;
@@ -191,43 +169,30 @@ IF &raktyyppi = 7 THEN DO;
 	IF &saunak = 1 THEN lissauna = &VapLisSauna;
 	ELSE lissauna = 0;
 
-	/* Kolmanneksi lasketaan jälleenhankinta-arvo vähentämällä perusarvosta ed. lisäykset ja vähennykset */
+	/* Lasketaan jälleenhankinta-arvo vähentämällä perusarvosta pinta-alaan sidottu vähennys ja lisätään arvoon edellä lasketut lisäarvot */
+	vaphankarvo = SUM(vapperarvo * &rakennuspa, -vahpa * &rakennuspa, listalvi * &rakennuspa, lissahko, lisviem, lisvesi, liswc, lissauna, liskuisti);
 
-	lissum = SUM(listalvi, lissahko, lisviem, lisvesi, liswc, lissauna, liskuisti);
-	vaphankarvo = SUM(vapperarvo, -vahvpap, -vahvpas, lissum);
+	/* Lasketaan verotusarvo vähentämällä jälleenhankinta-arvosta ikäalennukset */
+	/* Lasketaan aluksi rakennuksen korjattu ikä, oltava > 0 */
+	IF &ikavuosi > &valmvuosi THEN korjvuosi = &ikavuosi;
+	ELSE korjvuosi = &valmvuosi; 
 
-	/* Neljänneksi lasketaan verotusarvo vähentämällä jälleenhankinta-arvosta ikäalennukset */
-	/* Lasketaan rakennuksen korjattu ikä */
-
-	IF &ikavuosi GT &valmvuosi THEN korjvuosi = &ikavuosi;
-	ELSE IF &valmvuosi GE &ikavuosi THEN korjvuosi = &valmvuosi;
-	IF korjvuosi GE &mvuosi THEN korjvuosi = &valmvuosi;
-	IF &ikavuosi = 0 AND &valmvuosi = 0 THEN korjvuosi = 0; 
-
-	rakika = max((&mvuosi - korjvuosi + 1), 0);
 	IF korjvuosi = 0 THEN rakika = 0;
+	ELSE rakika = max((&mvuosi - korjvuosi + 1), 0);
 
 	/* Lasketaan ikävähennykset puu- ja kivirakenteisille rakennuksille */
+	IF &kantarakenne = 1 THEN ikavahvap = (&IkaAlePuu / 100) * rakika;
+	IF &kantarakenne = 2 THEN ikavahvap = (&IkaAleKivi / 100) * rakika;
 
-	IF &kantarakenne = 1 THEN DO;
-		ikavahvap = (&IkaAlePuu / 100) * rakika;
-	END;
-
-	IF &kantarakenne = 2 THEN DO;
-		ikavahvap = (&IkaAleKivi / 100) * rakika;
-	END;
-
-	IF ikavahvap GE (1 - &IkaVahRaja) THEN ikavahvap2 = &IkaVahRaja;
-	IF ikavahvap LT (1 - &IkaVahRaja) THEN ikavahvap2 = (1 - ikavahvap);
-
-	/* Keskeneräisen rakennuksen valmiusaste */ 
-
-	IF korjvuosi GT &mvuosi THEN valmaste = &valmiusaste;
+	/* Huomioidaan ikävähennyksen alaraja. ikavahvap2 voi saada arvoja väliltä: [&IkaVahRaja, 1] */
+	ikavahvap2 = MAX(&IkaVahRaja, SUM(1, -ikavahvap));
 
 	/* Lopuksi lasketaan verotusarvo */
-
-	IF korjvuosi GT &mvuosi THEN temp = (valmaste * vaphankarvo);
-	IF &jhvalarvokoodi > 1 then temp = valopullinen;
+	/* Jos rakennusta korjataan, niin arvo määritetään valmiusasteen avulla	*/
+	IF korjvuosi > &mvuosi THEN temp = (&valmiusaste/100 * vaphankarvo);
+	/* Jos jälleenhankinta-arvon koodi > 1, käytetään datan verotusarvoa */
+	ELSE IF &jhvalarvokoodi > 1 then temp = &valopullinen;
+	/* Muissa tapauksissa arvo määritetään huomioimalla ikävähennys */
 	ELSE temp = vaphankarvo * ikavahvap2;
 
 END;
@@ -236,8 +201,7 @@ ELSE temp = 0;
 
 &tulos = temp;
 
-DROP vapperarvo vahvraja vahvpap vahvpas listalvi lissahko lisviem lisvesi liswc lissauna lissum vaphankarvo 
-korjvuosi rakika ikavahvap ikavahvap2 valmaste temp liskuisti;
+DROP vapperarvo listalvi lissahko lisviem lisvesi liswc lissauna vaphankarvo korjvuosi rakika ikavahvap ikavahvap2 temp liskuisti;
 %MEND VapVerotusArvoS;
 
 
@@ -248,38 +212,18 @@ korjvuosi rakika ikavahvap ikavahvap2 valmaste temp liskuisti;
 	mvuosi: 		Vuosi, jonka lainsäädäntöä käytetään
 	minf: 			Deflaattori euromääräisten parametrien kertomiseksi 
 	raktyyppi: 		Rakennustyyppi
-	valmvuosi: 		Rakennuksen valmistumisvuosi
-	ikavuosi:		Rakentamisvuodesta poikkeava ikäalennuksen alkamisvuosi
-	kantarakenne:	Kantava rakenne (1=puu, 2=kivi)
-	rakennuspa:		Rakennuksen pinta-ala, m2
-	kellaripa:		Pientalon viimeistelemättömän kellarin pinta-ala, m2
-	vesik:			Vesijohtotieto (0=ei, 1=kyllä)
-	lammitysk:		Lämmityskoodi (1=keskuslämmitys, 2=ei keskuslämmitystä, 3=sähkölämmitys)
-	sahkok:			Sähkökoodi (0=ei, 1=kyllä)
-	jhvalarvokoodi:	Jälleenhankinta-arvon valmiskoodi (1 = laskettu, 2 = annettu valmisarvona verovuodeksi, 3 = annettu valmisarvona pysyvästi)
-	veropros:		Rakennukselle määrätty kiinteistöveroprosentti;
+	veropros:		Rakennukselle määrätty kiinteistöveroprosentti
+	ptvarvo:		Rakennuksen verotusarvo;
 
-%MACRO KiVeroPtS(tulos, mvuosi, minf, raktyyppi, valmvuosi, ikavuosi, kantarakenne, rakennuspa, 
-kellaripa, vesik, lammitysk, sahkok, jhvalarvokoodi, veropros, valmiusaste)/
+%MACRO KiVeroPtS(tulos, mvuosi, minf, raktyyppi, veropros, ptvarvo)/
 DES = 'KIVERO: Kiinteistövero pientalosta';
 
 %HaeParam&TYYPPI(&mvuosi, 1, &KIVERO_PARAM, PARAM.&PKIVERO);
 %ParamInf&TYYPPI(&mvuosi, 1, &KIVERO_MUUNNOS, &minf);
 
-%PtVerotusArvoS(ptvarvo, &mvuosi, &minf, &raktyyppi, &valmvuosi, &ikavuosi, &kantarakenne, &rakennuspa, 
-&kellaripa, &vesik, &lammitysk, &sahkok, &jhvalarvokoodi, &valmiusaste);
+IF &raktyyppi = 1 THEN &tulos = &ptvarvo * (&veropros / 100);
+ELSE &tulos = 0;
 
-IF &raktyyppi = 1 THEN DO;
-
-	temp = ptvarvo * (&veropros / 100);
-
-END;
-
-ELSE temp = 0;
-
-&tulos = temp;
-
-DROP temp ptvarvo;
 %MEND KiVeroPtS;
 
 
@@ -290,41 +234,18 @@ DROP temp ptvarvo;
 	mvuosi: 		Vuosi, jonka lainsäädäntöä käytetään
 	minf: 			Deflaattori euromääräisten parametrien kertomiseksi 
 	raktyyppi: 		Rakennustyyppi
-	valmvuosi: 		Rakennuksen valmistumisvuosi
-	ikavuosi:		Laskentavuosi. Rakentamisvuodesta poikkeava ikäalennuksen alkamisvuosi
-	kantarakenne:	Kantava rakenne (1=puu, 2=kivi)
-	rakennuspa:		Rakennuksen pinta-ala, m2
-	talviask:		Vapaa-ajan asunnon talviasuttavuus (0=ei, 1=kyllä)
-	kuistipa:		Vapaa-ajan asunnon kuistin pinta-ala, m2
-	sahkok:			Sähkökoodi (0=ei, 1=kyllä)
-	viemarik:		Viemäritieto (0=ei, 1=kyllä)
-	vesik:			Vesijohtotieto (0=ei, 1=kyllä)
-	wck:			Vapaa-ajan asunnon wc-tieto (0 = ei, 1=kyllä)
-	saunak:			Vapaa-ajan asunnon saunatieto (0=ei, 1=kyllä)
-	jhvalarvokoodi:	Jälleenhankinta-arvon valmiskoodi (1 = laskettu, 2 = annettu valmisarvona verovuodeksi, 3 = annettu valmisarvona pysyvästi)
-	veropros:		Rakennukselle määrätty kiinteistöveroprosentti;
+	veropros:		Rakennukselle määrätty kiinteistöveroprosentti
+	vapvarvo:		Rakennuksen verotusarvo;
 
-%MACRO KiVeroVapS(tulos, mvuosi, minf, raktyyppi, valmvuosi, ikavuosi, kantarakenne, rakennuspa, talviask, kuistipa, sahkok, 
-viemarik, vesik, wck, saunak, jhvalarvokoodi, veropros, valmiusaste)/ 
+%MACRO KiVeroVapS(tulos, mvuosi, minf, raktyyppi, veropros, vapvarvo)/ 
 DES = 'KIVERO: Vapaa-ajan asunnon kiinteistövero';
 
 %HaeParam&TYYPPI(&mvuosi, 1, &KIVERO_PARAM, PARAM.&PKIVERO);
 %ParamInf&TYYPPI(&mvuosi, 1, &KIVERO_MUUNNOS, &minf);
 
-%VapVerotusArvoS(vapvarvo, &mvuosi, &minf, &raktyyppi, &valmvuosi, &ikavuosi, &kantarakenne, &rakennuspa, 
-&talviask, &kuistipa, &sahkok, &viemarik, &vesik, &wck, &saunak, &jhvalarvokoodi, &valmiusaste);
+IF &raktyyppi = 7 THEN &tulos = &vapvarvo * (&veropros / 100);
+ELSE &tulos = 0;
 
-IF &raktyyppi = 7 THEN DO;
-
-	temp = vapvarvo * (&veropros / 100);
-
-END;
-
-ELSE temp = 0;
-
-&tulos = temp;
-
-DROP temp vapvarvo; 
 %MEND KiVeroVapS;
 
 
@@ -342,27 +263,21 @@ DES = 'KIVERO: Pienimmän määrättävän veron huomioon ottaminen';
 %HaeParam&TYYPPI(&mvuosi, 1, &KIVERO_PARAM, PARAM.&PKIVERO);
 %ParamInf&TYYPPI(&mvuosi, 1, &KIVERO_MUUNNOS, &minf); 
 
-IF &kivero < &PiMinimi THEN DO; 
-	temp = 0; 
-END; 
+IF &kivero < &PiMinimi THEN &tulos = 0;
+ELSE &tulos = &kivero; 
 
-ELSE temp = &kivero; 
-
-&tulos = temp; 
-
-DROP temp; 
 %MEND KiMinimi; 
 
 /* 7. Maapohjan kiinteistövero (2024-) */ 
 
 *Makron parametrit:
-	tulos: 			Makron tulosmuuttuja, Maapohjan kiinteistövero.
-	mvuosi: 		Vuosi, jonka lainsäädäntöä käytetään 
-	minf: 			Deflaattori euromääräisten parametrien kertomiseksi 
-	verotusarvo: 	Maapohjan verotusarvo
-	kiintpros: 		Aineistossa oleva kiinteistön kuntaveroprosentti
-	kuntanro: 		Kiinteistön kuntakoodi
-	MaapohjaAlaraja Maapohjan kiinteistöveroprosentin alaraja (2024-);
+	tulos: 				Makron tulosmuuttuja, Maapohjan kiinteistövero.
+	mvuosi: 			Vuosi, jonka lainsäädäntöä käytetään 
+	minf: 				Deflaattori euromääräisten parametrien kertomiseksi 
+	verotusarvo: 		Maapohjan verotusarvo
+	kiintpros: 			Aineistossa oleva kiinteistön kuntaveroprosentti
+	kuntanro: 			Kiinteistön kuntakoodi
+	MaapohjaAlaraja: 	Maapohjan kiinteistöveroprosentin alaraja (2024-);
 	
 %MACRO KiVeroMaaS(tulos, mvuosi, minf, verotusarvo, kiintpros, kuntanro)/
 DES = 'KiVeroMaaS: Maapohjan kiinteistövero (2024-)'; 
@@ -370,17 +285,98 @@ DES = 'KiVeroMaaS: Maapohjan kiinteistövero (2024-)';
 %HaeParam&TYYPPI(&mvuosi, 1, &KIVERO_PARAM, PARAM.&PKIVERO);
 %ParamInf&TYYPPI(&mvuosi, 1, &KIVERO_MUUNNOS, &minf); 
 
-temp = 0;
-
 /* Ahvenanmaan kunnille ei sovelleta maapohjan kiinteistöveroprosentin alarajaa */
-IF &kuntanro IN (035, 043, 060, 062, 065, 076, 170, 295, 318, 417, 438, 478, 736, 766, 771, 941) THEN DO;
-	temp = &verotusarvo * (&kiintpros / 100);
-END;
-ELSE DO;
-	temp = &verotusarvo * (MAX(&kiintpros, &MaapohjaAlaraja) / 100);
-END;
+IF &kuntanro IN (035, 043, 060, 062, 065, 076, 170, 295, 318, 417, 438, 478, 736, 766, 771, 941) THEN &tulos = &verotusarvo * (&kiintpros / 100);
+/* Muille kunnille sovelletaan maapohjan kiinteistöveroprosentin alarajaa */
+ELSE &tulos = &verotusarvo * (MAX(&kiintpros, &MaapohjaAlaraja) / 100);
 
-&tulos = temp; 
-
-DROP temp; 
 %MEND KiVeroMaaS;
+
+/* 8. Talousrakennuksen verotusarvo */
+
+*Makron parametrit:
+    tulos: 			Makron tulosmuuttuja, Vapaa-ajan asunnon verotusarvo
+	mvuosi: 		Vuosi, jonka lainsäädäntöä käytetään
+	minf: 			Deflaattori euromääräisten parametrien kertomiseksi 
+	raktyyppi: 		Rakennustyyppi (7=vapaa-ajan asunto)
+	valmvuosi: 		Rakennuksen valmistumisvuosi
+	ikavuosi:		Rakentamisvuodesta poikkeava ikäalennuksen alkamisvuosi
+	kantarakenne:	Kantava rakenne (1=puu, 2=kivi)
+	rakennuspa:		Rakennuksen pinta-ala, m2
+	autokatos: 		Onko rakennus autokatos (0 = ei, 1 = kyllä)
+	lampoeristys:	Lämpöeristys (0 = ei, 1 = kyllä)
+	jhvalarvokoodi:	Jälleenhankinta-arvon valmiskoodi (1 = laskettu, 2 = annettu valmisarvona verovuodeksi, 3 = annettu valmisarvona pysyvästi)
+	valmiusaste:	Keskeneräisen rakennuksen valmiusaste
+	valopullinen:	Datassa oleva rakennuksen verotusarvo;
+
+%MACRO TalVerotusArvoS(tulos, mvuosi, minf, raktyyppi, valmvuosi, ikavuosi, kantarakenne, rakennuspa, autokatos, lampoeristys, jhvalarvokoodi, valmiusaste, valopullinen)/  
+DES = 'KIVERO: Talousrakennuksen verotusarvo';
+
+%HaeParam&TYYPPI(&mvuosi, 1, &KIVERO_PARAM, PARAM.&PKIVERO);
+%ParamInf&TYYPPI(&mvuosi, 1, &KIVERO_MUUNNOS, &minf);
+
+IF &raktyyppi in (8, 9) THEN DO;
+
+	/* Lasketaan talousrakennuksen perusarvo */
+	IF &lampoeristys = 1 THEN taperarvo = &TaPerusArvo;
+	ELSE IF &lampoeristys = 0 THEN DO;
+		IF &valmvuosi >= 1970 THEN taperarvo = &TaEiLampoArvo;
+		ELSE taperarvo = &TaVanhaArvo;
+	END;
+
+	/* Lasketaan verotusarvo vähentämällä arvosta ikäalennukset */
+	/* Lasketaan aluksi rakennuksen korjattu ikä, oltava > 0 */
+	IF &ikavuosi > &valmvuosi THEN korjvuosi = &ikavuosi;
+	ELSE korjvuosi = &valmvuosi; 
+
+	IF korjvuosi = 0 THEN rakika = 0;
+	ELSE rakika = max((&mvuosi - korjvuosi + 1), 0);
+	
+	/* Lasketaan ikävähennykset puu- ja kivirakenteisille rakennuksille */
+	IF &autokatos = 1 THEN ikavahtal = (&IkaAleAutokatos / 100) * rakika;
+	ELSE DO;
+		IF &kantarakenne = 1 THEN ikavahtal = (&IkaAlePuuTalous / 100) * rakika;
+		ELSE IF &kantarakenne = 2 THEN ikavahtal = (&IkaAleKiviTalous / 100) * rakika;
+	END;
+	
+	/* Huomioidaan ikävähennyksen alaraja. ikavahtal2 voi saada arvoja väliltä: [&IkaVahRajaTalous, 1] */
+	ikavahtal2 = MAX(&IkaVahRajaTalous, SUM(1, -ikavahtal));
+
+	/* Lopuksi lasketaan verotusarvo */
+	/* Jos rakennusta korjataan, niin arvo määritetään valmiusasteen avulla	*/
+	IF korjvuosi > &mvuosi THEN temp = (&valmiusaste/100 * taperarvo * rakennuspa);
+	/* Jos jälleenhankinta-arvon koodi > 1, käytetään datan verotusarvoa */
+	ELSE IF &jhvalarvokoodi > 1 THEN temp = &valopullinen;
+	/* Muissa tapauksissa arvo määritetään huomioimalla ikävähennys */
+	ELSE temp = ikavahtal2 * taperarvo * rakennuspa;
+
+END;
+
+ELSE temp = 0;
+
+&tulos = temp;
+
+DROP korjvuosi rakika ikavahtal ikavahtal2 temp taperarvo;
+
+%MEND TalVerotusArvoS;
+
+/* 9. Talousrakennuksen kiinteistövero */
+
+*Makron parametrit:
+    tulos: 			Makron tulosmuuttuja, Kiinteistövero vapaa-ajan asunnosta
+	mvuosi: 		Vuosi, jonka lainsäädäntöä käytetään
+	minf: 			Deflaattori euromääräisten parametrien kertomiseksi 
+	raktyyppi: 		Rakennustyyppi
+	veropros:		Rakennukselle määrätty kiinteistöveroprosentti
+	talousrakarvo:	Rakennuksen verotusarvo;
+
+%MACRO KiVeroTalS(tulos, mvuosi, minf, raktyyppi, veropros, talousrakarvo)/ 
+DES = 'KIVERO: Talousrakennuksen kiinteistövero';
+
+%HaeParam&TYYPPI(&mvuosi, 1, &KIVERO_PARAM, PARAM.&PKIVERO);
+%ParamInf&TYYPPI(&mvuosi, 1, &KIVERO_MUUNNOS, &minf);
+
+IF &raktyyppi in (8, 9) THEN &tulos = &talousrakarvo * (&veropros / 100);
+ELSE &tulos = 0;
+
+%MEND KiVeroTalS;

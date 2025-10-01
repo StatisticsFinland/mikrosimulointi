@@ -225,6 +225,10 @@
 		END;
 		DROP AIKNROAPU;
 	RUN;
+ 
+	DATA TEMP.TEMP_ASUMTUKI_HENKI;
+   		SET STARTDAT.START_ASUMTUKI_HENKI;
+	RUN;
 
    	/* 2.2 Summataan kotitaloustasolle taulukkoon START_ASUMTUKI_KOTI */
 
@@ -326,18 +330,17 @@
 		FROM TEMP.TEMP_ASUMTUKI_KOTI4;
 	QUIT;
 
-	%DO i=1 %TO &AIKMAX;
-		PROC SQL;
-		CREATE TABLE TEMP.TEMP_ASUMTUKI_KOTI%EVAL(4 + &i) AS 
-			SELECT a.*, b.TYOTULOKK AS TYOTULOKK&i
-			FROM TEMP.TEMP_ASUMTUKI_KOTI%EVAL(4 + &i - 1) AS a
-				LEFT JOIN STARTDAT.START_ASUMTUKI_HENKI AS b ON (a.knro = b.knro AND b.AIKNRO = &i);
-		QUIT;
-	%END;
+	/* K‰‰nnet‰‰n TYOTULOKK muuttujat sarakkeille kotitalouksittain ja liitet‰‰n se kotitaloustason taulukkoon */
+	proc transpose data = TEMP.TEMP_ASUMTUKI_HENKI(where=(not missing(AIKNRO))) out = TEMP.TEMP_TYOTULO_LEVEA prefix = TYOTULOKK;
+		by knro;
+ 		id AIKNRO;
+  		var TYOTULOKK;
+	run;
 
-	DATA STARTDAT.START_ASUMTUKI_KOTI;
-		SET TEMP.TEMP_ASUMTUKI_KOTI%EVAL(4 + &AIKMAX);
-	RUN;
+	data STARTDAT.START_ASUMTUKI_KOTI;
+		merge TEMP.TEMP_ASUMTUKI_KOTI4 TEMP.TEMP_TYOTULO_LEVEA;
+		by knro;
+	run;
 
 	/* 2.3 Lis‰t‰‰n aineistoon apumuuttujia ja summataan kotitaloustasolle taulukkoon START_ASUMTUKI_KOTI */
 

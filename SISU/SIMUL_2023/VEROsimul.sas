@@ -187,13 +187,13 @@
 	   lähinnä oleva tieto korotuskertoimella myöhemmin. */
 
 	/* Vuoden aineistossa äyrit seuraaville vuosille */
-	%IF ((&LVUOSI >= 2022) AND (&LVUOSI <= 2025)) %THEN %DO; 
+	%IF ((&LVUOSI >= 2023) AND (&LVUOSI <= 2025)) %THEN %DO; 
 		%LET LAYRI = %SUBSTR(&LVUOSI, 3, 2);
 		RENAME ayri&LAYRI = AYRI kayri&LAYRI = KAYRI;
 	%END;
 
-	%ELSE %IF &LVUOSI < 2022 %THEN %DO;
-		RENAME ayri22 = AYRI kayri22 = KAYRI; 
+	%ELSE %IF &LVUOSI < 2023 %THEN %DO;
+		RENAME ayri23 = AYRI kayri23 = KAYRI; 
 	%END;
 
 	%ELSE %IF &LVUOSI > 2025 %THEN %DO;
@@ -422,8 +422,8 @@
 %MACRO Vero_Ayrit;
 
 /* Datassa on äyrit aineistovuodesta tuoreimpiin äyreihin */
-%IF &LVUOSI < 2022 %THEN %DO;
-	%KunnVerKerroin(2022, &LVUOSI);
+%IF &LVUOSI < 2023 %THEN %DO;
+	%KunnVerKerroin(2023, &LVUOSI);
 %END;
 
 %ELSE %DO;

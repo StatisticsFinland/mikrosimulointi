@@ -62,10 +62,10 @@
 	/* Tulostaulukoiden esivalinnat */
 
 	%LET TULOSLAAJ = 1; 	* Mikrotason tulosaineiston laajuus (1 = suppea, 2 = laaja (kaikki pohja-aineiston muuttujat));
-	%LET MUUTTUJAT = VALOPULLINENPT valopullinenptd VALOPULLINENVA valopullinenvad 
-					 RAK_KVEROPT rak_kveroptd RAK_KVEROVA rak_kverovad
+	%LET MUUTTUJAT = VALOPULLINENPT valopullinenptd VALOPULLINENVA valopullinenvad VALOLLINENTAL valopullinentald
+					 RAK_KVEROPT rak_kveroptd RAK_KVEROVA rak_kverovad RAK_KVEROTAL rak_kverotald
 					 verotusarvo KVTONTTIS kvtontti 
-					 ASOYKIVERO VERARVODATA omakkiiv KIVEDATA KIVEROYHT2 KIVEROYHT; 	* Taulukoitavat muuttujat (summataulukot);
+					 ASOYKIVERO VERARVODATA omakkiiv KIVEDATA KIVEROYHT2 KIVEROYHT;		* Taulukoitavat muuttujat (summataulukot);
 	%LET YKSIKKO = 2;		* Tulostaulukoiden yksikkö (1 = henkilö, 2 = kotitalous);
 	%LET LUOK_HLO1 = ; * Taulukoinnin 1. henkilöluokitus (jos YKSIKKO = 1)
 							   Vaihtoehtoina: 
@@ -144,7 +144,8 @@
 	(KEEP = hnro raktyyppi kvkayttokoodi valmispvm ikavuosi 
 	kantarakenne rakennuspa kellaripa vesik lammitysk sahkok 
 	talviask viemarik wck saunak verotusarvo valopullinen rak_kvero
-	kiintpros veropros kvtontti jhvalarvokoodi omosoittaja omnimittaja kuntanro valmiusaste kuistipa);
+	kiintpros veropros kvtontti jhvalarvokoodi omosoittaja omnimittaja kuntanro valmiusaste kuistipa 
+	Rakennus_on_autokatos Lampoeristys);
 
 	/* Lisätään aineistoon apumuuttujaksi omistusosuus kiinteistöstä */
 
@@ -160,25 +161,30 @@
 
 	IF raktyyppi = 1 THEN valopullinenptd = valopullinen;
 	IF raktyyppi = 7 THEN valopullinenvad = valopullinen;
+	IF raktyyppi in (8, 9) THEN valopullinentald = valopullinen;
 
 	IF raktyyppi = 1 THEN rak_kveroptd = rak_kvero;
 	IF raktyyppi = 7 THEN rak_kverovad = rak_kvero;
+	IF raktyyppi in (8, 9) THEN rak_kverotald = rak_kvero;
 	
-	KIVEDATA = SUM(rak_kveroptd, rak_kverovad, kvtontti);
-	VERARVODATA = SUM(valopullinenptd, valopullinenvad, verotusarvo);
+	VERARVODATA = SUM(valopullinen, verotusarvo);
+	KIVEDATA = SUM(rak_kvero, kvtontti);
 
 	/* Lasketaan datan arvot uudelleen henkilöiden omistusosuuksien suhteen */
 
 	valopullinen = valopullinen * OMOSUUS;
 	valopullinenptd = valopullinenptd * OMOSUUS;
 	valopullinenvad = valopullinenvad * OMOSUUS;
+	valopullinentald = valopullinentald * OMOSUUS;
 	rak_kvero = rak_kvero * OMOSUUS;
 	rak_kveroptd = rak_kveroptd * OMOSUUS; 
 	rak_kverovad = rak_kverovad * OMOSUUS;
+	rak_kverotald = rak_kverotald * OMOSUUS;
 	verotusarvo = verotusarvo * OMOSUUS;
 	kvtontti = kvtontti * OMOSUUS; 
 	VERARVODATA = VERARVODATA * OMOSUUS; 
 	KIVEDATA = KIVEDATA * OMOSUUS;
+
 
 	/* Luodaan datan muuttujille selitteet */
 
@@ -186,9 +192,11 @@
 	valopullinen = 'Rakennusten verotusarvo yhteensä, DATA'
 	valopullinenptd = 'Pientalojen verotusarvo, DATA'
 	valopullinenvad = 'Vapaa-ajan asuntojen verotusarvo, DATA'
+	valopullinentald = 'Talousrakennusten verotusarvo, DATA'
 	rak_kvero = 'Rakennusten kiinteistövero yhteensä (e/v), DATA'
 	rak_kveroptd = 'Pientalojen kiinteistövero (e/v), DATA'
 	rak_kverovad = 'Vapaa-ajan asuntojen kiinteistövero (e/v), DATA'
+	rak_kverotald = 'Talousrakennusten kiinteistövero (e/v), DATA'
 	verotusarvo = 'Maapohjan verotusarvo, DATA'
 	kvtontti = 'Maapohjan kiinteistövero (e/v), DATA'
 	VERARVODATA = 'Verotusarvo (pl. asoy) yhteensä (e/v), DATA'
@@ -249,24 +257,27 @@ SET STARTDAT.START_KIVERO_REK;
 /* 3.1 Lasketaan ensin kiinteistöverorekisterin tiedot */
 
 /* Lasketaan pientalon verotusarvo */
-%PtVerotusArvoS(VALOPULLINENPT, &LVUOSI, &INF, raktyyppi, valmvuosi, ikavuosi, kantarakenne, rakennuspa, kellaripa, vesik, lammitysk, sahkok, jhvalarvokoodi, valmiusaste);
+%PtVerotusArvoS(VALOPULLINENPT, &LVUOSI, &INF, raktyyppi, valmvuosi, ikavuosi, kantarakenne, 
+	rakennuspa, kellaripa, vesik, lammitysk, sahkok, jhvalarvokoodi, valmiusaste, valopullinen);
 
 /* Lasketaan pientalon kiinteistövero */
-
-%KiVeroPtS(RAK_KVEROPT, &LVUOSI, &INF, raktyyppi, valmvuosi, ikavuosi, kantarakenne, rakennuspa, kellaripa, vesik, lammitysk, sahkok, jhvalarvokoodi, veropros, valmiusaste);
+%KiVeroPtS(RAK_KVEROPT, &LVUOSI, &INF, raktyyppi, veropros, VALOPULLINENPT);
 
 /* Lasketaan vapaa-ajan asunnon verotusarvo */
-
-%VapVerotusArvoS(VALOPULLINENVA, &LVUOSI, &INF, raktyyppi, valmvuosi, ikavuosi, kantarakenne, rakennuspa, 
-talviask, kuistipa, sahkok, viemarik, vesik, wck, saunak, jhvalarvokoodi, valmiusaste);
+%VapVerotusArvoS(VALOPULLINENVA, &LVUOSI, &INF, raktyyppi, valmvuosi, ikavuosi, kantarakenne, 
+	rakennuspa, talviask, kuistipa, sahkok, viemarik, vesik, wck, saunak, jhvalarvokoodi, valmiusaste, valopullinen);
 
 /* Lasketaan vapaa-ajan asunnon kiinteistövero */
+%KiVeroVapS(RAK_KVEROVA, &LVUOSI, &INF, raktyyppi, veropros, VALOPULLINENVA);
 
-%KiVeroVapS(RAK_KVEROVA, &LVUOSI, &INF, raktyyppi, valmvuosi, ikavuosi, kantarakenne, rakennuspa, talviask, kuistipa, sahkok, 
-viemarik, vesik, wck, saunak, jhvalarvokoodi, veropros, valmiusaste);
+/* Lasketaan talousrakennuksen verotusarvo */
+%TalVerotusArvoS(VALOLLINENTAL, &LVUOSI, &INF, raktyyppi, valmvuosi, ikavuosi, kantarakenne, 
+	rakennuspa, Rakennus_on_autokatos, lampoeristys, jhvalarvokoodi, valmiusaste, valopullinen);
+
+/* Lasketaan talousrakennuksen kiinteistövero */
+%KiVeroTalS(RAK_KVEROTAL, &LVUOSI, &INF, raktyyppi, veropros, VALOLLINENTAL);
 
 /* Lasketaan kiinteistövero maapohjasta */
-
 %KiVeroMaaS(KVTONTTIS, &LVUOSI, &INF, verotusarvo, kiintpros, kuntanro);
 
 /* Lasketaan verotusarvo ja kiinteistövero omistusosuuden suhteen */
@@ -275,6 +286,8 @@ VALOPULLINENPT = VALOPULLINENPT * OMOSUUS;
 RAK_KVEROPT = RAK_KVEROPT * OMOSUUS;
 VALOPULLINENVA = VALOPULLINENVA * OMOSUUS;
 RAK_KVEROVA = RAK_KVEROVA * OMOSUUS;
+VALOLLINENTAL = VALOLLINENTAL * OMOSUUS;
+RAK_KVEROTAL = RAK_KVEROTAL * OMOSUUS;
 
 /* Luodaan tulosmuuttujille selitteet */
 
@@ -283,6 +296,8 @@ VALOPULLINENPT = 'Pientalojen verotusarvo, MALLI'
 RAK_KVEROPT = 'Pientalojen kiinteistövero (e/v), MALLI'
 VALOPULLINENVA = 'Vapaa-ajan asuntojen verotusarvo, MALLI'
 RAK_KVEROVA = 'Vapaa-ajan asuntojen kiinteistövero (e/v), MALLI'
+VALOLLINENTAL = 'Talousrakennusten verotusarvo, MALLI'
+RAK_KVEROTAL = 'Talousrakennusten kiinteistövero (e/v), MALLI'
 KVTONTTIS = 'Maapohjan kiinteistövero (e/v), MALLI';
 RUN;
 
@@ -291,269 +306,31 @@ RUN;
 DATA TEMP.KIVERO_ASOY;
 SET STARTDAT.START_KIVERO_ASOY (KEEP = hnro knro aslaji talotyyp rakvuosi hoitvast omakkiiv);
 
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan
-   Kiinteistöveron osuus kohtien 3001, 3002, 3003, 3004 ja 3021 summasta. */
-%IF &AVUOSI >= 2022 %THEN %DO;
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0813;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0701;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0739;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.082;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0723;
-	IF (2000 LE rakvuosi LT 2010) THEN HOITOSUUS = 0.0998;
-	IF rakvuosi GE 2010 THEN HOITOSUUS = 0.1022;
-END;
- 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0931;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0615;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0644;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0678;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0769;
-	IF (2000 LE rakvuosi LT 2010) THEN HOITOSUUS = 0.0952;
-	IF rakvuosi GE 2010 THEN HOITOSUUS = 0.104;
-END;
-%END;
-%ELSE %IF &AVUOSI = 2021 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2018" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0938;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0738;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0737;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0787;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0835;
-	IF (2000 LE rakvuosi LT 2010) THEN HOITOSUUS = 0.1043;
-	IF rakvuosi GE 2010 THEN HOITOSUUS = 0.1094;
-END;
- 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0964;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0684;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0569;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0712;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0812;
-	IF (2000 LE rakvuosi LT 2010) THEN HOITOSUUS = 0.0967;
-	IF rakvuosi GE 2010 THEN HOITOSUUS = 0.0958;
-END;
-%END;
-%ELSE %IF &AVUOSI = 2020 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2018" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0983;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0756;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.074;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0773;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0861;
-	IF (2000 LE rakvuosi LT 2010) THEN HOITOSUUS = 0.106;
-	IF rakvuosi GE 2010 THEN HOITOSUUS = 0.1111;
-END;
- 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0765;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0727;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0607;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0723;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0763;
-	IF (2000 LE rakvuosi LT 2010) THEN HOITOSUUS = 0.1022;
-	IF rakvuosi GE 2010 THEN HOITOSUUS = 0.0971;
-END;
-%END;
-%ELSE %IF &AVUOSI = 2019 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2018" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0967;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0778;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0731;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.078;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0771;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.1119;
-END;
+/* 	Määritellään kiinteistöveron osuus hoitovastikkeista aineistovuoden "Asunto-osakeyhtiöiden talous" -raportista
+	ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. Kiinteistöveron osuus jaetaan kohtien 
+	3001, 3002, 3003, 3004 ja 3021 summalla. */
 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.082;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0617;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0574;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0734;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0739;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0962;
-END;
-%END;
-%ELSE %IF &AVUOSI = 2018 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2018" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
 IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0833;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0743;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0671;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0759;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0823;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.108;
-END;
- 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0674;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0574;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0557;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0706;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0693;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0881;
-END;
-%END;
-%ELSE %IF &AVUOSI = 2017 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2017" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0816;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0721;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0699;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0785;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0913;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.113;
-END;
- 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0667;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0757;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0602;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0737;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0784;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.1024;
-END;
-%END;
-%ELSE %IF &AVUOSI = 2016 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2016" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0734;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0750;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0676;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0744;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0776;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.1075;
-END;
- 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0585;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0641;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0629;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0688;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0764;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0962;
-END;
-%END;
-%ELSE %IF &AVUOSI = 2015 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2015" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0776;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0723;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0699;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0811;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0774;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.1077;
-END;
- 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0890;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0576;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0606;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0719;
+	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0823;
+	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0709;
+	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0742;
+	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0777;
 	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0714;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0959;
-END;
-%END;
-%ELSE %IF &AVUOSI = 2014 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2014" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0776;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0683;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0665;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0760;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0748;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0949;
+	IF (2000 LE rakvuosi LT 2010) THEN HOITOSUUS = 0.0931;
+	IF rakvuosi GE 2010 THEN HOITOSUUS = 0.1004;
 END;
  
 IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0525;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0522;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0631;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0700;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0652;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0929;
-END;
-%END;
-%ELSE %IF &AVUOSI = 2013 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2013" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0709;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0695;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0643;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0705;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0707;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0941;
-END;
- 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0591;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0549;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0531;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0635;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0695;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0827;
-END;
-%END;
-%ELSE %IF &AVUOSI = 2012 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2012" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
-
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0769;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0647;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0615;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0697;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0701;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0959;
-END;
- 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0405;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0544;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0578;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0664;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0745;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0939;
-END;
-%END;
-%ELSE %IF &AVUOSI <= 2011 %THEN %DO;
-/* Määritellään kiinteistöveron osuus hoitovastikkeista "Asunto-osakeyhtiöiden talous 2010" -raportin mukaan
-   ja eritellään kerrostalo- ja rivitaloyhtiöihin asunnon iän mukaan. */
-
-IF aslaji = 3 and talotyyp = 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0580;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0557;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0562;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0673;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0640;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0946;
-END;
- 
-IF aslaji = 3 and talotyyp LT 3 THEN DO;
-	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0548;
-	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0471;
-	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0470;
-	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0613;
-	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0665;
-	IF rakvuosi GE 2000 THEN HOITOSUUS = 0.0842;
+	IF rakvuosi LT 1960 THEN HOITOSUUS = 0.0645;
+	IF (1960 LE rakvuosi LT 1970) THEN HOITOSUUS = 0.0597;
+	IF (1970 LE rakvuosi LT 1980) THEN HOITOSUUS = 0.0622;
+	IF (1980 LE rakvuosi LT 1990) THEN HOITOSUUS = 0.0687;
+	IF (1990 LE rakvuosi LT 2000) THEN HOITOSUUS = 0.0744;
+	IF (2000 LE rakvuosi LT 2010) THEN HOITOSUUS = 0.0883;
+	IF rakvuosi GE 2010 THEN HOITOSUUS = 0.0959;
 END;
 
-%END;
-ASOYKIVERO =(hoitvast * HOITOSUUS) * 12;
+ASOYKIVERO = (hoitvast * HOITOSUUS) * 12;
 
 LABEL
 HOITOSUUS = 'Kiinteistöveron osuus hoitovastikkeesta (%), MALLI'
@@ -566,7 +343,8 @@ RUN;
 
 PROC SUMMARY DATA = TEMP.KIVERO_REK ;
 VAR VALOPULLINENPT RAK_KVEROPT VALOPULLINENVA RAK_KVEROVA KVTONTTIS verotusarvo kvtontti  
-    valopullinenptd valopullinenvad rak_kveroptd rak_kverovad KIVEDATA VERARVODATA;
+    valopullinenptd valopullinenvad valopullinentald VALOLLINENTAL 
+	rak_kveroptd rak_kverovad rak_kverotald RAK_KVEROTAL KIVEDATA VERARVODATA ;
 BY hnro;
 OUTPUT OUT = TEMP.KIVERO_SUMMAT (DROP = _TYPE_ _FREQ_) SUM=;
 RUN;
@@ -576,20 +354,21 @@ MERGE TEMP.KIVERO_ASOY TEMP.KIVERO_SUMMAT;
 BY hnro;
 
 /*Lasketaan kiinteistövero yhteensä, ilman asunto-osakeyhtiötä. */
-KIVEROYHT2 = SUM(RAK_KVEROPT, RAK_KVEROVA, KVTONTTIS);
+KIVEROYHT2 = SUM(RAK_KVEROPT, RAK_KVEROVA, RAK_KVEROTAL, KVTONTTIS);
 
 /*Pienimmän määrättävän veron alittavat kiinteistöverot nollataan. */
 %KiMinimi(KIVEROYHT2, &LVUOSI, &INF, KIVEROYHT2);
 
 /* Nollataan osamuuttujat mikäli verotuksen kokonaissumma on nollattu. */
 IF KIVEROYHT2 = 0 THEN DO; 
-RAK_KVEROPT = 0;
-RAK_KVEROVA = 0; 
-KVTONTTIS = 0; 
+	RAK_KVEROPT = 0;
+	RAK_KVEROVA = 0; 
+	RAK_KVEROTAL = 0;
+	KVTONTTIS = 0; 
 END;
 
 /*Lasketaan kiinteistövero yhteensä asunto-osakeyhtiöt mukaan lukien.*/ 	
-KIVEROYHT = SUM(RAK_KVEROPT, RAK_KVEROVA, KVTONTTIS, ASOYKIVERO);
+KIVEROYHT = SUM(RAK_KVEROPT, RAK_KVEROVA, RAK_KVEROTAL, KVTONTTIS, ASOYKIVERO);
 
 LABEL
 KIVEROYHT = 'Kiinteistöverot (ml. asoy) yhteensä (e/v), MALLI'
@@ -598,9 +377,10 @@ KIVEROYHT2 = 'Kiinteistöverot (pl. asoy) yhteensä (e/v), MALLI';
 /* Asetetaan muuttujien 0-arvot tyhjiksi, jotta lukumäärät voidaan laskea suoraan */
 
 ARRAY PISTE 
-	 VALOPULLINENPT RAK_KVEROPT VALOPULLINENVA RAK_KVEROVA KVTONTTIS ASOYKIVERO KIVEROYHT KIVEROYHT2
-	 valopullinenptd valopullinenvad rak_kveroptd rak_kverovad  
-	 verotusarvo kvtontti omakkiiv KIVEDATA VERARVODATA;
+	 VALOPULLINENPT RAK_KVEROPT VALOPULLINENVA RAK_KVEROVA VALOLLINENTAL RAK_KVEROTAL KVTONTTIS ASOYKIVERO KIVEROYHT KIVEROYHT2
+	 valopullinenptd valopullinenvad valopullinentald rak_kveroptd rak_kverovad rak_kverotald
+	 verotusarvo kvtontti omakkiiv KIVEDATA VERARVODATA
+ ;
 DO OVER PISTE;
 	IF PISTE <= 0 THEN PISTE = .;
 END;

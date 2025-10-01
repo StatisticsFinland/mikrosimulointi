@@ -634,11 +634,10 @@
 
 	RUN;
 
-	*Summataan kotitaloustasolle;
-
+	* Summataan kotitaloustasolle ;
 	PROC SQL;
 		CREATE TABLE TEMP.TEMP_TOIMTUKI_KOTI1
-		AS SELECT knro, paasoss,elivtu,jasenia,kuntakoodi,
+		AS SELECT knro, paasoss, elivtu, jasenia, kuntakoodi,
 			SUM(EIAMSI) AS EIAMSIS,
 			COUNT(hnro) AS KOTITALOUSKOKO,
 			SUM(ONAIK) AS ONAIKS,
@@ -652,44 +651,46 @@
 			SUM(HARKINMENOT_KK) AS HARKINMENOT_KKS,
 			SUM(VARALLISUUS_DATA) AS VARALLISUUS_DATAS
 		FROM TEMP.TEMP_TOIMTUKI_HENKI
-		GROUP BY knro,paasoss,elivtu,jasenia,kuntakoodi;
+		GROUP BY knro, paasoss, elivtu, jasenia, kuntakoodi;
 	QUIT;
 
-	*Verrataan toteutuneita asumiskustannuksia toimeentulotuen asumisnormiin;
+	* Sortataan henkilötaulu transponointia varten ;
+   	proc sort data = TEMP.TEMP_TOIMTUKI_HENKI;
+		by knro JARJ;
+	run;
+
+	* Luodaan aputaulut työtuloista ja tulonhakkimiskuluista leveässä muodossa ;
+	proc transpose data = TEMP.TEMP_TOIMTUKI_HENKI out = TEMP.TEMP_TYOTULONETTO_LEVEA prefix = TYOTULONETTO_KK_;
+		by knro;
+ 		id JARJ;
+  		var TYOTULONETTO_KK;
+	run;
+
+	proc transpose data = TEMP.TEMP_TOIMTUKI_HENKI out = TEMP.TEMP_THANKK_LEVEA prefix = THANKK_KK_;
+		by knro;
+		id JARJ;
+		var THANKK_KK;
+	run;
+
+	* Yhdistetään kotitaloustauluun ;
+	data TEMP.TEMP_TOIMTUKI_KOTI1;
+		merge TEMP.TEMP_TOIMTUKI_KOTI1 TEMP.TEMP_TYOTULONETTO_LEVEA TEMP.TEMP_THANKK_LEVEA;
+		by knro;
+	run;
+
+	* Verrataan toteutuneita asumiskustannuksia toimeentulotuen asumisnormiin ;
 	%IF &ASUMKUST_MAKS = 1 AND &LVUOSI >= 2022 %THEN %DO;
 		%AsumMenoRajat(&LVUOSI, &LKUUK, &INF);
 	%END;
 
-
-	%LET KOTITALOUSKOKO_MAX = 0;
-	PROC SQL NOPRINT;
-		SELECT MAX(KOTITALOUSKOKO) INTO :KOTITALOUSKOKO_MAX
-		FROM TEMP.TEMP_TOIMTUKI_KOTI1;
-	QUIT;
-	%DO i=1 %TO &KOTITALOUSKOKO_MAX;
-		PROC SQL;
-			CREATE TABLE TEMP.TEMP_TOIMTUKI_KOTI%EVAL(1 + &i)
-			AS SELECT a.*, b.TYOTULONETTO_KK AS TYOTULONETTO_KK_&i, b.THANKK_KK AS THANKK_KK_&i
-			FROM TEMP.TEMP_TOIMTUKI_KOTI&i AS a
-			LEFT JOIN TEMP.TEMP_TOIMTUKI_HENKI AS b ON (a.knro = b.knro AND b.JARJ = &i);
-		QUIT;
-	%END;
-	DATA TEMP.TEMP_TOIMTUKI_KOTI;
-		SET TEMP.TEMP_TOIMTUKI_KOTI%EVAL(1 + &KOTITALOUSKOKO_MAX);
-	RUN;
-	%LET TYOTULONETTO_KK_MAX = TYOTULONETTO_KK_%EVAL(&KOTITALOUSKOKO_MAX);
-	%LET THANKK_KK_MAX = THANKK_KK_%EVAL(&KOTITALOUSKOKO_MAX);
-
-
-
 	DATA TEMP.&TULOSNIMI_TO;
-		SET TEMP.TEMP_TOIMTUKI_KOTI;
+		SET TEMP.TEMP_TOIMTUKI_KOTI1;
 
-		*Toimeentulotuen määrän kerroin, kun poistetaan armeijassa tai siviilipalveluksessa olemisen ajat.;
+		* Toimeentulotuen määrän kerroin, kun poistetaan armeijassa tai siviilipalveluksessa olemisen ajat. ;
 		KERROIN = EIAMSIS / KOTITALOUSKOKO;
 
-		ARRAY TYOTULONETTO_KK_ARRAY{*} TYOTULONETTO_KK_1-&TYOTULONETTO_KK_MAX;
-		ARRAY THANKK_KK_ARRAY{*} THANKK_KK_1-&THANKK_KK_MAX;
+		ARRAY TYOTULONETTO_KK_ARRAY TYOTULONETTO_KK_:;
+  		ARRAY THANKK_KK_ARRAY THANKK_KK_:;
 
 /* 4.1.3 Lasketaan toimeentulotuki kotitalouksittain */
 
@@ -700,8 +701,8 @@
 		TOIMTUKI = KERROIN * (12 * TOIMTUKIV);
 
 		KEEP knro paasoss KERROIN ONAIKS ONAIKLAPSIS ONLAPSI17S ONLAPSI10_16S ONLAPSIALLE10S
-			LLISAT_KKS TYOTULONETTO_KK_1-&TYOTULONETTO_KK_MAX MUUTTULOTNETTO_KKS
-			ASUMISKULUT_KKS HARKINMENOT_KKS THANKK_KK_1-&THANKK_KK_MAX 
+			LLISAT_KKS TYOTULONETTO_KK_: MUUTTULOTNETTO_KKS
+			ASUMISKULUT_KKS HARKINMENOT_KKS THANKK_KK_: 
 			VARALLISUUS_DATAS TOIMTUKI;
 			
 		LABEL	
@@ -716,14 +717,9 @@
 			ASUMISKULUT_KKS = "Kotitalouden asumiskulut (e/kk)"
 			HARKINMENOT_KKS = "Kotitalouden harkinnanvaraiset menot (e/kk)"
 			VARALLISUUS_DATAS = "Kotitalouden huomioitavan varallisuuden määrä (euroa, vuoden lopussa), DATA"
+			TYOTULONETTO_KK_: = "Henkilön saamien työtulojen nettomäärä (e/kk)"
+			THANKK_KK_: = "Henkilön tulonhankkimiskulut (e/kk), DATA"
 			TOIMTUKI = "Kotitalouden saama toimeentulotuki (e/v), MALLI";
-
-		%DO i=1 %TO &KOTITALOUSKOKO_MAX;
-			LABEL
-				TYOTULONETTO_KK_&i = "Henkilön saamien työtulojen nettomäärä (e/kk)"
-				THANKK_KK_&i = "Henkilön tulonhankkimiskulut (e/kk), DATA";
-		%END;
-
 	RUN;
 
 	* Siirretään simuloitu toimeentulotuki talouden viitehenkilölle (asko = 1) ;
@@ -766,14 +762,9 @@
 			MUUTTULOTNETTO_KKS = "Kotitalouden ei-työtulojen nettomäärä (e/kk)"
 			ASUMISKULUT_KKS = "Kotitalouden asumiskulut (e/kk)"
 			HARKINMENOT_KKS = "Kotitalouden harkinnanvaraiset menot (e/kk)"
+			TYOTULONETTO_KK_: = "Henkilön saamien työtulojen nettomäärä (e/kk)"
+			THANKK_KK_: = "Henkilön tulonhankkimiskulut (e/kk), DATA"
 			TOIMTUKI = "Kotitalouden saama toimeentulotuki (e/v), MALLI";
-			
-		%DO i=1 %TO &KOTITALOUSKOKO_MAX;
-			LABEL
-				TYOTULONETTO_KK_&i = "Henkilön saamien työtulojen nettomäärä (e/kk)"
-				THANKK_KK_&i = "Henkilön tulonhankkimiskulut (e/kk), DATA";
-		%END;
-
 	RUN;
 
 /* 4.2 Luodaan tulostiedosto OUTPUT-kansioon */
@@ -785,7 +776,7 @@
 		/* Yhdistetään tulokset pohja-aineistoon */
 
 		DATA TEMP.&TULOSNIMI_TO;
-			
+
 		/* 4.2.1 Suppea tulostiedosto (vain tärkeimmät luokittelumuuttujat) */
 
 			%IF &TULOSLAAJ = 1 %THEN %DO; 
@@ -818,7 +809,7 @@
 
 		%IF &YKSIKKO = 2 AND &START ^= 1 %THEN %DO;
 			%SumKotitT(OUTPUT.&TULOSNIMI_TO._KOTI, TEMP.&TULOSNIMI_TO, &MALLI, &MUUTTUJAT);
-		
+
 			PROC DATASETS LIBRARY=TEMP NOLIST;
 				DELETE &TULOSNIMI_TO;
 			RUN;

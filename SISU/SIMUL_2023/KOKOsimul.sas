@@ -113,7 +113,7 @@
 %LET LLISA = 1;
 %LET ELASUMTUKI = 1;
 %LET ASUMTUKI = 1;
-%LET PHOITO = 0;
+%LET PHOITO = 1;
 %LET TOIMTUKI = 1;
 
 /* Erillismoduulien valinta (vain REK) */
@@ -199,8 +199,7 @@
 		PRAHAMAKSU_SIMUL PRAHAMAKSU_DATA KUNNVE_SIMUL KUNNVE_DATA KIRKVE_SIMUL KIRKVE_DATA
 		SAIRVAKMAKSU_SIMUL SAIRVAKMAKSU_DATA VALTVERO_SIMUL VALTVERO_DATA
 		POVERO_SIMUL POVERO_DATA YLEVERO_SIMUL YLEVERO_DATA VEROTYHT_SIMUL VEROTYHT_DATA MAKSP_VEROT_SIMUL
-		MAKSP_VEROT_DATA PTVARVO_SIMUL PTKIVERO_SIMUL VAPVARVO_SIMUL
-		VAPKIVERO_SIMUL ASOYKIVERO_SIMUL MPKIVE_SIMUL KIVEROYHT_SIMUL KIVEROYHT2_SIMUL
+		MAKSP_VEROT_DATA KIVEROYHT_SIMUL KIVEROYHT2_SIMUL
 		KIVEROYHT_DATA LAPSIP_SIMUL LAPSIP_DATA ELASUMTUKI_SIMUL ELASUMTUKI_DATA ASUMTUKI_SIMUL ASUMTUKI_DATA
 		PHOITO_SIMUL PHOITO_DATA TOIMTUKI_SIMUL TOIMTUKI_DATA PALKAT MUUT_EL MUU_ANSIO PANSIO_SIMUL PANSIO_DATA 
 		PPOMA_SIMUL PPOMA_DATA YRIT_ANSIO YRIT_POTULO SEKAL_PRAHAT SEKAL_POTULO SEKAL_VEROT SEKAL_VEROTT_TULO
@@ -311,7 +310,7 @@
 	 tsiraho tmyynt tmyynt1 fluotap tvahevas tptmuu tulkyhp ttapel tlapel ttappr tmuupr
 	 tvakpr tpotel tmuuel teanstu tmtatt kuto amstipe
 	 rsyhte hasepr hsotvkor elasa per_apuraha omakkiiv
-	 lveru elama saiprva aiprva cdmky htkapr dtyhtet vvvmk1
+	 lveru elama saiprva aiprva kreurv cdmky htkapr dtyhtet vvvmk1
 	 vvvmk3 vvvmk5 tkoultuk etuki vtukia16 vtukiy16 lapsikorotus rielake ryelake lgkthr lgkthl lgktku
 	 lgos lgjhhr hkotihm odalsy odalke odmksyko odmksyke odmkkeko odmkkeke odkma verot svatvap svatpp lpvma lshma ltva ltvp lkuve lkive
 	 lelvak tnoosvvb teinovvb tuosvvap teinovv tnoosvab tuosvv einotptosva
@@ -357,7 +356,7 @@
 	/* Sekalaisia pääomatuloja */
 
 	SEKAL_POTULO = SUM(tvuokr, tvuokr1, tjvkork, tmuukor, tjmark, tmuutp, tsiraho, 
-		MAX(SUM(tmyynt, tmyynt1, -fluotap), 0), tptmuu, MAX(SUM(tulkyhp, -tuosvv), 0), tvahep50, tptvs, tvahep20, tptsu50, tkapite);
+		MAX(SUM(tmyynt, tmyynt1, -fluotap), 0), tvahevas, tptmuu, MAX(SUM(tulkyhp, -tuosvv), 0), tvahep50, tptvs, tvahep20, tptsu50, tkapite);
 
 	/* Sekalaisia, ei-simuloituja, verottomia tuloja */
 
@@ -379,7 +378,7 @@
 	
 	/* Lasketaan vertailutiedoiksi simuloitavien muuttujasummien arvoja datasta */
 
-	SAIRVAK_DATA = SUM(MAX(saiprva, 0), MAX(aiprva, 0), MAX(cdmky, 0), htkapr);
+	SAIRVAK_DATA = SUM(MAX(saiprva, 0), MAX(aiprva, 0), MAX(cdmky, 0), MAX(kreurv, 0), htkapr);
 
 	TTURVA_DATA = SUM(MAX(vvvmk1, 0), MAX(vvvmk3, 0), MAX(vvvmk5, 0),
 					MAX(dtyhtep, 0),
@@ -602,7 +601,7 @@
 		/* Sairausvakuutus */
 		%IF &SAIRVAK = 1 %THEN %DO;
 			TEMP.&TULOSNIMI_SV
-			(KEEP = hnro SAIRPR VANHPR SAIRPR_TYONANT VANHPR_TYONANT ERITHOITR)
+			(KEEP = hnro SAIRPR VANHPR KURAPR SAIRPR_TYONANT VANHPR_TYONANT KURAPR_TYONANT ERITHOITR)
 		%END;
 
 		/* Työttömyysturva */
@@ -702,7 +701,7 @@ SET STARTDAT.START_KOKO;
 	SAIRVAK_SIMUL = SAIRVAK_DATA;
 %END;
 %ELSE %DO;
-	SAIRVAK_SIMUL = SUM(SAIRPR, VANHPR, ERITHOITR, htkapr);
+	SAIRVAK_SIMUL = SUM(SAIRPR, VANHPR, ERITHOITR, KURAPR, htkapr);
 %END;
 
 /* Työttömyysturvan päivärahat */
@@ -818,17 +817,11 @@ PRAHAT_SIMUL = SUM(SAIRVAK_SIMUL, TTURVA_SIMUL, KOTIHTUKI_SIMUL, OPINTUKI_SIMUL)
 
 /* Kiinteistövero */
 
-%IF &KIVERO = 1 %THEN %DO; 
-	PTVARVO_SIMUL = VALOPULLINENPT;
-	PTKIVERO_SIMUL = RAK_KVEROPT;
-	VAPVARVO_SIMUL = VALOPULLINENVA;
-	VAPKIVERO_SIMUL = RAK_KVEROVA;
-	ASOYKIVERO_SIMUL = ASOYKIVERO;
-	MPKIVE_SIMUL =  KVTONTTIS ;
+%IF &KIVERO = 1 %THEN %DO;
 	KIVEROYHT_SIMUL = KIVEROYHT;
 	KIVEROYHT2_SIMUL = KIVEROYHT2;
  
-	DROP VALOPULLINENPT RAK_KVEROPT RAK_KVEROPT VALOPULLINENVA RAK_KVEROVA ASOYKIVERO KVTONTTIS KIVEROYHT KIVEROYHT2;
+	DROP KIVEROYHT KIVEROYHT2;
 %END;
 %ELSE %DO;			  	  
 	KIVEROYHT2_SIMUL = KIVEROYHT_DATA; 
@@ -957,7 +950,7 @@ ARRAY PISTE
 	YLEVERO_DATA PANSIO_DATA PANSIO_SIMUL PPOMA_DATA PPOMA_SIMUL MAKSP_VEROT_DATA MAKSP_VEROT_SIMUL OPLAINA_SIMUL OPLAINA_DATA
 	OSVEROVAP1_DATA OSVEROVAP2_DATA OSVEROVAP3_DATA OSVEROVAP4_DATA OSINGOTP1_DATA OSINGOTP2_DATA OSINGOTP3_DATA
 	OSVEROVAP1_SIMUL OSVEROVAP2_SIMUL OSVEROVAP3_SIMUL OSVEROVAP4_SIMUL OSINGOTP1_SIMUL OSINGOTP2_SIMUL OSINGOTP3_SIMUL
-	PTVARVO_SIMUL PTKIVERO_SIMUL VAPVARVO_SIMUL VAPKIVERO_SIMUL ASOYKIVERO_SIMUL MPKIVE_SIMUL KIVEROYHT2_SIMUL 
+	PTKIVERO_SIMUL KIVEROYHT2_SIMUL 
     KIVEROYHT_SIMUL KIVEROYHT_DATA;
 DO OVER PISTE;
 	IF PISTE <= 0 THEN PISTE = .;
@@ -1028,12 +1021,6 @@ kturaha = 'Käytettävissä olevat rahatulot (aineisto), DATA'
 KAYTTULO_SIMUL = 'Käytettävissä olevat tulot, MALLI'
 KAYTTULO_DATA = 'Käytettävissä olevat tulot (rekonstruoitu), DATA'
 ktu = 'Käytettävissä olevat tulot (aineisto), DATA'
-PTKIVERO_SIMUL = 'Kiinteistövero pientalosta, MALLI'
-PTVARVO_SIMUL = 'Verotusarvo pientalosta, MALLI'
-VAPKIVERO_SIMUL = 'Kiinteistövero vapaa-ajan asunnosta, MALLI'
-VAPVARVO_SIMUL = 'Verotusarvo vapaa-ajan asunnosta, MALLI'
-MPKIVE_SIMUL = 'Kiinteistövero maapohjasta, MALLI'
-ASOYKIVERO_SIMUL = 'Kiinteistövero asunto-osakeyhtiöissä, MALLI'
 KIVEROYHT_SIMUL = 'Kiinteistöverot (ml. asoy) yhteensä, MALLI'
 KIVEROYHT2_SIMUL = 'Kiinteistöverot (pl. asoy) yhteensä, MALLI';
 RUN;

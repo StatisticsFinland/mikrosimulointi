@@ -8,6 +8,35 @@
 *************************************************************************************************
 
 *************************************************************************************************
+**************************   UUSI MALLIVERSIO 25.40 JAETTU 22.09.2025  **************************
+*************************************************************************************************
+
+11.	Julkaistu VM:n syksyn 2025 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
+	parametritaulut vuosille 2024-2029.
+
+10. 	Lisätty kuntoutusrahat SAIRVAKsimul- ja KOKOsimul-ohjelmiin.
+	
+	../SIMUL_2023/KOKOsimul.sas
+	../SIMUL_2023/SAIRVAKsimul.sas
+
+9.	Korjattu VEROsimul-osamallista kovakoodattuja vuosilukuja, jotta malli simuloi kunnallis- 
+	ja kirkollisverot lainsäädäntövuodelle 2022 ja sitä ennen. 
+
+	../SIMUL_2023/VEROsimul.sas
+
+8.	Lisätty kiinteistöveron simulointiin saunarakennukset sekä erilliset talous- ja 
+	autotallirakennukset. Selkeytetty samalla kiinteistoveron simulointia.
+
+	../SIMUL_2023/KIVEROsimul.sas
+	../SIMUL_2023/KOKOsimul.sas
+	../MAKROT/KIVEROlakimakrot.sas
+	../PARAM/pkivero.sas7bdat
+	../OHJAUS/kaikki_param.sas7bdat
+
+7.	Viety erityisen alijäämähyvityksen poisto tuloverolain muutoksen mukaisesti. Muutos tulee
+	voimaan 1.1.2027 alkaen.
+
+*************************************************************************************************
 **************************   UUSI MALLIVERSIO 25.30 JAETTU 16.06.2025  **************************
 *************************************************************************************************
 

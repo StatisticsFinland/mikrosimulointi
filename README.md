@@ -10,3 +10,7 @@ Mallin tarkempi sisältö kuvattu mallin [käyttöoppaassa](https://stat.fi/medi
 SISU-mallin koodi on ladattavissa avoimena datana. Mallikoodi on lisensoitu ns. kolmepykäläisellä BSD-lisenssillä, joten koodia voi muokata, käyttää ja jakaa vapaasti. Varsinainen lisenssiteksti löytyy mallin latauskansiosta. Mallin voi ladata "tags"-osiosta:
 1. Mene osioon klikkaamalla tags-painiketta.
 2. Lataa haluamasi malliversio zip-tiedostona klikkaamalla zip-painiketta.
+
+Ladattavalla versiolla on mahdollista tehdä laskelmia erityyppisille esimerkkikotitalouksille.
+
+Aineistopohjaista simulointia varten tarvitaan erillinen käyttölupa mallin hyödyntämiin aineistoihin, joita käytetään etäkäyttöyhteydellä.

@@ -162,6 +162,7 @@ IF &vanh = 0 THEN DO;
 	IF (&tulo >  &SRaja2) THEN &tulos = &SPros1 *  &SRaja2 / &maxpaiv + &SPros2 * (&tulo -  &SRaja2) / &maxpaiv;
 	IF (&tulo >  &SRaja3) THEN &tulos = &SPros1 *  &SRaja2 / &maxpaiv + &SPros2 *  (&SRaja3 -&SRaja2) / &maxpaiv + &SPros3 * (&tulo -  &SRaja3) / &maxpaiv;
 	IF (&tulos < &Minimi) AND (&mvuosi > 2018) THEN &tulos = &Minimi;
+	IF ikavu < &ikaraja1 OR ikavu > &ikaraja2 + 1  THEN &tulos = 0; *Rajaus iän mukaan;
 END;
 
 *Sitten vanhempainraha;

@@ -7,6 +7,35 @@
 *				                                                                *
 *************************************************************************************************
 
+
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 25.50 JAETTU 18.12.2025  **************************
+*************************************************************************************************
+
+15.	Julkaistu VM:n talven 2025 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
+	parametritaulut vuosille 2024-2030.	
+
+14.	Asetettu toimeentulotuessa huomioitavien kuntakohtaisten enimmäisasumismenojen käyttäminen
+	vakioasetukseksi. Lisätty myös mahdollisuus käyttää deflaattoria näihin parametreihin.
+	Lisäksi korjattu vuoden 2023 parametritaulukko sisältämään oikeat arvot.
+
+	../SIMUL_2023/TOIMTUKIsimul.sas
+	../PARAM/asummenorajat_2023.sas7bdat
+
+13.	Lisätty SAIRVAKsimul-osamalliin etuuksien maksussa sovellettavat ala- ja yläikärajat.
+
+	../SIMUL_2023/SAIRVAKsimul.sas
+	../SIMUL_2023/SAIRVAKlakimakrot.sas
+	../PARAM/psairvak.sas7bdat
+	../PARAM/kaikkiparam.sas7bdat
+
+12. 	OPINTUKIsimul-osamallin koodia yksinkertaistettu ja simulointia tarkennettu. Rekisteriaineis-
+	ton uusien muuttujien avulla tiedetään nyt opintotukikuukausien jakautuminen kevät- ja syys-
+	lukukaudelle. 
+
+	../SIMUL_2023/OPINTUKIsimul.sas
+	../SIMUL_2023/OPINTUKIlakimakrot.sas
+
 *************************************************************************************************
 **************************   UUSI MALLIVERSIO 25.40 JAETTU 22.09.2025  **************************
 *************************************************************************************************

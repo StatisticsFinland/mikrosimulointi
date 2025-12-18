@@ -360,7 +360,7 @@ DES = 'OPINTUKI: Opintoraha kuukausitasolla';
 
 %LuoKuuID(kuuid, &mvuosi, &mkuuk);
 
-IF &ika < 17 OR (kuuid < MDY(7, 1, 1992)) OR (kuuid < MDY(7, 1, 1994) AND &kork = 0) THEN temp2 = 0;
+IF (kuuid < MDY(7, 1, 1992)) OR (kuuid < MDY(7, 1, 1994) AND &kork = 0) THEN temp2 = 0;
 
 ELSE DO;
 
@@ -428,13 +428,11 @@ ELSE DO;
 
 	* 1.8.2019 LÄHTIEN: Pienituloisten perheiden ammatillista tai lukiokoulutusta suorittavilla lapsilla oikeus opintorahan oppimateriaalilisään;
 	* 1.8.2021 LÄHTIEN: Oppimateriaalilisä poistuu opiskelijoilta, jotka ovat oppivelvollisuuslain mukaan oikeutettuja maksuttomaan koulutukseen;
-	IF &oppimateriaali = 1 AND (kuuid < MDY(8,1,2021) OR &ika > MIN(&mvuosi - 2005, 20)) AND &kork = 0 AND &vanhtulo1 <= &VanhTuloYlaRaja AND korotus > 0 THEN temp2 = SUM(temp2, &OpmatLisa);
+	IF &oppimateriaali = 1 THEN DO;
+		IF (&ika < 17 AND kuuid < MDY(8, 1, 2021)) OR (&ika > MIN(&mvuosi - 2005, 20) AND &kork = 0 AND &vanhtulo1 <= &VanhTuloYlaRaja AND korotus > 0) THEN temp2 = SUM(temp2, &OpmatLisa);
+	END;
 
 END;
-	
-* 1.8.2019 LÄHTIEN: Pienituloisten perheiden ammatillista tai lukiokoulutusta suorittavilla lapsilla oikeus opintorahan oppimateriaalilisään;
-* 1.8.2021 LÄHTIEN: Oppimateriaalilisä poistuu opiskelijoilta, jotka ovat oppivelvollisuuslain mukaan oikeutettuja maksuttomaan koulutukseen; 
-IF &ika < 17 AND &oppimateriaali = 1 AND (kuuid < MDY(8,1,2021) OR &ika > MIN(&mvuosi - 2005, 20)) AND &kork = 0 AND &vanhtulo1 <= &VanhTuloYlaRaja THEN temp2 = SUM(temp2, &OpmatLisa);
 
 &tulos = temp2;
 DROP vah2 temp2 opalennus korotus kuuid;

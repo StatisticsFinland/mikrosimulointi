@@ -502,7 +502,7 @@ Tuottaa:
 
 %ParamPaivitys(
 	pvuosi = 2025, 
-	tvuosi = 2029, 
+	tvuosi = 2030, 
 	indtaulu = param.pindeksi_vuosi,
 	popintuki = popintuki,
 	ptoimtuki = ptoimtuki, 

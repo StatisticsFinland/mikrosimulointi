@@ -56,7 +56,7 @@
 			%LET VARALLISUUSKATTO = 0; 
 
 			* Käytetäänkö simuloinnissa Kelan ohjeellisia asumiskustannusten maksimiarvoja (1 käytetään, 0 ei käytetä);
-			%LET ASUMKUST_MAKS = 0;
+			%LET ASUMKUST_MAKS = 1;
 
 			* Ohjeellisten asumiskustannusten taustaa, 1. liittyen normien ylitykseen, 2. liittyen normien soveltamisen määräaikaan.
 
@@ -177,7 +177,7 @@
 
 		DATA STARTDAT.START_TOIMTUKI;
 			SET POHJADAT.&AINEISTO&AVUOSI
-			(KEEP = hnro knro asko ikakk ikavu svatva svatvp verot ltvp omakkiiv elama korotv elivtu
+			(KEEP = hnro knro asko ikavu svatva svatvp verot ltvp omakkiiv elama korotv elivtu
 			bbyhte lapsikorotus rielake ryelake amstipe lbeltuki rsyhte hasepr elasa
 			hsotvkor yastuki eastuki maksvuok hoitvast omalamm omamaks
 			aslaikor sahko per_apuraha vtyomj vthmp vmatk lelvak lpvma tnoosvvb teinovvb tuosvvap
@@ -196,21 +196,19 @@
 		DATA STARTDAT.START_TOIMTUKI;
 			SET STARTDAT.START_TOIMTUKI;
 
-			IKAKUUKAUSINA = SUM(ikavu * 12, ikakk);
-
 			* Niiden kuukausien osuus, jona henkilö ei ole ollut armeijassa tai siviilipalveluksessa;
 			EIAMSI = (12-varm)/12;
 
 			* Perheaseman määrittely;
-			IF (asko = 1) OR (asko = 2) OR (asko = 3 AND IKAKUUKAUSINA <= 0) OR (asko NE 1 AND asko NE 2 AND asko NE 3) THEN ONAIK = 1;
+			IF asko IN (1, 2, 4, 5, 6) THEN ONAIK = 1;
 			ELSE ONAIK = 0;
-			IF asko = 3 AND IKAKUUKAUSINA >= 216 THEN ONAIKLAPSI = 1;
+			IF asko = 3 AND ikavu >= 18 THEN ONAIKLAPSI = 1;
 			ELSE ONAIKLAPSI = 0;
-			IF asko = 3 AND IKAKUUKAUSINA >= 204 AND IKAKUUKAUSINA < 216 THEN ONLAPSI17 = 1;
+			IF asko = 3 AND ikavu = 17 THEN ONLAPSI17 = 1;
 			ELSE ONLAPSI17 = 0;
-			IF asko = 3 AND IKAKUUKAUSINA >= 120 AND IKAKUUKAUSINA < 204 THEN ONLAPSI10_16 = 1;
+			IF asko = 3 AND ikavu >= 10 AND ikavu <= 16 THEN ONLAPSI10_16 = 1;
 			ELSE ONLAPSI10_16 = 0;
-			IF asko = 3 AND IKAKUUKAUSINA > 0 AND IKAKUUKAUSINA < 120 THEN ONLAPSIALLE10 = 1;
+			IF asko = 3 AND ikavu < 10 THEN ONLAPSIALLE10 = 1;
 			ELSE ONLAPSIALLE10 = 0;
 
 			* Veronalainen työtulo;
@@ -619,7 +617,7 @@
 		VEROTTUL = SUM(VEROTTUL_MUU, ASUMLISA_SIMUL, OPINTOLAINA_SIMUL, ELLISAT_SIMUL, MAMUTUKI_SIMUL, ELTUKI_SIMUL, OSINGOT_VEROVAP_SIMUL, ELASUMTUKI_SIMUL, ASUMTUKI_SIMUL);
 
 		* Ei-työtulojen nettomäärä kuukaudessa;
-		MUUTTULOTNETTO_KK =  MAX(SUM(MUUTVERTULOTNETTO, VEROTTUL, -SEKALVERO, -KIVERO_SIMUL) / 12, 0);
+		MUUTTULOTNETTO_KK = SUM(MUUTVERTULOTNETTO, VEROTTUL, -SEKALVERO, -KIVERO_SIMUL) / 12 ;
 		
 		* Harkinnanvaraiset menot kuukaudessa;
 		HARKINMENOT_KK = MAX(HARKINMENOT_SIMUL / 12, 0);

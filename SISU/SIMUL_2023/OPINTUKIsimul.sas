@@ -138,8 +138,8 @@
 	/* 2.1 Määritellään tarvittavat muuttujat taulukkoon START_OPINTUKI */
 	DATA STARTDAT.START_OPINTUKI; 
 	SET POHJADAT.&AINEISTO&AVUOSI
-	(KEEP = hnro knro ikavu ikakk tkopira odorsyko odorkeko odorsyke odorkeke odalsy odalke odmksyko odmksyke odmkkeko odmkkeke odlksy odlkke odoksy odokke odta
-	svatva svatvp per_apuraha aloituspvm cllkm ASKUST_LASK TUKIAIKA_KESK TUKIAIKA_KOR TAYSIM_KESK TAYSIM_KOR KOTONA_AS yrvah
+	(KEEP = hnro knro ikavu ikakk asko tkopira odorsyko odorkeko odorsyke odorkeke odalsy odalke odmksyko odmksyke odmkkeko odmkkeke odlksy odlkke odoksy odokke odta
+	svatva svatvp per_apuraha aloituspvm cllkm yrvah
 	maksvuok jasenia yastukikr astukikr_l15 astukikr_l24 astukikr_l25
 	TUKIKOR_DATA TUKIKESK_DATA ASUMLISA_DATA OPLAIN_DATA);
 
@@ -158,7 +158,12 @@
 	ELSE IF I19KUUK > 6 THEN IKA = 19;
 	ELSE IKA = ikavu;
 
-	/* Päätellään opintolainan valtiontakauksen todelliset kuukaudet korkea- ja keskiasteelle.
+	/* Päätellään asuuko henkilö vanhempiensa luona vai ei */
+
+	IF asko = 3 AND sum(odalsy, odalke, 0) = 0 THEN KOTONA_AS = 1;
+	ELSE KOTONA_AS = 0; 
+
+	/* Päätellään opintolainan valtiontakauksen todelliset kuukaudet lukukausittain korkea- ja keskiasteelle.
 	Hyödynnetään tietoa lukukausittaisista valtiontakauskuukausista (odlksy ja odlkke)
 	ja valtiontakauksen euromäärästä korkea-asteelle (odmksyko ja odmkkeko) sekä
 	keskiasteelle (odmksyke ja odmkkeke). */
@@ -172,14 +177,15 @@
 		OPLAIVKK_KOR_KE = (odmkkeko / SUM(odmkkeke, odmkkeko)) * odlkke;
 	END;
 
-	OPLAIVKK_KESK = ROUND(SUM(OPLAIVKK_KESK_SY, OPLAIVKK_KESK_KE), 1);
-	OPLAIVKK_KOR = ROUND(SUM(OPLAIVKK_KOR_SY, OPLAIVKK_KOR_KE), 1);
+	OPLAIVKK_KESK_SY = ROUND(OPLAIVKK_KESK_SY, 1);
+	OPLAIVKK_KESK_KE = ROUND(OPLAIVKK_KESK_KE, 1);
+	OPLAIVKK_KOR_SY = ROUND(OPLAIVKK_KOR_SY, 1);
+	OPLAIVKK_KOR_KE = ROUND(OPLAIVKK_KOR_KE, 1);
 
 	/* Lasketaan datasta opiskelijan omat veronalaiset tulot ja apurahat */
 	OMA_TULO = SUM(svatva, svatvp, per_apuraha, yrvah);
 
 	DROP IALLE17KUUK I17KUUK I18KUUK I19KUUK
-	OPLAIVKK_KESK_SY OPLAIVKK_KESK_KE OPLAIVKK_KOR_SY OPLAIVKK_KOR_KE
 	ikavu ikakk tkopira svatva svatvp per_apuraha yrvah;
 	RUN;
 
@@ -232,16 +238,14 @@
 	LABEL
 	KOTONA_AS = 'Vanhempien luona asuminen (0/1), DATA'
 	IKA = 'Opintotuen ikäluokka, DATA'
-	TUKIAIKA_KESK = 'Keskiasteen tukikuukaudet, DATA'
-	TUKIAIKA_KOR = 'Korkeakouluopintojen opintojen tukikuukaudet, DATA'
-	TAYSIM_KESK = 'Keskiasteen tuen täysiä monikertoja vastaavat tukikuukaudet, DATA'
-	TAYSIM_KOR = 'Korkea-asteen tuen täysiä monikertoja vastaavat tukikuukaudet, DATA'
 	OMA_TULO = 'Opiskelijan omat veronalaiset tulot ja apurahat (e/v), DATA'
 	VANH_TULO1 = 'Vanhempien veronalaiset ansio- ja pääomatulot (e/v), DATA'
 	VANH_TULO2 = 'Vanhempien puhtaat ansio- ja pääomatulot (e/v), DATA'
 	ONHUOLTAJA = 'Alaikäisen lapsen huoltaja (0/1), DATA'
-	OPLAIVKK_KESK = 'Opintolainan valtiontakauksen voimassaolokuukaudet keskiasteen opintoihin, DATA'
-	OPLAIVKK_KOR = 'Opintolainan valtiontakaukset voimassaolokuukaudet korkeakouluopintoihin, DATA';
+	OPLAIVKK_KESK_SY = 'Opintolainan valtiontakauksen voimassaolokuukaudet keskiasteen opintoihin, syyslukukausi, DATA'
+	OPLAIVKK_KESK_KE = 'Opintolainan valtiontakauksen voimassaolokuukaudet keskiasteen opintoihin, kevätlukukausi, DATA'
+	OPLAIVKK_KOR_SY = 'Opintolainan valtiontakauksen voimassaolokuukaudet korkeakouluopintoihin, syyslukukausi, DATA'
+	OPLAIVKK_KOR_KE = 'Opintolainan valtiontakauksen voimassaolokuukaudet korkeakouluopintoihin, kevätlukukausi, DATA';
 
 	RUN;
 
@@ -278,245 +282,99 @@ SET STARTDAT.START_OPINTUKI;
 
 * Keskiasteen opiskelijan opintoraha;
 
-* Huomioidaan vanhempien tulot vain jos opiskelija ei ole saanut tukea täysimääräisenä;
-VANH_TULO_KESK1 = IFN(TAYSIM_KESK = 1, 0, VANH_TULO1);
-VANH_TULO_KESK2 = IFN(TAYSIM_KESK = 1, 0, VANH_TULO2);
-
-IF sum(odorsyke, odorkeke) > 0 THEN DO;
+IF (SUM(odorsyke, odorkeke) > 0 AND SUM(odorsyko, odorkeko) <= 0) THEN DO;
 
 	/* Mahdollisen huoltajakorotuksen ja oppimateriaalilisän kanssa */
-	%OpRahaVS(OPRAHAKES, &LVUOSI, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO_KESK1, VANH_TULO_KESK2, 0, huoltaja=ONHUOLTAJA, oppimateriaali=1);
-	TUKIKESK = TUKIAIKA_KESK * OPRAHAKES;
+	%OpRahaKS(OPRAHAKES1, &LVUOSI, 1, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
+	%OpRahaKS(OPRAHAKES2, &LVUOSI, 9, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
+	TUKIKESK = SUM(odokke * OPRAHAKES1, odoksy * OPRAHAKES2);
 
 	/* Ilman huoltajakorotusta */
-	%OpRahaVS(OPRAHAKES_ILMHUOLT, &LVUOSI, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO_KESK1, VANH_TULO_KESK2, 0, huoltaja=0, oppimateriaali=1);
-	TUKIKESK_ILMHUOLT = TUKIAIKA_KESK * OPRAHAKES_ILMHUOLT;
+	%OpRahaKS(OPRAHAKES1_ILMHUOLT, &LVUOSI, 1, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
+	%OpRahaKS(OPRAHAKES2_ILMHUOLT, &LVUOSI, 9, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
+	TUKIKESK_ILMHUOLT = SUM(odokke * OPRAHAKES1_ILMHUOLT, odoksy * OPRAHAKES2_ILMHUOLT);
 
 	/* Ilman oppimateriaalilisää */
-	%OpRahaVS(OPRAHAKES_ILMOP, &LVUOSI, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO_KESK1, VANH_TULO_KESK2, 0, huoltaja=ONHUOLTAJA, oppimateriaali=0);
-	TUKIKESK_ILMOP = TUKIAIKA_KESK * OPRAHAKES_ILMOP;
+	%OpRahaKS(OPRAHAKES1_ILMOP, &LVUOSI, 1, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
+	%OpRahaKS(OPRAHAKES2_ILMOP, &LVUOSI, 9, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
+	TUKIKESK_ILMOP = SUM(odokke * OPRAHAKES1_ILMOP, odoksy * OPRAHAKES2_ILMOP);
 
 	/* Ilman huoltajakorotusta ja oppimateriaalilisää */
-	%OpRahaVS(OPRAHAKES_ILMHUOLTOP, &LVUOSI, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO_KESK1, VANH_TULO_KESK2, 0, huoltaja=0, oppimateriaali=0);
-	TUKIKESK_ILMHUOLTOP = TUKIAIKA_KESK * OPRAHAKES_ILMHUOLTOP;
+	%OpRahaKS(OPRAHAKES1_ILMHUOLTOP, &LVUOSI, 1, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
+	%OpRahaKS(OPRAHAKES2_ILMHUOLTOP, &LVUOSI, 9, &INF, 0, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
+	TUKIKESK_ILMHUOLTOP = SUM(odokke * OPRAHAKES1_ILMHUOLTOP, odoksy * OPRAHAKES2_ILMHUOLTOP);
 
 END;
-
 
 * Korkeakouluopiskelijan opintoraha;
 
-* Huomioidaan vanhempien tulot vain jos opiskelija ei ole saanut tukea täysimääräisenä;
-VANH_TULO_KOR1 = IFN(TAYSIM_KOR = 1, 0, VANH_TULO1);
-VANH_TULO_KOR2 = IFN(TAYSIM_KOR = 1, 0, VANH_TULO2);
-
-* Lasketaan korkeakouluopiskelijan opintoraha (jos 9 kk);
-
-IF  (sum(odorsyko, odorkeko) > 0 AND TUKIAIKA_KOR = 9) THEN DO;
+IF (SUM(odorsyko, odorkeko) > 0) THEN DO;
 
 	/* Mahdollisen huoltajakorotuksen ja oppimateriaalilisän kanssa */
-	%OpRahaKS(OPRAHAKOR1, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
-	%OpRahaKS(OPRAHAKOR2, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
-	%OpRahaKS(OPRAHAKOR3, &LVUOSI, 11, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
-	TUKIKOR = SUM(5 * OPRAHAKOR1, 2 * OPRAHAKOR2, 2 * OPRAHAKOR3);
+	%OpRahaKS(OPRAHAKOR1, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
+	%OpRahaKS(OPRAHAKOR2, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
+	TUKIKOR = SUM(odokke * OPRAHAKOR1, odoksy * OPRAHAKOR2);
 
 	/* Ilman huoltajakorotusta */
-	%OpRahaKS(OPRAHAKOR1_ILMHUOLT, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
-	%OpRahaKS(OPRAHAKOR2_ILMHUOLT, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
-	%OpRahaKS(OPRAHAKOR3_ILMHUOLT, &LVUOSI, 11, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
-	TUKIKOR_ILMHUOLT = SUM(5 * OPRAHAKOR1_ILMHUOLT, 2 * OPRAHAKOR2_ILMHUOLT, 2 * OPRAHAKOR3_ILMHUOLT);
+	%OpRahaKS(OPRAHAKOR1_ILMHUOLT, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
+	%OpRahaKS(OPRAHAKOR2_ILMHUOLT, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
+	TUKIKOR_ILMHUOLT = SUM(odokke * OPRAHAKOR1_ILMHUOLT, odoksy * OPRAHAKOR2_ILMHUOLT);
 
 	/* Ilman oppimateriaalilisää */
-	%OpRahaKS(OPRAHAKOR1_ILMOP, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
-	%OpRahaKS(OPRAHAKOR2_ILMOP, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
-	%OpRahaKS(OPRAHAKOR3_ILMOP, &LVUOSI, 11, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
-	TUKIKOR_ILMOP = SUM(5 * OPRAHAKOR1_ILMOP, 2 * OPRAHAKOR2_ILMOP, 2 * OPRAHAKOR3_ILMOP);
+	%OpRahaKS(OPRAHAKOR1_ILMOP, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
+	%OpRahaKS(OPRAHAKOR2_ILMOP, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
+	TUKIKOR_ILMOP = SUM(odokke * OPRAHAKOR1_ILMOP, odoksy * OPRAHAKOR2_ILMOP);
 
 	/* Ilman huoltajakorotusta ja oppimateriaalilisää */
-	%OpRahaKS(OPRAHAKOR1_ILMHUOLTOP, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
-	%OpRahaKS(OPRAHAKOR2_ILMHUOLTOP, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
-	%OpRahaKS(OPRAHAKOR3_ILMHUOLTOP, &LVUOSI, 11, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
-	TUKIKOR_ILMHUOLTOP = SUM(5 * OPRAHAKOR1_ILMHUOLTOP, 2 * OPRAHAKOR2_ILMHUOLTOP, 2 * OPRAHAKOR3_ILMHUOLTOP);
+	%OpRahaKS(OPRAHAKOR1_ILMHUOLTOP, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
+	%OpRahaKS(OPRAHAKOR2_ILMHUOLTOP, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO1, VANH_TULO2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
+	TUKIKOR_ILMHUOLTOP = SUM(odokke * OPRAHAKOR1_ILMHUOLTOP, odoksy * OPRAHAKOR2_ILMHUOLTOP);
 
 END;
-
-* Lasketaan korkeakouluopiskelijan opintoraha (jos ei 9 kk, keskiarvo) ;
-
-ELSE IF (sum(odorsyko, odorkeko) > 0 AND odta = 3) THEN DO;
-
-	/* Mahdollisen huoltajakorotuksen ja oppimateriaalilisän kanssa */
-	%OpRahaVS(OPRAHAKOR4, &LVUOSI, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
-	TUKIKOR = TUKIAIKA_KOR * OPRAHAKOR4;
-
-	/* Ilman huoltajakorotusta */
-	%OpRahaVS(OPRAHAKOR4_ILMHUOLT, &LVUOSI, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
-	TUKIKOR_ILMHUOLT = TUKIAIKA_KOR * OPRAHAKOR4_ILMHUOLT;
-
-	/* Ilman oppimateriaalilisää */
-	%OpRahaVS(OPRAHAKOR4_ILMOP, &LVUOSI, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
-	TUKIKOR_ILMOP = TUKIAIKA_KOR * OPRAHAKOR4_ILMOP;
-
-	/* Ilman huoltajakorotusta ja oppimateriaalilisää */
-	%OpRahaVS(OPRAHAKOR4_ILMHUOLTOP, &LVUOSI, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
-	TUKIKOR_ILMHUOLTOP = TUKIAIKA_KOR * OPRAHAKOR4_ILMHUOLTOP;
-
-END;
-
-* Lasketaan korkeakouluopiskelijan opintoraha (kevätlukukausi) ;
-
-ELSE IF (sum(odorsyko, odorkeko) > 0 AND odta = 2) THEN DO;
-
-	/* Mahdollisen huoltajakorotuksen ja oppimateriaalilisän kanssa */
-	%OpRahaKS(OPRAHAKOR5, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
-	TUKIKOR = TUKIAIKA_KOR * OPRAHAKOR5;
-
-	/* Ilman huoltajakorotusta */
-	%OpRahaKS(OPRAHAKOR5_ILMHUOLT, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
-	TUKIKOR_ILMHUOLT = TUKIAIKA_KOR * OPRAHAKOR5_ILMHUOLT;
-
-	/* Ilman oppimateriaalilisää */
-	%OpRahaKS(OPRAHAKOR5_ILMOP, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
-	TUKIKOR_ILMOP = TUKIAIKA_KOR * OPRAHAKOR5_ILMOP;
-
-	/* Ilman huoltajakorotusta ja oppimateriaalilisää */
-	%OpRahaKS(OPRAHAKOR5_ILMHUOLTOP, &LVUOSI, 1, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
-	TUKIKOR_ILMHUOLTOP = TUKIAIKA_KOR * OPRAHAKOR5_ILMHUOLTOP;
-
-END;
-
-* Lasketaan korkeakouluopiskelijan opintoraha (4 kk syyslukukausi) ;
-
-ELSE IF (sum(odorsyko, odorkeko) > 0 AND TUKIAIKA_KOR = 4 AND odta = 1) THEN DO;
-
-	/* Mahdollisen huoltajakorotuksen ja oppimateriaalilisän kanssa */
-	%OpRahaKS(OPRAHAKOR6, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
-	%OpRahaKS(OPRAHAKOR7, &LVUOSI, 11, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
-	TUKIKOR = SUM(2 * OPRAHAKOR6, 2 * OPRAHAKOR7);
-
-	/* Ilman huoltajakorotusta */
-	%OpRahaKS(OPRAHAKOR6_ILMHUOLT, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
-	%OpRahaKS(OPRAHAKOR7_ILMHUOLT, &LVUOSI, 11, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
-	TUKIKOR_ILMHUOLT = SUM(2 * OPRAHAKOR6_ILMHUOLT, 2 * OPRAHAKOR7_ILMHUOLT);
-
-	/* Ilman oppimateriaalilisää */
-	%OpRahaKS(OPRAHAKOR6_ILMOP, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
-	%OpRahaKS(OPRAHAKOR7_ILMOP, &LVUOSI, 11, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
-	TUKIKOR_ILMOP = SUM(2 * OPRAHAKOR6_ILMOP, 2 * OPRAHAKOR7_ILMOP);
-
-	/* Ilman huoltajakorotusta ja oppimateriaalilisää */
-	%OpRahaKS(OPRAHAKOR6_ILMHUOLTOP, &LVUOSI, 9, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
-	%OpRahaKS(OPRAHAKOR7_ILMHUOLTOP, &LVUOSI, 11, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
-	TUKIKOR_ILMHUOLTOP = SUM(2 * OPRAHAKOR6_ILMHUOLTOP, 2 * OPRAHAKOR7_ILMHUOLTOP);
-
-END;
-
-* Lasketaan korkeakouluopiskelijan opintoraha (syyslukukausi, ei 4 kk);
-
-ELSE IF (sum(odorsyko, odorkeko) > 0 AND TUKIAIKA_KOR > 0 AND TUKIAIKA_KOR NE 4 AND odta = 1) THEN DO;
-
-	/* Mahdollisen huoltajakorotuksen ja oppimateriaalilisän kanssa */
-	%OpRahaVS(OPRAHAKOR8, &LVUOSI, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=1);
-	TUKIKOR = TUKIAIKA_KOR * OPRAHAKOR8;
-
-	/* Ilman huoltajakorotusta */
-	%OpRahaVS(OPRAHAKOR8_ILMHUOLT, &LVUOSI, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=1);
-	TUKIKOR_ILMHUOLT = TUKIAIKA_KOR * OPRAHAKOR8_ILMHUOLT;
-
-	/* Ilman oppimateriaalilisää */
-	%OpRahaVS(OPRAHAKOR8_ILMOP, &LVUOSI, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=ONHUOLTAJA, oppimateriaali=0);
-	TUKIKOR_ILMOP = TUKIAIKA_KOR * OPRAHAKOR8_ILMOP;
-
-	/* Ilman huoltajakorotusta ja oppimateriaalilisää */
-	%OpRahaVS(OPRAHAKOR8_ILMHUOLTOP, &LVUOSI, &INF, 1, KOTONA_AS, IKA, 0, 0, VANH_TULO_KOR1, VANH_TULO_KOR2, 0, aloituspvm=aloituspvm, huoltaja=0, oppimateriaali=0);
-	TUKIKOR_ILMHUOLTOP = TUKIAIKA_KOR * OPRAHAKOR8_ILMHUOLTOP;
-
-END;
-
 
 * Opintotuen asumislisä;
 
-* Lasketaan opintotuen asumislisä (jos 9 kk) ;
+* Lasketaan opintotuen asumislisä;
 
 IF TUKIKOR > 0 THEN TUKIKORAPU = 1;
 ELSE TUKIKORAPU = 0;
 
-IF (sum(odoksy, odokke) = 9 AND ONHUOLTAJA = 0 AND KOTONA_AS = 0) THEN DO;
+IF (ONHUOLTAJA = 0 AND KOTONA_AS = 0) THEN DO;
 
 	%AsumLisaKS(ASLIS1, &LVUOSI, 1, &INF, TUKIKORAPU, IKA, 0, maksvuok, 0, 0, 0, 0, KUNTARYHMA); 
 	%AsumLisaKS(ASLIS2, &LVUOSI, 9, &INF, TUKIKORAPU, IKA, 0, maksvuok, 0, 0, 0, 0, KUNTARYHMA); 
-	%AsumLisaKS(ASLIS3, &LVUOSI, 11, &INF, TUKIKORAPU, IKA, 0, maksvuok, 0, 0, 0, 0, KUNTARYHMA);
-
-	ASUMLISA = SUM(5 * ASLIS1, 2 * ASLIS2, 2 * ASLIS3);
+	ASUMLISA = SUM(odokke * ASLIS1, odoksy * ASLIS2);
 
 END;
-
-* Lasketaan opintotuen asumislisä (jos ei 9 kk, keskiarvo) ;
-
-ELSE IF (odta = 3 AND ONHUOLTAJA = 0 AND KOTONA_AS = 0) THEN DO;
-
-	%AsumLisaVS(ASLIS4, &LVUOSI, &INF, TUKIKORAPU, IKA, 0, maksvuok, 0, 0, 0, 0, KUNTARYHMA);
-
-	ASUMLISA = sum(odoksy, odokke) * ASLIS4;
-
-END;
-
-* Lasketaan opintotuen asumislisä (kevätlukukausi) ;
-
-ELSE IF (odta = 2 AND ONHUOLTAJA = 0 AND KOTONA_AS = 0) THEN DO;
-
-	%AsumLisaKS(ASLIS5, &LVUOSI, 1, &INF, TUKIKORAPU, IKA, 0, maksvuok, 0, 0, 0, 0, KUNTARYHMA);
-
-	ASUMLISA = sum(odoksy, odokke) * ASLIS5;
-
-END;
-
-* Lasketaan opintotuen asumislisä (4 kk syyslukukausi) ;
-
-ELSE IF (sum(odoksy, odokke) = 4 AND odta = 1 AND ONHUOLTAJA = 0 AND KOTONA_AS = 0) THEN DO;
-
-	%AsumLisaKS(ASLIS6, &LVUOSI, 9, &INF, TUKIKORAPU, IKA, 0, maksvuok, 0, 0, 0, 0, KUNTARYHMA);
-	%AsumLisaKS(ASLIS7, &LVUOSI, 11, &INF, TUKIKORAPU, IKA, 0, maksvuok, 0, 0, 0, 0, KUNTARYHMA);
-
-	ASUMLISA = SUM(2 * ASLIS6, 2 * ASLIS7);
-
-END;
-
-* Lasketaan opintotuen asumislisä (syyslukukausi, ei 4 kk);
-
-ELSE IF sum(odoksy, odokke) > 0 AND sum(odoksy, odokke) NE 4 AND odta = 1 AND ONHUOLTAJA = 0 AND KOTONA_AS = 0 THEN DO;
-
-	%AsumLisaKS(ASLIS8, &LVUOSI, 9, &INF, TUKIKORAPU, IKA, 0, maksvuok, 0, 0, 0, 0, KUNTARYHMA);
-
-	ASUMLISA = sum(odoksy, odokke) * ASLIS8;
-
-END;
-
 
 * Lasketaan opintolainan valtiontakaus ;
 
-%OpLainaVS(OPLAIV_KESK, &LVUOSI, &INF, 0, 0, IKA);
-%OpLainaVS(OPLAIV_KOR, &LVUOSI, &INF, 1, 0, IKA);
+%OpLainaKS(OPLAIV_KESK1, &LVUOSI, 1, &INF, 0, 0, IKA);
+%OpLainaKS(OPLAIV_KESK2, &LVUOSI, 9, &INF, 0, 0, IKA);
+%OpLainaKS(OPLAIV_KOR1, &LVUOSI, 1, &INF, 1, 0, IKA);
+%OpLainaKS(OPLAIV_KOR2, &LVUOSI, 9, &INF, 1, 0, IKA);
 
-OPLAIN = SUM(OPLAIVKK_KESK * OPLAIV_KESK, OPLAIVKK_KOR * OPLAIV_KOR);
+OPLAIN = SUM(OPLAIVKK_KESK_KE * OPLAIV_KESK1, OPLAIVKK_KESK_SY * OPLAIV_KESK2, OPLAIVKK_KOR_KE * OPLAIV_KOR1, OPLAIVKK_KOR_SY * OPLAIV_KOR2);
 
 * Lasketaan opintotuen takaisinperintä ; 
 
-IF odta < 3 THEN DO;
+IF (odokke = 0 OR odoksy = 0) THEN DO;
 
 	/* Mahdollisen huoltajakorotuksen ja oppimateriaalilisän kanssa */
-	%OpTukiTakaisinS(TUKIKESK_TAK, &LVUOSI, 1, &INF, TUKIAIKA_KESK, 0.5 * SUM(OMA_TULO, -TUKIKESK), TUKIKESK);
-	%OpTukiTakaisinS(TUKIKOR_TAK, &LVUOSI, 1, &INF, TUKIAIKA_KOR, 0.5 * SUM(OMA_TULO, -TUKIKOR), TUKIKOR);
+	%OpTukiTakaisinS(TUKIKESK_TAK, &LVUOSI, 1, &INF, SUM(odokke, odoksy), 0.5 * SUM(OMA_TULO, -TUKIKESK), TUKIKESK);
+	%OpTukiTakaisinS(TUKIKOR_TAK, &LVUOSI, 1, &INF, SUM(odokke, odoksy), 0.5 * SUM(OMA_TULO, -TUKIKOR), TUKIKOR);
 
 	/* Ilman huoltajakorotusta */
-	%OpTukiTakaisinS(TUKIKESK_TAK_ILMHUOLT, &LVUOSI, 1, &INF, TUKIAIKA_KESK, 0.5 * SUM(OMA_TULO, -TUKIKESK_ILMHUOLT), TUKIKESK_ILMHUOLT);
-	%OpTukiTakaisinS(TUKIKOR_TAK_ILMHUOLT, &LVUOSI, 1, &INF, TUKIAIKA_KOR, 0.5 * SUM(OMA_TULO, -TUKIKOR_ILMHUOLT), TUKIKOR_ILMHUOLT);
+	%OpTukiTakaisinS(TUKIKESK_TAK_ILMHUOLT, &LVUOSI, 1, &INF, SUM(odokke, odoksy), 0.5 * SUM(OMA_TULO, -TUKIKESK_ILMHUOLT), TUKIKESK_ILMHUOLT);
+	%OpTukiTakaisinS(TUKIKOR_TAK_ILMHUOLT, &LVUOSI, 1, &INF, SUM(odokke, odoksy), 0.5 * SUM(OMA_TULO, -TUKIKOR_ILMHUOLT), TUKIKOR_ILMHUOLT);
 
 	/* Ilman oppimateriaalilisää */
-	%OpTukiTakaisinS(TUKIKESK_TAK_ILMOP, &LVUOSI, 1, &INF, TUKIAIKA_KESK, 0.5 * SUM(OMA_TULO, -TUKIKESK_ILMOP), TUKIKESK_ILMOP);
-	%OpTukiTakaisinS(TUKIKOR_TAK_ILMOP, &LVUOSI, 1, &INF, TUKIAIKA_KOR, 0.5 * SUM(OMA_TULO, -TUKIKOR_ILMOP), TUKIKOR_ILMOP);
+	%OpTukiTakaisinS(TUKIKESK_TAK_ILMOP, &LVUOSI, 1, &INF, SUM(odokke, odoksy), 0.5 * SUM(OMA_TULO, -TUKIKESK_ILMOP), TUKIKESK_ILMOP);
+	%OpTukiTakaisinS(TUKIKOR_TAK_ILMOP, &LVUOSI, 1, &INF, SUM(odokke, odoksy), 0.5 * SUM(OMA_TULO, -TUKIKOR_ILMOP), TUKIKOR_ILMOP);
 
 	/* Ilman huoltajakorotusta ja oppimateriaalilisää */
-	%OpTukiTakaisinS(TUKIKESK_TAK_ILMHUOLTOP, &LVUOSI, 1, &INF, TUKIAIKA_KESK, 0.5 * SUM(OMA_TULO, -TUKIKESK_ILMHUOLTOP), TUKIKESK_ILMHUOLTOP);
-	%OpTukiTakaisinS(TUKIKOR_TAK_ILMHUOLTOP, &LVUOSI, 1, &INF, TUKIAIKA_KOR, 0.5 * SUM(OMA_TULO, -TUKIKOR_ILMHUOLTOP), TUKIKOR_ILMHUOLTOP);
+	%OpTukiTakaisinS(TUKIKESK_TAK_ILMHUOLTOP, &LVUOSI, 1, &INF, SUM(odokke, odoksy), 0.5 * SUM(OMA_TULO, -TUKIKESK_ILMHUOLTOP), TUKIKESK_ILMHUOLTOP);
+	%OpTukiTakaisinS(TUKIKOR_TAK_ILMHUOLTOP, &LVUOSI, 1, &INF, SUM(odokke, odoksy), 0.5 * SUM(OMA_TULO, -TUKIKOR_ILMHUOLTOP), TUKIKOR_ILMHUOLTOP);
 
 	%OpTukiTakaisinS(ASUMLISA_TAK, &LVUOSI, 1, &INF, sum(odoksy, odokke), 0.5 * SUM(OMA_TULO, -TUKIKOR, -TUKIKESK), ASUMLISA);
 
@@ -525,20 +383,20 @@ END;
 ELSE DO;
 
 	/* Mahdollisen huoltajakorotuksen ja oppimateriaalilisän kanssa */
-	%OpTukiTakaisinS(TUKIKESK_TAK, &LVUOSI, 1, &INF, TUKIAIKA_KESK, SUM(OMA_TULO, -TUKIKESK), TUKIKESK);
-	%OpTukiTakaisinS(TUKIKOR_TAK, &LVUOSI, 1, &INF, TUKIAIKA_KOR, SUM(OMA_TULO, -TUKIKOR), TUKIKOR);
+	%OpTukiTakaisinS(TUKIKESK_TAK, &LVUOSI, 1, &INF, SUM(odokke, odoksy), SUM(OMA_TULO, -TUKIKESK), TUKIKESK);
+	%OpTukiTakaisinS(TUKIKOR_TAK, &LVUOSI, 1, &INF, SUM(odokke, odoksy), SUM(OMA_TULO, -TUKIKOR), TUKIKOR);
 
 	/* Ilman huoltajakorotusta */
-	%OpTukiTakaisinS(TUKIKESK_TAK_ILMHUOLT, &LVUOSI, 1, &INF, TUKIAIKA_KESK, SUM(OMA_TULO, -TUKIKESK_ILMHUOLT), TUKIKESK_ILMHUOLT);
-	%OpTukiTakaisinS(TUKIKOR_TAK_ILMHUOLT, &LVUOSI, 1, &INF, TUKIAIKA_KOR, SUM(OMA_TULO, -TUKIKOR_ILMHUOLT), TUKIKOR_ILMHUOLT);
+	%OpTukiTakaisinS(TUKIKESK_TAK_ILMHUOLT, &LVUOSI, 1, &INF, SUM(odokke, odoksy), SUM(OMA_TULO, -TUKIKESK_ILMHUOLT), TUKIKESK_ILMHUOLT);
+	%OpTukiTakaisinS(TUKIKOR_TAK_ILMHUOLT, &LVUOSI, 1, &INF, SUM(odokke, odoksy), SUM(OMA_TULO, -TUKIKOR_ILMHUOLT), TUKIKOR_ILMHUOLT);
 
 	/* Ilman oppimateriaalilisää */
-	%OpTukiTakaisinS(TUKIKESK_TAK_ILMOP, &LVUOSI, 1, &INF, TUKIAIKA_KESK, SUM(OMA_TULO, -TUKIKESK_ILMOP), TUKIKESK_ILMOP);
-	%OpTukiTakaisinS(TUKIKOR_TAK_ILMOP, &LVUOSI, 1, &INF, TUKIAIKA_KOR, SUM(OMA_TULO, -TUKIKOR_ILMOP), TUKIKOR_ILMOP);
+	%OpTukiTakaisinS(TUKIKESK_TAK_ILMOP, &LVUOSI, 1, &INF, SUM(odokke, odoksy), SUM(OMA_TULO, -TUKIKESK_ILMOP), TUKIKESK_ILMOP);
+	%OpTukiTakaisinS(TUKIKOR_TAK_ILMOP, &LVUOSI, 1, &INF, SUM(odokke, odoksy), SUM(OMA_TULO, -TUKIKOR_ILMOP), TUKIKOR_ILMOP);
 
 	/* Ilman huoltajakorotusta ja oppimateriaalilisää */
-	%OpTukiTakaisinS(TUKIKESK_TAK_ILMHUOLTOP, &LVUOSI, 1, &INF, TUKIAIKA_KESK, SUM(OMA_TULO, -TUKIKESK_ILMHUOLTOP), TUKIKESK_ILMHUOLTOP);
-	%OpTukiTakaisinS(TUKIKOR_TAK_ILMHUOLTOP, &LVUOSI, 1, &INF, TUKIAIKA_KOR, SUM(OMA_TULO, -TUKIKOR_ILMHUOLTOP), TUKIKOR_ILMHUOLTOP);
+	%OpTukiTakaisinS(TUKIKESK_TAK_ILMHUOLTOP, &LVUOSI, 1, &INF, SUM(odokke, odoksy), SUM(OMA_TULO, -TUKIKESK_ILMHUOLTOP), TUKIKESK_ILMHUOLTOP);
+	%OpTukiTakaisinS(TUKIKOR_TAK_ILMHUOLTOP, &LVUOSI, 1, &INF, SUM(odokke, odoksy), SUM(OMA_TULO, -TUKIKOR_ILMHUOLTOP), TUKIKOR_ILMHUOLTOP);
 
 	%OpTukiTakaisinS(ASUMLISA_TAK, &LVUOSI, 1, &INF, sum(odoksy, odokke), SUM(OMA_TULO, -TUKIKOR, -TUKIKESK), ASUMLISA);
 
@@ -546,7 +404,7 @@ END;
 
 * Vähennetään opintotuen takaisinperintä (keskiaste) ; 
 
-IF (sum(odorsyke, odorkeke) > 0 AND TAYSIM_KESK NE 1) THEN DO;
+IF TUKIKESK > 0 THEN DO;
 	/* Mahdollisen huoltajakorotuksen kanssa */
 	TUKIKESK = SUM(TUKIKESK, -TUKIKESK_TAK);
 	/* Ilman huoltajakorotusta */
@@ -559,7 +417,7 @@ END;
 
 * Vähennetään opintotuen takaisinperintä (korkea-aste) ; 
 
-IF(sum(odorsyko, odorkeko) > 0 AND TAYSIM_KOR NE 1) THEN DO;
+IF TUKIKOR > 0 THEN DO;
 	/* Mahdollisen huoltajakorotuksen kanssa */
 	TUKIKOR = SUM(TUKIKOR, -TUKIKOR_TAK);
 	/* Ilman huoltajakorotusta */

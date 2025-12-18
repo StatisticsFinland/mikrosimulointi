@@ -246,11 +246,11 @@ DES = "ASUMMENOMAKS: Asumismenojen kuntakohtaisten rajojen soveltaminen";
 	create table TEMP.TEMP_TOIMTUKI_KOTI1 as
 	select a.*, 
 		case
-			when a.jasenia=1 then (b.yksi_henkilo + &HuomVesi * jasenia)
-			when a.jasenia=2 then (b.kaksi_henkiloa + &HuomVesi * jasenia)
-			when a.jasenia=3 then (b.kolme_henkiloa + &HuomVesi * jasenia)
-			when a.jasenia=4 then (b.nelja_henkiloa + &HuomVesi * jasenia)
-			when a.jasenia>4 then (b.nelja_henkiloa + (b.lisa_henkilo * (a.jasenia-4)) + (&HuomVesi * a.jasenia))
+			when a.jasenia=1 then (b.yksi_henkilo * &minf + &HuomVesi * jasenia)
+			when a.jasenia=2 then (b.kaksi_henkiloa * &minf + &HuomVesi * jasenia)
+			when a.jasenia=3 then (b.kolme_henkiloa * &minf + &HuomVesi * jasenia)
+			when a.jasenia=4 then (b.nelja_henkiloa * &minf + &HuomVesi * jasenia)
+			when a.jasenia>4 then (b.nelja_henkiloa * &minf + (b.lisa_henkilo * (a.jasenia-4)) + (&HuomVesi * a.jasenia))
 		end as ASUMNORMIT
 	from TEMP.TEMP_TOIMTUKI_KOTI1 a
 	left join PARAM.asummenorajat_&mvuosi. b on a.kuntakoodi=b.koodi 
@@ -283,11 +283,8 @@ DES = "ASUMMENOMAKS: Asumismenojen kuntakohtaisten rajojen soveltaminen";
 		data TEMP.TEMP_TOIMTUKI_KOTI1; 
 		set TEMP.TEMP_TOIMTUKI_KOTI1;
 		IF 
-			/*Poikkeuksena lapsiperheet*/
-			elivtu not in (20,40,50,60,70,82,84)
-
 			/*Kela ei sovella enää 5 %:n joustoa*/
-			AND ASUMISKULUT_KKS > ASUMNORMIT
+			ASUMISKULUT_KKS > ASUMNORMIT
 
 			/*Vuodesta 2024 lähtien lakiin on kirjattu toimeentulotuen asumiskustannusten osalta, että määräaika
 			  asumisnormien soveltamiseen on 3 kuukautta */			

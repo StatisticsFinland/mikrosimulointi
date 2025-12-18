@@ -1,4 +1,5 @@
 # Mikrosimulointi
+
 Tilastokeskus kehittää, ylläpitää ja jakaa Suomen henkilövero- ja sosiaaliturvajärjestelmää mallintavaa SISU-mikrosimulointimallia. SISU-malli on henkilöverotuksen ja sosiaaliturvalainsäädännön suunnitteluun, seurantaan ja arvioimiseen tarkoitettu laskentaväline.
 
 Lisätietoja mallin käyttöönotosta [Tilastokeskuksen sivuilla](https://stat.fi/tup/mikrosimulointi/index.html).
@@ -7,9 +8,9 @@ Mallin tarkempi sisältö kuvattu mallin [käyttöoppaassa](https://stat.fi/medi
 
 ### SISU-mikrosimulointimallin lataus
 
-SISU-mallin koodi on ladattavissa avoimena datana. Mallikoodi on lisensoitu ns. kolmepykäläisellä BSD-lisenssillä, joten koodia voi muokata, käyttää ja jakaa vapaasti. Varsinainen lisenssiteksti löytyy mallin latauskansiosta. Mallin voi ladata "tags"-osiosta:
-1. Mene osioon klikkaamalla tags-painiketta.
-2. Lataa haluamasi malliversio zip-tiedostona klikkaamalla zip-painiketta.
+SISU-mallin koodi on ladattavissa avoimena datana. Mallikoodi on lisensoitu ns. kolmepykäläisellä BSD-lisenssillä, joten koodia voi muokata, käyttää ja jakaa vapaasti. Varsinainen lisenssiteksti löytyy mallin latauskansiosta. Mallin voi ladata `Releases`-osiosta:
+1. Mene osioon klikkaamalla `Releases`-painiketta.
+2. Lataa haluamasi malliversio zip-tiedostona klikkaamalla `Source code (zip)`-painiketta. Nämä löytyvät kunkin malliversion `Assets`-kohdasta.
 
 Ladattavalla versiolla on mahdollista tehdä laskelmia erityyppisille esimerkkikotitalouksille.
 

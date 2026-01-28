@@ -1,7 +1,6 @@
 /************************************************************
 * Kuvaus: Tyˆttˆmyysturvan simulointimalli 					*
 ************************************************************/ 
-
 /* 0. Yleisi‰ vakioiden m‰‰rittelyj‰ (‰l‰ muuta n‰it‰!) */
 %TuhoaGlobaalit;
 
@@ -73,7 +72,7 @@
 	* Tulostaulukoiden esivalinnat ; 
 
 	%LET TULOSLAAJ = 1 ; 	 * Mikrotason tulosaineiston laajuus (1 = suppea, 2 = laaja (palveluaineisto)) ;
-	%LET MUUTTUJAT = TMTUKIDAT YHTTMTUKI YPITOKDAT YPITOK PERPRDAT PERUSPR VVVMKQ ANSIOPR 
+	%LET MUUTTUJAT = TMTUKIDAT YHTTMTUKI PERPRDAT PERUSPR VVVMKQ ANSIOPR YLEISTUKI YPITOKDAT YPITOK
 			         vvvmk3 VUORKORV VVVPVTQ VVVPVTQ_SIMUL dtpalkmt TMTUKIPV_SIMUL; * Taulukoitavat muuttujat (summataulukot) ;
 	%LET YKSIKKO = 1;		 * Tulostaulukoiden yksikkˆ (1 = henkilˆ, 2 = kotitalous) ;
 	%LET LUOK_HLO1 = ; * Taulukoinnin 1. henkilˆluokitus (jos YKSIKKO = 1)
@@ -135,20 +134,13 @@
 
 %Aloitus;
 
-
 %MACRO TTURVA_Varoitukset;
-
 	%IF &APKESTOSIMUL = 1 OR &VKKESTOSIMUL = 1 %THEN %DO;
-
 		%PUT WARNING: TTURVA-mallissa on keston mallinnus p‰‰ll‰. Suhtauduthan saataviin tuloksiin varovaisesti, %CMPRES(
 						) sill‰ keston mallinnuksessa on havaittu ep‰selvyyksi‰.;
-
 	%END;
-
 %MEND TTURVA_Varoitukset;
-
 %TTURVA_Varoitukset;
-
 
 /* 2. Datan poiminta ja apumuuttujien luominen (optio) */
 
@@ -465,7 +457,7 @@ IF VVVPVTQ > 0 THEN DO;
 	DROP SOVAPR TAYSAPR SOVKORPR5 TAYSKORPR5 SOVKORPR1 TAYSKORPR1;
 END;
 
-/* 3.1.3. Tyˆmarkkinatuen simulointi */
+/* 3.1.3. Tyˆmarkkinatuen simulointi (voimassa 4/2026 asti) */
 TMTUKIPV_SIMUL = SUM(PELKKOR, KORVAH, SOVKOR, SOVKORVAH, TAYSTARV, TAYSOS, SOVTARV, SOVOS, SOVPELK, SOVVAH, PELKVAH, dttayspv);
 
 IF TMTUKIPV_SIMUL > 0 THEN DO;
@@ -576,7 +568,7 @@ IF TMTUKIPV_SIMUL > 0 THEN DO;
 END;
 
 
-/* 3.1.4. Perusp‰iv‰raha */
+/* 3.1.4. Perusp‰iv‰raha (voimassa 4/2026 asti) */
 
 IF dtpalkmp > 0 THEN DO;
 	%PerusPRahaVS(PERUSPR, &LVUOSI, &INF, 0, 0, 0, LAPSKORMAKS, 0, 0, 0);
@@ -594,7 +586,7 @@ IF dtpalkmp > 0 THEN DO;
 			IF SOVPELKP > 0 THEN DO; %SoviteltuVS(SOVPERUSPR, &LVUOSI, &INF, 0, 0, LAPSKORMAKS, PERUSPR, SOVPALKKAPR, 0, 0); END;
 			IF SOVKORPA > 0 THEN DO; %SoviteltuVS(SOVKPERUSPRA, &LVUOSI, &INF, 0, 0, LAPSKORMAKS, PERKORPRA, SOVPALKKAPR, 0, 0); END;
 		END;
-		*Sovitellaan ensi perusosa. Jos j‰‰ soviteltavaa niin sitten vasta korotusosa;
+		* Sovitellaan ensi perusosa. Jos j‰‰ soviteltavaa niin sitten vasta korotusosa;
 		IF 0 < SOVKPERUSPRA < &KorotusOsa * &TTPaivia THEN PERILMAKOR = SOVKPERUSPRA; 
 		ELSE IF SOVKORPA > 0 THEN PERILMAKOR = SOVKPERUSPRA - &KorotusOsa * &TTPaivia;
 	END;
@@ -603,7 +595,91 @@ IF dtpalkmp > 0 THEN DO;
 
 END;
 
-/* 3.1.5. Kulukorvaukset */
+/* 3.1.5. Yleistuki (voimassa alkaen 5/2026, simuloidaan tyˆmarkkinatuki- ja perusp‰iv‰rahap‰ivien perusteella) */
+IF TMTUKIPV_SIMUL OR dtpalkmp THEN DO;
+
+	* Yleistuki: simuloitu t‰ysille tyˆmarkkinatuki- ja perusp‰iv‰rahap‰iville;
+	IF dttayspv OR koropvpkw OR TAYSPVP OR PELKKOR THEN DO;
+		%YleistukiVS(TAYSYLEISTUKI_EUR, &LVUOSI, &INF, 1, 1, 0, 0, 0, 0);
+		TAYSYLEISTUKI = SUM(dttayspv, koropvpkw, TAYSPVP, PELKKOR) * TAYSYLEISTUKI_EUR / &TTPaivia;
+	END;
+
+	* Yleistuki: simuloitu tarveharkintaisen tyˆmarkkinatukip‰iville;
+	IF TAYSTARV OR SOVTARV THEN DO;
+		IF &TTDATATULO NE 0 THEN DO;
+			%YleistukiVS(TARVYLEISTUKI, &LVUOSI, &INF, 0, 1, 0, dtomapal, 0, 0);
+			IF SOVTARV > 0 THEN DO; %SoviteltuVS(SOVTARVYLEISTUKI, &LVUOSI, &INF, 0, 0, 0, TARVYLEISTUKI, dttspalk, 0, 0); END;
+		END;
+		ELSE DO;
+			%YleistukiVS(TARVYLEISTUKI, &LVUOSI, &INF, 0, 1, 0, DTOMAPALX2, 0, 0);
+			IF SOVTARV > 0 THEN DO; %SoviteltuVS(SOVTARVYLEISTUKI, &LVUOSI, &INF, 0, 0, 0, TARVYLEISTUKI, SOVPALKKATM, 0, 0); END;
+		END;
+	
+		TARVYLEISTUKI = SUM(TAYSTARV * TARVYLEISTUKI, SOVTARV * SOVTARVYLEISTUKI) / &TTPaivia;
+		DROP SOVTARVYLEISTUKI;
+	END;
+
+	* Yleistuki: simuloitu osittaisena maksetuille tyˆmarkkinatukip‰iville;
+	IF TAYSOS OR SOVOS THEN DO;
+		IF &TTDATATULO NE 0 THEN DO;
+			%YleistukiVS(OSYLEISTUKI, &LVUOSI, &INF, 1, 0, dtovlkm, 0, MAX(SUM(dtopalkk, -vanh_omaishoitohp), 0), 0);
+			IF SOVOS > 0 THEN DO; %SoviteltuVS(SOVOSYLEISTUKI, &LVUOSI, &INF, 0, 0, 0, OSYLEISTUKI, dttspalk, 0, 0); END;
+		END;
+		ELSE DO;
+			%YleistukiVS(OSYLEISTUKI, &LVUOSI, &INF, 1, 0, dtovlkm, 0, MAX(SUM(dtopalkk, -vanh_omaishoitohp), 0), 0);
+			IF SOVOS > 0 THEN DO; %SoviteltuVS(SOVOSYLEISTUKI, &LVUOSI, &INF, 0, 0, 0, OSYLEISTUKI, SOVPALKKATM, 0, 0); END;
+		END;
+	
+		OSYLEISTUKI = SUM(TAYSOS * OSYLEISTUKI, SOVOS * SOVOSYLEISTUKI) / &TTPaivia;
+		DROP SOVOSYLEISTUKI;
+	END;
+
+	* Yleistuki: simuloitu tyˆmarkkinatukip‰iville, joista on v‰hennetty muut sosiaalietuudet;
+	IF PELKVAH OR SOVVAH OR KORVAH THEN DO; 
+		%YleistukiVS(VAHYLEISTUKI, &LVUOSI, &INF, 1, 1, 0, 0, 0, SOSETUVAH); 
+	
+		IF SOVVAH > 0 THEN DO;
+			%SoviteltuVS(SVAHYLEISTUKI, &LVUOSI, &INF, 0, 0, 0, VAHYLEISTUKI, dttspalk, 0, 0);
+		END;
+
+		VAHYLEISTUKI = SUM(VAHYLEISTUKI * SUM(PELKVAH, KORVAH), SVAHYLEISTUKI * SOVVAH) / &TTPaivia;
+		DROP SVAHYLEISTUKI;
+	END;
+
+	* Yleistuki: simuloitu sovitelluille tyˆmarkkinatukip‰iville;
+	IF SOVPELK OR SOVKOR OR SOVKORVAH THEN DO;
+		%YleistukiVS(TAYSYLEISTUKI_EUR, &LVUOSI, &INF, 1, 1, 0, 0, 0, 0); 
+
+		IF &TTDATATULO NE 0 THEN DO;
+			%SoviteltuVS(SOVYLEISTUKI, &LVUOSI, &INF, 0, 0, dttllkm, TAYSYLEISTUKI_EUR, dttspalk, 0, 0);
+		END;
+		ELSE DO;
+			%SoviteltuVS(SOVYLEISTUKI, &LVUOSI, &INF, 0, 0, dttllkm, TAYSYLEISTUKI_EUR, SOVPALKKATM, 0, 0);
+		END;
+	
+		SOVYLEISTUKI_1 = SUM(SOVPELK, SOVKOR, SOVKORVAH) * SOVYLEISTUKI / &TTPaivia;
+	
+	END;
+
+	* Yleistuki: simuloitu sovitelluille perusp‰iv‰rahap‰iville;
+	IF SOVPELKP > 0 THEN DO;
+		%YleistukiVS(TAYSYLEISTUKI_EUR, &LVUOSI, &INF, 1, 1, 0, 0, 0, 0); 
+
+		IF &TTDATATULO NE 0 THEN DO; 
+			%SoviteltuVS(SOVYLEISTUKI, &LVUOSI, &INF, 0, 0, 0, TAYSYLEISTUKI_EUR, dtpspalk, 0, 0); 
+		END;
+		ELSE DO;
+			%SoviteltuVS(SOVYLEISTUKI, &LVUOSI, &INF, 0, 0, 0, TAYSYLEISTUKI_EUR, SOVPALKKAPR, 0, 0); 
+		END;
+
+		SOVYLEISTUKI_2 = SOVPELKP * SOVYLEISTUKI / &TTPaivia;
+	END;
+
+	YLEISTUKI = SUM(TAYSYLEISTUKI, TARVYLEISTUKI, OSYLEISTUKI, VAHYLEISTUKI, SOVYLEISTUKI_1, SOVYLEISTUKI_2);
+
+END;
+
+/* 3.1.6. Kulukorvaukset */
 
 IF dtyllapv > 0 OR dtyllapvp > 0 OR ypkotipvt > 0 THEN DO;
 	IF YPITOKORPV > 0 THEN DO;
@@ -616,7 +692,7 @@ IF dtyllapv > 0 OR dtyllapvp > 0 OR ypkotipvt > 0 THEN DO;
 END;
 
 
-/* 3.1.6. Ansiosidonnaiset vuorottelukorvaukset */
+/* 3.1.7. Ansiosidonnaiset vuorottelukorvaukset */
 
 IF vvvpvt3 > 0 THEN DO;
 	IF &TTDATATULO = 0 THEN PALKKA3 = LASKPALKKA3; 
@@ -643,7 +719,7 @@ END;
 ARRAY PISTE 
 TMTUKIDAT YHTTMTUKI TMTUKILMKOR YPITOK 
 PERPRDAT PERUSPR PERILMAKOR VVVMKQ ANSIOPR ANSIOILMKOR VUORKORV
-VVVPVTQ VVVPVTQ_SIMUL dtpalkmt TMTUKIPV_SIMUL;
+VVVPVTQ VVVPVTQ_SIMUL dtpalkmt TMTUKIPV_SIMUL YLEISTUKI;
 DO OVER PISTE;
 	IF PISTE <= 0 THEN PISTE = .;
 END;
@@ -660,10 +736,12 @@ ANSIOPR = 'Ansiop‰iv‰raha, MALLI'
 ANSIOILMKOR = 'Ansiop‰iv‰raha ilman aktiiviajan korotusosia, MALLI'
 VUORKORV = 'Vuorottelukorvaukset, MALLI'
 VVVPVTQ_SIMUL = 'Maksetut ansiop‰iv‰rahap‰iv‰t, MALLI'
-TMTUKIPV_SIMUL = 'Tyˆmarkkinatuen p‰ivien lkm, MALLI';
+TMTUKIPV_SIMUL = 'Tyˆmarkkinatuen p‰ivien lkm, MALLI'
+YLEISTUKI = 'Yleistuki, MALLI'
+;
 
 KEEP hnro knro TMTUKIDAT YHTTMTUKI TMTUKILMKOR YPITOK 
-PERPRDAT PERUSPR PERILMAKOR VVVMKQ ANSIOPR ANSIOILMKOR VUORKORV
+PERPRDAT PERUSPR PERILMAKOR VVVMKQ ANSIOPR YLEISTUKI ANSIOILMKOR VUORKORV
 VVVPVTQ_SIMUL dtpalkmt TMTUKIPV_SIMUL;
 
 RUN;

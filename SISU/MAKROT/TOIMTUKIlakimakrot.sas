@@ -83,7 +83,7 @@ DES = "TOIMTUKI: Alaikäisten lasten osuus desimaalilukuna toimeentulotuen peruso
 		tulonhank: Perheen jokaisen jäsenen tulonhankkimiskulut kerättynä vektoriin (ARRAY), e/kk */ 
 
 %MACRO ToimTukiKS(tulos, mvuosi, mkuuk, minf, kryhma, ydinp, aik, aiklapsia, lapsia17,
-lapsia10_16, lapsiaalle10, lapsilisat, tyotulo, muuttulot, asmenot, harkmenot, tulonhank) /
+lapsia10_16, lapsiaalle10, lapsilisat, tyotulo, muuttulot, asmenot, harkmenot, tulonhank, ika) /
 DES = "TOIMTUKI: Toimeentulotuki kuukaudessa";
 
 	%HaeParam&TYYPPI(&mvuosi, &mkuuk, &TOIMTUKI_PARAM, PARAM.&PTOIMTUKI); 
@@ -153,6 +153,10 @@ DES = "TOIMTUKI: Toimeentulotuki kuukaudessa";
 				vapaatulo = SUM(&tyotulo{i}, &tulonhank{i});
 			END;	
 			IF vapaatulo > &VapaaOsRaja THEN vapaatulo = &VapaaOsRaja;
+
+			IF kuuid >= MDY(3, 1, 2026) THEN DO;
+				IF &ika{i} >= 18 THEN vapaatulo = 0;
+			END;
 			tyotulohuomioon = SUM(tyotulohuomioon, &tyotulo{i}, -vapaatulo);
 		END;
 	END;
@@ -203,14 +207,14 @@ DES = "TOIMTUKI: Toimeentulotuki kuukaudessa";
 		tulonhank: Perheen jokaisen jäsenen tulonhankkimiskulut kerättynä vektoriin (ARRAY), e/kk */ 
 
 %MACRO ToimTukiVS(tulos, mvuosi, minf, kryhma, ydinp, aik, aiklapsia, lapsia17,
-lapsia10_16, lapsiaalle10, lapsilisat, tyotulo, muuttulot, asmenot, harkmenot, tulonhank) /
+lapsia10_16, lapsiaalle10, lapsilisat, tyotulo, muuttulot, asmenot, harkmenot, tulonhank, ika) /
 DES = "TOIMTUKI: Toimeentulotuki vuosikeskiarvona";
 
 	ttvuosi = 0;
 
 	%DO kuuk = 1 %TO 12;
 		%ToimTukiKS(ttkk, &mvuosi, &kuuk, &minf, &kryhma, &ydinp, &aik, &aiklapsia, &lapsia17,
-		&lapsia10_16, &lapsiaalle10, &lapsilisat, &tyotulo, &muuttulot, &asmenot, &harkmenot, &tulonhank);
+		&lapsia10_16, &lapsiaalle10, &lapsilisat, &tyotulo, &muuttulot, &asmenot, &harkmenot, &tulonhank, &ika);
 		ttvuosi = SUM(ttvuosi, ttkk);
 	%END;
 

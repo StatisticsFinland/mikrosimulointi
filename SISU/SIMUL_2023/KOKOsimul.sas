@@ -132,7 +132,7 @@
 %LET TARKPVM = 1;    	* Jos tämän arvo = 1, VERO-mallissa sairausvakuutuksen päivärahamaksun
 						  laskentaa tarkennetaan käänteisellä päättelyllä ;
 %LET YRIT = 0; 			* Simuloidaanko toimeentulotuki myös yrittäjätalouksille (1 = Kyllä, 0 = Ei);
-%LET ASUMKUST_MAKS = 0; * Käytetäänkö TOIMTUKI-mallissa Kelan ohjeellisia asumiskustannusten maksimiarvoja = 1 vai eikö = 0;
+%LET ASUMKUST_MAKS = 1; * Käytetäänkö TOIMTUKI-mallissa Kelan ohjeellisia asumiskustannusten maksimiarvoja = 1 vai eikö = 0;
 %LET VARALLISUUSDATA = 0; * Käytetäänkö ASUMTUKI-, ELASUMTUKI- ja TOIMTUKI-mallissa datan varallisuustietoja (1 = Kyllä, 0 = Ei). 
 							Varallisuustiedot eivät ole kattavat, niistä puuttuvat mm. talletukset. Tämän takia oletusarvo = 0;
 %LET VARALLISUUSKATTO = 0; * Toimeentulotuen simuloinnissa käytettävä euromääräinen arvo. Jos kotitalouden varallisuuden arvo ylittää muuttujan 
@@ -310,7 +310,7 @@
 	 tsiraho tmyynt tmyynt1 fluotap tvahevas tptmuu tulkyhp ttapel tlapel ttappr tmuupr
 	 tvakpr tpotel tmuuel teanstu tmtatt kuto amstipe
 	 rsyhte hasepr hsotvkor elasa per_apuraha omakkiiv
-	 lveru elama saiprva aiprva kreurv cdmky htkapr dtyhtet vvvmk1
+	 lveru elama saiprva vkpmkyv vkpopmkyv aiprva kreurv cdmky htkapr dtyhtet vvvmk1
 	 vvvmk3 vvvmk5 tkoultuk etuki vtukia16 vtukiy16 lapsikorotus rielake ryelake lgkthr lgkthl lgktku
 	 lgos lgjhhr hkotihm odalsy odalke odmksyko odmksyke odmkkeko odmkkeke odkma verot svatvap svatpp lpvma lshma ltva ltvp lkuve lkive
 	 lelvak tnoosvvb teinovvb tuosvvap teinovv tnoosvab tuosvv einotptosva
@@ -378,7 +378,7 @@
 	
 	/* Lasketaan vertailutiedoiksi simuloitavien muuttujasummien arvoja datasta */
 
-	SAIRVAK_DATA = SUM(MAX(saiprva, 0), MAX(aiprva, 0), MAX(cdmky, 0), MAX(kreurv, 0), htkapr);
+	SAIRVAK_DATA =  SUM(MAX(vkpmkyv, 0), MAX(vkpopmkyv, 0), MAX(aiprva, 0), MAX(cdmky, 0), MAX(kreurv, 0), htkapr);
 
 	TTURVA_DATA = SUM(MAX(vvvmk1, 0), MAX(vvvmk3, 0), MAX(vvvmk5, 0),
 					MAX(dtyhtep, 0),
@@ -601,18 +601,18 @@
 		/* Sairausvakuutus */
 		%IF &SAIRVAK = 1 %THEN %DO;
 			TEMP.&TULOSNIMI_SV
-			(KEEP = hnro SAIRPR VANHPR KURAPR SAIRPR_TYONANT VANHPR_TYONANT KURAPR_TYONANT ERITHOITR)
+			(KEEP = hnro SAIRPR SAIROSPR VANHPR KURAPR SAIRPR_TYONANT SAIROSPR_TYONANT VANHPR_TYONANT KURAPR_TYONANT ERITHOITR)
 		%END;
 
 		/* Työttömyysturva */
 		%IF &TTURVA = 1 %THEN %DO;
 			TEMP.&TULOSNIMI_TT
-			(KEEP = hnro YHTTMTUKI TMTUKILMKOR PERILMAKOR PERUSPR ANSIOPR ANSIOILMKOR VUORKORV YPITOK)
+			(KEEP = hnro YHTTMTUKI TMTUKILMKOR PERILMAKOR PERUSPR ANSIOPR ANSIOILMKOR VUORKORV YPITOK YLEISTUKI)
 		%END;
 
 		%IF &TTURVA = 2 %THEN %DO;
 			TEMP.&TULOSNIMI_TT
-			(KEEP = hnro YHTTMTUKI TMTUKILMKOR PERILMAKOR PERUSPR ANSIOPR ANSIOILMKOR VUORKORV_DATA)
+			(KEEP = hnro YHTTMTUKI TMTUKILMKOR PERILMAKOR PERUSPR ANSIOPR ANSIOILMKOR VUORKORV_DATA YLEISTUKI)
 		%END;
 
 		/* Kansaneläke */
@@ -701,7 +701,7 @@ SET STARTDAT.START_KOKO;
 	SAIRVAK_SIMUL = SAIRVAK_DATA;
 %END;
 %ELSE %DO;
-	SAIRVAK_SIMUL = SUM(SAIRPR, VANHPR, ERITHOITR, KURAPR, htkapr);
+	SAIRVAK_SIMUL = SUM(SAIRPR, SAIROSPR, VANHPR, ERITHOITR, KURAPR, htkapr);
 %END;
 
 /* Työttömyysturvan päivärahat */
@@ -710,10 +710,10 @@ SET STARTDAT.START_KOKO;
 	TTURVA_SIMUL = TTURVA_DATA;
 %END;
 %ELSE %IF &TTURVA = 2 %THEN %DO;
-	TTURVA_SIMUL = SUM(YHTTMTUKI, PERUSPR, ANSIOPR, IFN(&LVUOSI <= 2024, VUORKORV_DATA, 0));
+	TTURVA_SIMUL = SUM(YHTTMTUKI, PERUSPR, ANSIOPR, YLEISTUKI, IFN(&LVUOSI <= 2024, VUORKORV_DATA, 0));
 %END;
 %ELSE %DO;
-	TTURVA_SIMUL = SUM(YHTTMTUKI, PERUSPR, ANSIOPR, VUORKORV);
+	TTURVA_SIMUL = SUM(YHTTMTUKI, PERUSPR, ANSIOPR, YLEISTUKI, VUORKORV);
 %END;
 
 /* Kansaneläkkeet ym. */

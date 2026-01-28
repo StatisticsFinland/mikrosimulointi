@@ -29,7 +29,7 @@
   - Ansiotasoindeksiin (ansio64) perustuva inflaatiokorjaus: INF = ATI ;
 
 %LET INF = 1.00; * Syötä lukuarvo, KHI tai ATI;
-%LET AVUOSI = 2025; * Perusvuosi inflaatiokorjausta varten ;
+%LET AVUOSI = 2026; * Perusvuosi inflaatiokorjausta varten ;
 %LET PINDEKSI_VUOSI = pindeksi_vuosi; * Käytettävä indeksien parametritaulukko ;
 
 * Käytettävien tiedostojen nimet; 
@@ -79,8 +79,8 @@
 /* 3.1 Fiktiivinen data */
 
 * Lainsäädäntövuosi (1990-);
-%LET MINIMI_ASUMTUKI_VUOSI = 2025;
-%LET MAKSIMI_ASUMTUKI_VUOSI = 2025;
+%LET MINIMI_ASUMTUKI_VUOSI = 2026;
+%LET MAKSIMI_ASUMTUKI_VUOSI = 2026;
 
 /* UUSI lainsäädäntövuodesta 2015 lähtien */
 * Lainsäädäntökuukausi (1-12); 

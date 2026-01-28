@@ -40,7 +40,7 @@
 
 	%LET AINEISTO = REK;	* Käytettävä aineisto (PALV = Palveluaineisto, REK = Rekisteriaineisto) ;
 
-	%LET TULOSNIMI_SV = sairvak_simul_&SYSDATE._1 ; * Simuloidun tulostiedoston nimi ;
+	%LET TULOSNIMI_SV = sairvak_simul_&SYSDATE._1; * Simuloidun tulostiedoston nimi ;
 
 	%LET SDATATULO = 0;  * Käytetäänkö SAIRVAK-mallissa datan tulotietoja = 1 vai laskennallisia tulotietoja = 0. 
 					       Jos 1, niin käytetään datan tulotietoja TULOSRT_PALKVAH ja TULOPRT_PALKVAH, muuten
@@ -71,7 +71,7 @@
 	* Tulostaulukoiden esivalinnat ; 
 
 	%LET TULOSLAAJ = 1 ; 	 * Mikrotason tulosaineiston laajuus (1 = suppea, 2 = laaja (kaikki pohja-aineiston muuttujat)) ;
-	%LET MUUTTUJAT = saiprva SAIRPR aiprva VANHPR kreurv KURAPR vkpmkyt SAIRPR_TYONANT vkamkyt VANHPR_TYONANT cdmky ERITHOITR kreurt KURAPR_TYONANT; * Taulukoitavat muuttujat (summataulukot) ;
+	%LET MUUTTUJAT = vkpmkyv SAIRPR aiprva VANHPR kreurv KURAPR vkpopmkyv SAIROSPR vkpmkyt SAIRPR_TYONANT vkpopmkyt SAIROSPR_TYONANT vkamkyt VANHPR_TYONANT cdmky ERITHOITR kreurt KURAPR_TYONANT; * Taulukoitavat muuttujat (summataulukot) ;
 	%LET YKSIKKO = 1;		 * Tulostaulukoiden yksikkö (1 = henkilö, 2 = kotitalous) ;
 	%LET LUOK_HLO1 = ; * Taulukoinnin 1. henkilöluokitus (jos YKSIKKO = 1)
 							   Vaihtoehtoina: 
@@ -143,23 +143,26 @@
 
 	DATA STARTDAT.START_SAIRVAK;
 	SET POHJADAT.&AINEISTO&AVUOSI
-	(KEEP = hnro knro vkppv vkppvt TULOSRT_PALKVAH TULOPRT_PALKVAH aiprva saiprva vkpmkyt vkamkyt cdmky cdpv
-	muuperu aivpvkt aivpvt2 aivpvk aivpv2 aivpv1 aivpvt1 kreur krpv kreurt kreurv krpvt
+	(KEEP = hnro knro ikavu vkppv vkppvt TULOSRT_PALKVAH TULOPRT_PALKVAH aiprva vkpmkyv vkpmkyt vkamkyt cdmky cdpv
+	muuperu aivpvkt aivpvt2 aivpvk aivpv2 aivpv1 aivpvt1 kreur krpv kreurt kreurv krpvt vkpoppv vkpoppvt vkpopmky vkpopmkyv vkpopmkyt vkpypmky vkpyppv
 
 	SAIR_PVX KURA_PVX SAIR_PER_PV VANH_PER_PV KURA_PER_PV SAIR_TULO VANH_TULO KURA_TULO SAIR_PV_TYONANT
-	VANH_PV_TYONANT KURA_PV_TYONANT SAIRTULO_TYONANT VANHTULO_TYONANT KURATULO_TYONANT ERITHOIT_PER_PV ERITHOIT_TULO ANSPALKKA ikavu);
+	VANH_PV_TYONANT KURA_PV_TYONANT SAIRTULO_TYONANT VANHTULO_TYONANT KURATULO_TYONANT ERITHOIT_PER_PV ERITHOIT_TULO ANSPALKKA
+	SAIROS_PVX SAIROS_PER_PV SAIROS_PV_TYONANT);
 
 	WHERE vkppv > 0 OR vkppvt > 0 OR TULOSRT_PALKVAH > 0 OR TULOPRT_PALKVAH > 0 OR aiprva > 0
-	OR saiprva > 0 OR vkamkyt > 0 OR cdmky > 0 OR cdpv > 0 OR krpv > 0 OR kreur > 0;
-
+	OR vkpmkyv > 0 OR vkamkyt > 0 OR cdmky > 0 OR cdpv > 0 OR krpv > 0 OR kreur > 0 OR vkpopmky > 0 OR vkpoppv > 0 OR vkpyppv > 0 ;
 
 	LABEL 
 	SAIR_PVX = 'Vakuutetun sairauspäivärahapäivät, DATA'
+	SAIROS_PVX = 'Vakuutetun osasairauspäivärahapäivät, DATA'
 	SAIR_PER_PV = 'Vakuutetun sairauspäivärahat päivää kohden, DATA'
+	SAIROS_PER_PV = 'Vakuutetun osasairauspäivärahat päivää kohden, DATA'
 	VANH_PER_PV = 'Vakuutetun vanhempainpäivärahat päivää kohden, DATA'
 	SAIR_TULO = 'Laskennallinen vakuutetun sairauspäivärahan perusteena oleva tulo (e/v), DATA'
 	VANH_TULO = 'Laskennallinen vakuutetun vanhemnpainpäivärahan perusteena oleva tulo (e/v), DATA'
 	SAIR_PV_TYONANT = 'Työnantajalle maksettu sairauspäiväraha päivää kohden, DATA'
+	SAIROS_PV_TYONANT = 'Työnantajalle maksettu osasairauspäiväraha päivää kohden, DATA'
 	VANH_PV_TYONANT = 'Työnantajalle maksettu vanhempainpäiväraha päivää kohden, DATA'
 	SAIRTULO_TYONANT = 'Laskennallinen työnantajalle maksettavan sairauspäivärahan perusteena oleva tulo (e/v), DATA'
 	VANHTULO_TYONANT = 'Laskennallinen työnantajalle maksettavanvanhemnpainpäivärahan perusteena oleva tulo (e/v), DATA'
@@ -208,50 +211,50 @@
 %KuukSimul(TTURVA);
 
 /* Varsinainen simulointivaihe */
-
 DATA TEMP.&TULOSNIMI_SV;
 SET STARTDAT.START_SAIRVAK;
 
+
 /* 3.1 Päivärahojen simulointi */
-
 /* 3.1.1 Sairauspäivärahat */
-
 /* Simulointi laskennallisilla tulotiedoilla */
 IF &SDATATULO NE 1 OR TULOSRT_PALKVAH = 0 THEN DO;
-	%SairVakPRahaVS(SAIRPR, &LVUOSI, &INF, 0, 0, SAIR_TULO);
-	%SairVakPRahaVS(SAIRPR_TYONANT, &LVUOSI, &INF, 0, 0, SAIRTULO_TYONANT);
+	%SairVakPRahaVS(SAIRPRX, &LVUOSI, &INF, 0, 0, ikavu, SAIR_TULO);
+	%SairVakPRahaVS(SAIRPRX_TYONANT, &LVUOSI, &INF, 0, 0, ikavu, SAIRTULO_TYONANT);
 END;
 
 /* Vaihtoehtoisesti simulointi datan tulotiedoilla */
 ELSE DO;
-	%SairVakPRahaVS(SAIRPR, &LVUOSI, &INF, 0, 0, TULOSRT_PALKVAH);
-	%SairVakPRahaVS(SAIRPR_TYONANT, &LVUOSI, &INF, 0, 0, TULOSRT_PALKVAH);
+	%SairVakPRahaVS(SAIRPRX, &LVUOSI, &INF, 0, 0, ikavu, TULOSRT_PALKVAH);
+	%SairVakPRahaVS(SAIRPRX_TYONANT, &LVUOSI, &INF, 0, 0, ikavu, TULOSRT_PALKVAH);
 END;
 
-SAIRPR = SAIR_PVX * SAIRPR / &SPaivat;
-SAIRPR_TYONANT = vkppvt * SAIRPR_TYONANT / &SPaivat;
+SAIRPR = SAIR_PVX * SAIRPRX / &SPaivat;
+SAIRPR_TYONANT = vkppvt * SAIRPRX_TYONANT / &SPaivat;
+
+/* Osairauspäivärahat */
+/* Osasairauspäiväraha on puolet kokopäivärahasta */
+SAIROSPR = SAIROS_PVX * SAIRPRX / (2 * &SPaivat); 
+SAIROSPR_TYONANT = vkpoppvt * SAIRPRX_TYONANT / (2 * &SPaivat);
 
 /* Kuntoutusrahojen simulointi */
-
 /* Simulointi laskennallisilla tulotiedoilla */
 IF &SDATATULO NE 1 OR TULOSRT_PALKVAH = 0 THEN DO;
-	%SairVakPRahaVS(KURAPR, &LVUOSI, &INF, 0, 0, KURA_TULO);
-	%SairVakPRahaVS(KURAPR_TYONANT, &LVUOSI, &INF, 0, 0, KURATULO_TYONANT);
+	%SairVakPRahaVS(KURAPR, &LVUOSI, &INF, 0, 0, ikavu, KURA_TULO);
+	%SairVakPRahaVS(KURAPR_TYONANT, &LVUOSI, &INF, 0, 0, ikavu, KURATULO_TYONANT);
 END;
 
 /* Vaihtoehtoisesti simulointi datan tulotiedoilla */
 ELSE DO;
-	%SairVakPRahaVS(KURAPR, &LVUOSI, &INF, 0, 0, TULOSRT_PALKVAH);
-	%SairVakPRahaVS(KURAPR_TYONANT, &LVUOSI, &INF, 0, 0, TULOSRT_PALKVAH);
+	%SairVakPRahaVS(KURAPR, &LVUOSI, &INF, 0, 0, ikavu, TULOSRT_PALKVAH);
+	%SairVakPRahaVS(KURAPR_TYONANT, &LVUOSI, &INF, 0, 0, ikavu, TULOSRT_PALKVAH);
 END;
 
 KURAPR = KURA_PVX * KURAPR / &SPaivat;
 KURAPR_TYONANT = krpvt * KURAPR_TYONANT / &SPaivat;
 
 
-
 /* 3.1.2 Vanhempainpäivärahat */
-
 /* Simulointi laskennallisilla tulotiedoilla */
 IF &SDATATULO NE 1 OR TULOPRT_PALKVAH = 0 THEN DO;
 	/* Vakuutetulle maksetut */
@@ -276,9 +279,7 @@ ELSE DO;
 	%VanhPRahaVS(NORMVANH_TYONANT, &LVUOSI, &INF, 0, 0, 1, 0, TULOPRT_PALKVAH);
 END;
 
-
 /* Kerrotaan päivillä */
-
 AIT_VANH = aivpvk * AIT_VANH;
 KOR_VANH = aivpv1 * KOR_VANH;
 NORMVANH = aivpv2 * NORMVANH;
@@ -286,8 +287,8 @@ AIT_VANH_TYONANT = aivpvkt * AIT_VANH_TYONANT;
 KOR_VANH_TYONANT = aivpvt1 * KOR_VANH_TYONANT;
 NORMVANH_TYONANT =  aivpvt2 * NORMVANH_TYONANT;
 
-/* 3.1.3 Erityishoitoraha */
 
+/* 3.1.3 Erityishoitoraha */
 IF cdpv > 0 THEN DO;
 	%VanhPRahaVS(ERITHOITR, &LVUOSI, &INF, 0, 0, 1, 0, ERITHOIT_TULO);
 	ERITHOITR = cdpv * ERITHOITR;
@@ -299,7 +300,6 @@ VANHPR = SUM(NORMVANH, AIT_VANH, KOR_VANH);
 /* Jos vanhempainpäiväraha perustuu työttömyysturvaan (muuperu = "TT"), 
    johdetaan päiväraha työttömyyspäivärahasta käyttämällä apumuuttujaa ANSPALKKA.
    Huom! Tämä sivuuttaa mahdollisesti aikaisemmin lasketut muuttujat NORMVANH, AIT_VANH ja KOR_VANH */
-
 IF muuperu = "TT" THEN DO;
 	%AnsioSidVS(ANSIOSID, &LVUOSI, &INF, 0, 0, 0, 0, ANSPALKKA, 0, 0, 0);
 	VANHPR = SUM(aivpv1, aivpv2, aivpvk) * ANSIOSID / &SPaivat;
@@ -308,13 +308,13 @@ END;
 VANHPR_TYONANT = SUM(NORMVANH_TYONANT, KOR_VANH_TYONANT, AIT_VANH_TYONANT);
 
 * Asetetaan muuttujien 0-arvot tyhjiksi, jotta lukumäärät voidaan laskea suoraan ;
-
 ARRAY PISTE 
-	saiprva SAIRPR aiprva VANHPR
+	vkpmkyv SAIRPR aiprva VANHPR
 	vkpmkyt SAIRPR_TYONANT vkamkyt
 	VANHPR_TYONANT cdmky ERITHOITR
 	AIT_VANH KOR_VANH NORMVANH AIT_VANH_TYONANT KOR_VANH_TYONANT NORMVANH_TYONANT
-	kreurv KURAPR kreurt KURAPR_TYONANT;
+	kreurv KURAPR kreurt KURAPR_TYONANT
+	SAIROSPR SAIROSPR_TYONANT vkpopmkyv vkpopmkyt;
 DO OVER PISTE;
 	IF PISTE <= 0 THEN PISTE = .;
 END;
@@ -334,12 +334,13 @@ KOR_VANH_TYONANT = 'Työnantajille maksetut korotetut vanhempainpäivärahat, MALLI
 NORMVANH_TYONANT = 'Työnantajille maksetut korottamattomat vanhempainpäivärahat, MALLI'
 ERITHOITR = 'Erityishoitorahat, MALLI'
 KURAPR = 'Vakuutetuille maksetut kuntoutusrahat, MALLI'
-KURAPR_TYONANT = 'Työnantajille maksetut kuntoutusrahat, MALLI';
+KURAPR_TYONANT = 'Työnantajille maksetut kuntoutusrahat, MALLI'
+SAIROSPR = 'Vakuutetuille maksetut osasairauspäivärahat, MALLI'
+SAIROSPR_TYONANT = 'Työnantajille maksetut osasairauspäivärahat, MALLI';
 
 KEEP hnro SAIRPR VANHPR SAIRPR_TYONANT VANHPR_TYONANT ERITHOITR
 	AIT_VANH KOR_VANH NORMVANH AIT_VANH_TYONANT KOR_VANH_TYONANT NORMVANH_TYONANT
-	KURAPR KURAPR_TYONANT kreurv;
-
+	KURAPR KURAPR_TYONANT kreurv SAIROSPR SAIROSPR_TYONANT;
 RUN;
 
 /* 3.2 Luodaan tulostiedosto OUTPUT-kansioon */
@@ -356,7 +357,7 @@ RUN;
 
 	%IF &TULOSLAAJ = 1 %THEN %DO; 
 		MERGE POHJADAT.&AINEISTO&AVUOSI 
-		(KEEP = hnro knro &PAINO saiprva aiprva vkpmkyt vkamkyt cdmky ikavu ikavuv desmod soss paasoss elivtu koulas koulasv rake maakunta kreurt krpvt)
+		(KEEP = hnro knro &PAINO vkpmkyv aiprva vkpmkyt vkamkyt cdmky ikavu ikavuv desmod soss paasoss elivtu koulas koulasv rake maakunta kreurt krpvt vkpopmkyv vkpopmkyt)
 		TEMP.&TULOSNIMI_SV;
 	%END;
 
@@ -369,7 +370,7 @@ RUN;
 	* Asetetaan muuttujien 0-arvot tyhjiksi, jotta lukumäärät voidaan laskea suoraan ;
 
 	ARRAY PISTE 
-		saiprva aiprva kreurv vkpmkyt vkamkyt kreurt cdmky ;
+		vkpmkyv aiprva kreurv vkpmkyt vkamkyt kreurt cdmky vkpopmkyv vkpopmkyt vkpypmky;
 	DO OVER PISTE;
 		IF PISTE <= 0 THEN PISTE = .;
 	END;
@@ -377,13 +378,15 @@ RUN;
 	* Luodaan datan muuttujille selitteet ;
 
 	LABEL 
-	saiprva = 'Vakuutetuille maksetut sairauspäivärahat, DATA'
+	vkpmkyv = 'Vakuutetuille maksetut sairauspäivärahat, DATA'
 	aiprva = 'Vakuutetuille maksetut vanhempainpäivärahat, DATA'
 	vkpmkyt = 'Työnantajille maksetut sairauspäivärahat, DATA'
 	vkamkyt = 'Työnantajille maksetut vanhempainpäivärahat, DATA'
 	cdmky = 'Erityishoitorahat, DATA'
 	kreurv = 'Vakuutetuille maksetut kuntoutusrahat, DATA'
-	kreurt = 'Työnantajille maksetut kuntoutusrahat, DATA';
+	kreurt = 'Työnantajille maksetut kuntoutusrahat, DATA'
+	vkpopmkyv = 'Vakuutetuille maksetut osasairauspäivärahat, DATA'
+	vkpopmkyt = 'Työnantajille maksetut osasairauspäivärahat, DATA';
 
 	BY hnro;
 

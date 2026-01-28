@@ -12,7 +12,7 @@
 
 %IF &EG NE 1 %THEN %DO;
 
-%LET TULOSNIMI_SV = sairvak_esim_&SYSDATE._1 ; * Simuloidun tulostiedoston nimi ;
+%LET TULOSNIMI_SV = sairvak_esim_&SYSDATE._1; * Simuloidun tulostiedoston nimi ;
 %LET VUOSIKA = 1;		* 1 = Vuosikeskiarvo, 2 = datassa annetun kuukauden lainsäädäntö ;
 %LET VALITUT = _ALL_;	* Tulostaulukossa näytettävät muuttujat ;
 %LET EROTIN = 2;		* Tulosteessa käytettävä desimaalierotin, 1 = piste tai 2 = pilkku;
@@ -29,7 +29,7 @@
   - Ansiotasoindeksiin (ansio64) perustuva inflaatiokorjaus: INF = ATI ;
 
 %LET INF = 1.00; * Syötä lukuarvo, KHI tai ATI;
-%LET AVUOSI = 2025; * Perusvuosi inflaatiokorjausta varten ;
+%LET AVUOSI = 2026; * Perusvuosi inflaatiokorjausta varten ;
 %LET PINDEKSI_VUOSI = pindeksi_vuosi; * Käytettävä indeksien parametritaulukko ;
 
 * Käytettävien tiedostojen nimet;
@@ -63,12 +63,16 @@
 /* 2.1 Fiktiivinen data */
 
 * Lainsäädäntövuosi (1985-);
-%LET MINIMI_SAIRVAK_VUOSI = 2025;
-%LET MAKSIMI_SAIRVAK_VUOSI = 2025;
+%LET MINIMI_SAIRVAK_VUOSI = 2026;
+%LET MAKSIMI_SAIRVAK_VUOSI = 2026;
 
 * Lainsäädäntökuukausi (1-12);
 %LET MINIMI_SAIRVAK_KUUK = 12;
 %LET MAKSIMI_SAIRVAK_KUUK = 12;
+
+* Ikä (vuosina);
+%LET MINIMI_SAIRVAK_IKA = 30; 
+%LET MAKSIMI_SAIRVAK_IKA = 30;
 
 * Onko kyse vanhempainrahasta (1 = tosi, 0 = epätosi));
 %LET MINIMI_SAIRVAK_VANHRAHA = 0;
@@ -127,6 +131,7 @@ DATA OUTPUT.&TULOSNIMI_SV;
 
 DO SAIRVAK_VUOSI = &MINIMI_SAIRVAK_VUOSI TO &MAKSIMI_SAIRVAK_VUOSI;
 DO SAIRVAK_KUUK = &MINIMI_SAIRVAK_KUUK TO &MAKSIMI_SAIRVAK_KUUK;
+DO SAIRVAK_IKA = &MINIMI_SAIRVAK_IKA TO &MAKSIMI_SAIRVAK_IKA;
 DO SAIRVAK_LAPSIA = &MINIMI_SAIRVAK_LAPSIA TO &MAKSIMI_SAIRVAK_LAPSIA;
 DO SAIRVAK_KUUKPALK = &MINIMI_SAIRVAK_KUUKPALK TO &MAKSIMI_SAIRVAK_KUUKPALK BY &KYNNYS_SAIRVAK_KUUKPALK;
 DO SAIRVAK_YRIT = &MINIMI_SAIRVAK_YRIT TO &MAKSIMI_SAIRVAK_YRIT BY &KYNNYS_SAIRVAK_YRIT;  
@@ -141,7 +146,7 @@ DO SAIRVAK_TYOMATKAKULUT = &MINIMI_SAIRVAK_TYOMATKAKULUT TO &MAKSIMI_SAIRVAK_TYO
 %InfKerroin_ESIM(&AVUOSI, SAIRVAK_VUOSI, &INF);
 
 OUTPUT;
-END;END;END;END;END;END;END;END;END;END;END;
+END;END;END;END;END;END;END;END;END;END;END;END;
 
 RUN;
 
@@ -219,10 +224,10 @@ END;
 IF SAIRVAK_KORAIT = 0 AND SAIRVAK_KORVANH = 0 THEN DO;
 
 	IF &VUOSIKA = 1 THEN DO;
-		%SairVakPrahaVS (SPRAHAK, SAIRVAK_VUOSI, INF, SAIRVAK_VANHRAHA, SAIRVAK_LAPSIA, SAIRVAK_VUOSITULO, yrittaja = SAIRVAK_YRITTULO, tulonhankk = SVHANKVAH);
+		%SairVakPrahaVS (SPRAHAK, SAIRVAK_VUOSI, INF, SAIRVAK_VANHRAHA, SAIRVAK_LAPSIA, SAIRVAK_IKA, SAIRVAK_VUOSITULO, yrittaja = SAIRVAK_YRITTULO, tulonhankk = SVHANKVAH);
  	END;
 	ELSE DO;
-		%SairVakPrahaKS (SPRAHAK, SAIRVAK_VUOSI, SAIRVAK_KUUK, INF, SAIRVAK_VANHRAHA, SAIRVAK_LAPSIA, SAIRVAK_VUOSITULO, yrittaja = SAIRVAK_YRITTULO, tulonhankk = SVHANKVAH);
+		%SairVakPrahaKS (SPRAHAK, SAIRVAK_VUOSI, SAIRVAK_KUUK, INF, SAIRVAK_VANHRAHA, SAIRVAK_LAPSIA, SAIRVAK_IKA, SAIRVAK_VUOSITULO, yrittaja = SAIRVAK_YRITTULO, tulonhankk = SVHANKVAH);
 	END;
 	
 END;
@@ -252,6 +257,7 @@ DROP kuuknro w y z testi kkuuk taulu_&PSAIRVAK taulu_&PVERO;
 LABEL 
 SAIRVAK_VUOSI = 'Lainsäädäntövuosi'
 SAIRVAK_KUUK = 'Lainsäädäntökuukausi'
+SAIRVAK_IKA = 'Ikä'
 SAIRVAK_LAPSIA = 'Alle 18-v. lasten lkm'
 SAIRVAK_KUUKPALK = 'Päivärahan perusteena oleva kuukausipalkka, (e)'
 SAIRVAK_YRIT = 'Päivärahan perusteena oleva YEL- tai MYEL-työtulo (e/kk)'
@@ -285,7 +291,7 @@ SPRAHAP = 'Päiväraha, (e/pv)';
 
 /* Kokonaislukuina ne muuttujat, joissa ei haluta käyttää desimaalierotinta */
 
-FORMAT SAIRVAK_VUOSI SAIRVAK_KUUK SAIRVAK_LAPSIA SAIRVAK_VANHRAHA SAIRVAK_KORAIT SAIRVAK_KORVANH 8.;
+FORMAT SAIRVAK_VUOSI SAIRVAK_KUUK SAIRVAK_IKA SAIRVAK_LAPSIA SAIRVAK_VANHRAHA SAIRVAK_KORAIT SAIRVAK_KORVANH 8.;
 
 KEEP &VALITUT;
 

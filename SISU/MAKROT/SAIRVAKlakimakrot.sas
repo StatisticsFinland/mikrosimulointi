@@ -152,7 +152,7 @@ DROP temp;
 /* 2.6 Laskukaava tammikuusta 1996 l‰htien */
 /*Huom vanhempainp‰iv‰rahojen poikkeavat parametrit SRaja2Vanh, SPros2Vanh ja SPros3Vanh*/
 
-%MACRO SairVakPrahaK6 (tulos, mvuosi, vanh, tulo)/
+%MACRO SairVakPrahaK6 (tulos, mvuosi, vanh, tulo, ika)/
 DES = 'SAIRVAK: Sairausvakuutuksen p‰iv‰rahan laskukaava, versio 6 tammikuusta 1996 l‰htien';
 
 *Ensin tilanne, jossa ei ole kyse vanhempainrahasta;
@@ -162,7 +162,7 @@ IF &vanh = 0 THEN DO;
 	IF (&tulo >  &SRaja2) THEN &tulos = &SPros1 *  &SRaja2 / &maxpaiv + &SPros2 * (&tulo -  &SRaja2) / &maxpaiv;
 	IF (&tulo >  &SRaja3) THEN &tulos = &SPros1 *  &SRaja2 / &maxpaiv + &SPros2 *  (&SRaja3 -&SRaja2) / &maxpaiv + &SPros3 * (&tulo -  &SRaja3) / &maxpaiv;
 	IF (&tulos < &Minimi) AND (&mvuosi > 2018) THEN &tulos = &Minimi;
-	IF ikavu < &ikaraja1 OR ikavu > &ikaraja2 + 1  THEN &tulos = 0; *Rajaus i‰n mukaan;
+	IF &ika < &ikaraja1 OR &ika > &ikaraja2 + 1 THEN &tulos = 0; *Rajaus i‰n mukaan;
 END;
 
 *Sitten vanhempainraha;
@@ -182,7 +182,7 @@ END;
 	   T‰ss‰ vaiheessa lis‰t‰‰n (mahdolliset) lapsikorotukset.
 	   Kerroin, jolla tyˆtuloa alennetaan, otetaan myˆs t‰ss‰ huomioon */
 
-%MACRO SairVakPrahaKS (tulos, mvuosi, mkuuk, minf, vanh, lapsia, tulo, yrittaja=0, tulonhankk=0)/
+%MACRO SairVakPrahaKS (tulos, mvuosi, mkuuk, minf, vanh, lapsia, ika, tulo, yrittaja=0, tulonhankk=0)/
 DES = 'SAIRVAK: Sairausvakuutuksen p‰iv‰raha kuukausitasolla';
 
 %HaeParam&TYYPPI(&mvuosi, &mkuuk, &SAIRVAK_PARAM, PARAM.&PSAIRVAK);
@@ -217,27 +217,27 @@ END;
 
 *Ennen tammikuuta 1984;
 IF kuuid >= MDY(3, 1, 1983) AND  kuuid < MDY(1, 1, 1984) THEN DO;
-	%SairVakPrahaK2(temp,   tyotulo);
+	%SairVakPrahaK2(temp, tyotulo);
 END;
 
 *Ennen tammikuuta 1992;
 IF kuuid >= MDY(1, 1, 1984) AND  kuuid < MDY(1, 1, 1992) THEN DO;
-	%SairVakPrahaK3(temp,   tyotulo);
+	%SairVakPrahaK3(temp, tyotulo);
 END;
 
 *Ennen syyskuuta 1992;
 IF kuuid >= MDY(1, 1, 1992) AND  kuuid < MDY(9, 1, 1992) THEN DO;
-	%SairVakPrahaK4(temp,    tyotulo);
+	%SairVakPrahaK4(temp, tyotulo);
 END;
 
 *Ennen tammikuuta 1996;
 IF kuuid >= MDY(9, 1, 1992) AND  kuuid < MDY(1, 1, 1996) THEN DO;
-	%SairVakPrahaK5(temp, &mvuosi,   &vanh, tyotulo);
+	%SairVakPrahaK5(temp, &mvuosi, &vanh, tyotulo);
 END;
 
 *Tammikuusta 1996 l‰htien;
 IF kuuid >= MDY(1, 1, 1996) THEN DO;
-	%SairVakPrahaK6(temp, &mvuosi, &vanh, tyotulo);
+	%SairVakPrahaK6(temp, &mvuosi, &vanh, tyotulo, &ika);
 END;
 
 &tulos = temp + lapsikorot;
@@ -247,13 +247,13 @@ DROP kuuid temp tyotulo1 tyotulo2 tyotulo lapsluku lapsikorot ;
 
 /* 2.8. Makro laskee sairausvakuutuksen p‰iv‰rahan kuukausitasolla vuosikeskiarvona */
 
-%MACRO SairVakPrahaVS (tulos, mvuosi, minf, vanh, lapsia, tulo, yrittaja = 0, tulonhankk = 0)/
+%MACRO SairVakPrahaVS (tulos, mvuosi, minf, vanh, lapsia, ika, tulo, yrittaja = 0, tulonhankk = 0)/
 DES = 'SAIRVAK: Sairausvakuutuksen p‰iv‰raha kuukausitasolla vuosikeskiarvona';
 
 raha = 0;
 
 %DO i = 1 %TO 12;
-	%SairVakPrahaKS(temp, &mvuosi, &i, &minf, &vanh, &lapsia,  &tulo, yrittaja = &yrittaja, tulonhankk = &tulonhankk);
+	%SairVakPrahaKS(temp, &mvuosi, &i, &minf, &vanh, &lapsia, &ika, &tulo, yrittaja = &yrittaja, tulonhankk = &tulonhankk);
 	raha = raha + temp;
 %END;
 
@@ -273,35 +273,35 @@ vanh: Onko vanhempainp‰iv‰raha (=1) tai ei (=0)
 lapsia: Alaik‰isten lasten lukum‰‰r‰ (ei vaikutusta vuoden 1993 j‰lkeen, parametrin arvo parametritaulukossa ratkaisee)
 praha: Sairausvakuutuksen p‰iv‰raha,;
 
-%MACRO SairVakTuloKS(tulos, mvuosi, mkuuk, minf, vanh, lapsia, praha)/
+%MACRO SairVakTuloKS(tulos, mvuosi, mkuuk, minf, vanh, lapsia, ika, praha)/
 DES = 'SAIRVAK: Sairausvakuutuksen p‰iv‰rahan perusteena oleva vuositulo (k‰‰nteismakro)';
 
-%SairVakPRahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia,  0);
+%SairVakPRahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia, &ika, 0);
 
 IF &praha <= testi THEN &tulos = 0;
 	ELSE DO;
 		DO i = 1 TO 100 UNTIL(testi >= &praha);
-			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia,  i * 10000);
+			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia, &ika, i * 10000);
 		END;
 		DO j = -9 TO 9 UNTIL(testi >= &praha);
-			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia,  (i * 10000 + j * 1000) );
+			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia, &ika, (i * 10000 + j * 1000));
 		END;
 		DO k = -9 TO 9 UNTIL(testi >= &praha);
-			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia,  (i * 10000 + j * 1000 + k * 100));
+			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia, &ika, (i * 10000 + j * 1000 + k * 100));
 		END;
 		DO m = -9 TO 9 UNTIL(testi >= &praha);
-			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia,  (i * 10000 + j * 1000 + k * 100 + m * 10));
+			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia, &ika, (i * 10000 + j * 1000 + k * 100 + m * 10));
 		END;
 		DO n = -9 TO 9 UNTIL(testi >= &praha);
-			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia,  (i * 10000 + j * 1000 + k * 100 + m * 10 + n ));
+			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia, &ika, (i * 10000 + j * 1000 + k * 100 + m * 10 + n ));
 		END;
 		DO p = -9 TO 9 UNTIL(testi >= &praha);
-			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia, (i * 10000 + j * 1000 + k * 100 + m * 10 + n + p / 10));
+			%SairVakPrahaKS(testi, &mvuosi, &mkuuk, &minf, &vanh, &lapsia, &ika, (i * 10000 + j * 1000 + k * 100 + m * 10 + n + p / 10));
 		END;
 	&tulos = (i * 10000 + j * 1000 + k * 100 + m * 10 + n + p / 10);
 END;
 
-&tulos =&tulos;
+&tulos = &tulos;
 DROP i j k m n p testi;
 %MEND SairVakTuloKS;
 
@@ -317,30 +317,30 @@ vanh: Onko vanhempainp‰iv‰raha (=1) tai ei (=0)
 lapsia: Alaik‰isten lasten lukum‰‰r‰ (ei vaikutusta vuoden 1993 j‰lkeen, parametrin arvo parametritaulukossa ratkaisee)
 praha: Sairausvakuutuksen p‰iv‰raha, e/kk;
 
-%MACRO SairVakTuloVS(tulos, mvuosi, minf, vanh, lapsia, praha)/
+%MACRO SairVakTuloVS(tulos, mvuosi, minf, vanh, lapsia, ika, praha)/
 DES = 'SAIRVAK: Sairausvakuutuksen p‰iv‰rahan perusteena oleva vuositulo (k‰‰nteismakro) vuosikeskiarvona';
 
-%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia,  0);
+%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia, &ika, 0);
 
 IF &praha <= testi THEN &tulos = 0;
 	ELSE DO;
 		DO i = 1 TO 100 UNTIL(testi >= &praha);
-			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia,  i * 10000);
+			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia, &ika, i * 10000);
 		END;
 		DO j = -9 TO 9 UNTIL(testi >= &praha);
-			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia,  (i * 10000 + j * 1000) );
+			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia, &ika, (i * 10000 + j * 1000));
 		END;
 		DO k = -9 TO 9 UNTIL(testi >= &praha);
-			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia,  (i * 10000 + j * 1000 + k * 100));
+			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia, &ika, (i * 10000 + j * 1000 + k * 100));
 		END;
 		DO m = -9 TO 9 UNTIL(testi >= &praha);
-			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia,  (i * 10000 + j * 1000 + k * 100 + m * 10));
+			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia, &ika, (i * 10000 + j * 1000 + k * 100 + m * 10));
 		END;
 		DO n = -9 TO 9 UNTIL(testi >= &praha);
-			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia,  (i * 10000 + j * 1000 + k * 100 + m * 10 + n ));
+			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia, &ika, (i * 10000 + j * 1000 + k * 100 + m * 10 + n ));
 		END;
 		DO p = -9 TO 9 UNTIL(testi >= &praha);
-			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia, (i * 10000 + j * 1000 + k * 100 + m * 10 + n + p / 10));
+			%SairVakPrahaVS(testi, &mvuosi, &minf, &vanh, &lapsia, &ika, (i * 10000 + j * 1000 + k * 100 + m * 10 + n + p / 10));
 		END;
 	&tulos = (i * 10000 + j * 1000 + k * 100 + m * 10 + n + p / 10);
 END;
@@ -411,7 +411,7 @@ DES = 'SAIRVAK: Korotettu vanhempainp‰iv‰raha kuukausitasolla';
 /*Ennen vuotta 2007 lasketaan normaali vanhempainp‰iv‰raha. Samoin v‰lill‰ 2016-07/2022, jos kyse ei ole ‰itien
 ensimm‰isen 56 p‰iv‰n ‰itiysrahasta.;*/
 IF &mvuosi < 2007 OR ((2015 < &mvuosi < 2022 OR (&mvuosi = 2022 AND &mkuuk < 8)) AND  &ait = 0) THEN DO;
-	%SairVakPrahaKS(&tulos, &mvuosi, &mkuuk, &minf, 1, &lapsia, &tulo, yrittaja = &yrittaja, tulonhankk = &tulonhankk);
+	%SairVakPrahaKS(&tulos, &mvuosi, &mkuuk, &minf, 1, &lapsia, 0, &tulo, yrittaja = &yrittaja, tulonhankk = &tulonhankk);
 END;
 
 ELSE DO;
@@ -473,7 +473,7 @@ DES = 'SAIRVAK: Korotettu vanhempainp‰iv‰raha kuukausitasolla vuosikeskiarvona';
 raha = 0;
 
 %DO i = 1 %to 12;
-	%KorVanhRahaKS(temp, &mvuosi, &i, &minf, &ait, &lapsia,  &tulo, yrittaja = &yrittaja, tulonhankk=&tulonhankk);
+	%KorVanhRahaKS(temp, &mvuosi, &i, &minf, &ait, &lapsia, &tulo, yrittaja = &yrittaja, tulonhankk=&tulonhankk);
 	raha = raha + temp;
 %END;
 
@@ -502,7 +502,7 @@ DES = 'SAIRVAK: Eri suuruiset vanhempainp‰iv‰rahat p‰iv‰‰ kohden kuukausitasolla
 /*Ennen vuotta 2007 lasketaan normaali p‰iv‰raha. Samoin vuodesta 2016 l‰htien, jos kyse ei ole ‰itien
 ensimm‰isen 56 p‰iv‰n ‰itiysrahasta;*/
 IF &mvuosi < 2007 or (&mvuosi > 2015 AND &ait = 0) THEN DO;
-	%SairVakPrahaKS(temp, &mvuosi, &mkuuk, &minf, 1, &lapsia, &vanhtulo, yrittaja = &yrittaja, tulonhankk=&tulonhankk);
+	%SairVakPrahaKS(temp, &mvuosi, &mkuuk, &minf, 1, &lapsia, 0, &vanhtulo, yrittaja = &yrittaja, tulonhankk=&tulonhankk);
 	&tulos = temp / &SPaivat;
 END;
 

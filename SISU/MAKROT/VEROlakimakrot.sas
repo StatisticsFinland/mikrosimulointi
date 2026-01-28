@@ -195,7 +195,9 @@ ELSE IF &mvuosi >= 1989 THEN kulut = &tulhankkulut;
 
 IF &mvuosi < 1989 THEN &tulos = tulvah + &aymaksut;
 
-IF &mvuosi >= 1989 THEN &tulos = tyom + tulvah + &aymaksut;
+IF (&mvuosi < 2026 AND &mvuosi >= 1989) THEN &tulos = tyom + tulvah + &aymaksut;
+
+IF &mvuosi >= 2026 THEN &tulos = tyom + tulvah;
 
 DROP tyom kulut tulvah;
 

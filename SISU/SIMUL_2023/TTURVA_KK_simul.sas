@@ -84,6 +84,7 @@
 					 YHTTMTUKI			/*Työmarkkinatuki, simul*/
 					 PERUSPR_DATA		/*Peruspäiväraha, data*/
 					 PERUSPR			/*Peruspäiväraha, simul*/
+					 YLEISTUKI 			/*Yleistuki, simul*/
 					 VUORKORV_DATA		/*Vuorottelukorvaukset, data*/
 					 ANSIOPRPV_DATA		/*Ansiopäivärahapäivät, data*/
 					 ANSIOPRPV_SIMUL	/*Ansiopäivärahapäivät, simul*/
@@ -182,13 +183,13 @@
 	
 	PROC SUMMARY DATA = TEMP.TTURVA_KK&avuosi._SORT NWAY;
     	CLASS hnro akuuk;
-    	ID &PAINO avuosi lomautettu lapsimaara pepalkkavteke tmedvuosi ppedvuosi apedvuosi;
+    	ID &PAINO avuosi lomautettu lapsimaara pepalkkavteke tmedvuosi ppedvuosi apedvuosi lkoodi tyossaoloehto_kk;
 		VAR sovipalkka tmomattulot--APPOAPTAPPLISAP appertayspvt--yllanordeur;
     	OUTPUT OUT = TEMP.TTURVA_KK&avuosi._NETTOKK (DROP = _:) SUM = ;
 	RUN;
     
-	/* Rajataan starttidataan vain työttömyysturvaa saaneet ja tarvittavat muuttujat */
-	DATA STARTDAT.START_TTURVA_KK;
+	/* Rajataan mukaan vain työttömyysturvaa saaneet ja tarvittavat muuttujat */
+	DATA TEMP.START_TTURVA_KK;
 
 	SET TEMP.TTURVA_KK&avuosi._NETTOKK
  		(WHERE = (SUM(appertayspvt, appersovipvt, apkortayspvt, apkorsovipvt,
@@ -206,7 +207,7 @@
 				tmkortayspvt tmkortayseur tmkorsovipvt tmkorsovieur
 				vvappertayseur vvappersovieur vvpppertayseur vvpppersovieur
 				vvappertayspvt vvappersovipvt vvpppertayspvt vvpppersovipvt
-				tmedvuosi ppedvuosi apedvuosi);
+				tmedvuosi ppedvuosi apedvuosi lkoodi tyossaoloehto_kk);
 
 		/* Lasketaan sovitellut päivärahat suhteessa täyteen päivärahaan keston määritystä varten.
 		Tämä perustuu nyt aineistovuoteen, vaikka tarkkaan ottaen tämä tulisi siirtää simulointiin.
@@ -226,12 +227,12 @@
 	DROP TEMP_SOVAP TAYSANSPR;
 	RUN;
 
-	/* Haetaan vuosirekisteristä mukaan muuttujia */
-	DATA STARTDAT.START_TTURVA_KK;
-		MERGE STARTDAT.START_TTURVA_KK(IN=b) 
-			  POHJADAT.REK&AVUOSI.(IN=a
-				KEEP = hnro ikavu tyopv_ed tyopv_ed2 tyopv_ed3 tklaskr4_ed tklaskr1-tklaskr4
-					   tyokk_hist lasktyohist ikakk vvvpvtq knro dtyhtep vvvmkq vanh_omaishoitohp);
+	/* Liitetään vuosirekisteristä mukaan muuttujia */
+	DATA TEMP.START_TTURVA_KK;
+		MERGE 	TEMP.START_TTURVA_KK(IN=b) 
+				POHJADAT.REK&AVUOSI.(IN=a
+		KEEP = hnro knro ikavu ikakk jasen isa aiti tklaskr4_ed tklaskr1-tklaskr4
+		tyokk_hist lasktyohist vvvpvtq dtyhtep vvvmkq vanh_omaishoitohp svatvp);
 		BY hnro;
 		IF a AND b;
 
@@ -241,6 +242,9 @@
 	/* Laskennalliset työvuodet 20 vuoden ajalta
 	Datamuuttuja lasktyohist (laskennalliset työkuukaudet) on laskettu jakamalla viimeisen 20 vuoden työtulot vuositasolla 510 eurolla */
 	LASKTYOHISTV = ROUND(lasktyohist / 12, 0.1);
+
+	/* Onko työllistymistä edistävissä palveluissa (1=kyllä, 0=ei) */
+	IF lkoodi = "00" OR lkoodi = "" THEN TYOLLISTYMISPALVELU=0; ELSE TYOLLISTYMISPALVELU=1;
 
 	/* Nollataan seuraavan kvartaalin kertymä, jos tklaskr pienentynyt edelliseen kvartaaliin nähden mutta ei nollaantunut (ansiosidonnaisen laskuri alkanut alusta) */
 	IF (akuuk>3 AND 0<tklaskr1<tklaskr4_ed) OR (akuuk>6 AND 0<tklaskr2<tklaskr1) OR (akuuk>9 AND 0<tklaskr3<tklaskr2) THEN nollaus=1;
@@ -257,6 +261,9 @@
 	ikavu2 = FLOOR(SUM(ikavu, (ikakk2 / 12)));
 	syntv = SUM(&AVUOSI., -ikavu);
 
+	/* Pääomatulot muutetaan kuukausitasolle */
+	POTULOT = svatvp / 12;
+
 	/* Muodostetaan datan summamuuttujat */
 	ANSIOPR_DATA = SUM(appertayseur, apkorsovieur, appersovieur, apkortayseur);
 	TMTUKI_DATA = SUM(tmpertayseur, tmkorsovieur, tmpersovieur, tmkortayseur);
@@ -267,7 +274,7 @@
 	TMTUKIPV_DATA = SUM(tmpertayspvt_eikor, tmkorsovipvt, tmpersovipvt_eikor, tmkortayspvt);
 	PERUSPRPV_DATA = SUM(pppertayspvt_eikor, ppkorsovipvt, pppersovipvt_eikor, ppkortayspvt);
 
-	/* Pudotetaan turhat muuttujat pois ja sortataan */
+	/* Pudotetaan turhat muuttujat pois */
 	DROP
 		appertayseur apkorsovieur appersovieur apkortayseur
 		tmpertayseur tmkorsovieur tmpersovieur tmkortayseur
@@ -275,9 +282,57 @@
 		vvappertayseur vvappersovieur vvpppertayseur vvpppersovieur;
 	RUN;
 
-	PROC SORT DATA = STARTDAT.START_TTURVA_KK;
-		BY hnro akuuk nollaus;
-	RUN;
+	/* Lisätään linkit vanhempien tulotietojen liittämistä varten */
+	proc sql;
+	create table TEMP.TEMP_TTURVA_KK_HNRO as
+		select
+			a.*,
+			b.hnro as hnro_isa,
+			c.hnro as hnro_aiti
+		from TEMP.START_TTURVA_KK as a
+			left join POHJADAT.REK&AVUOSI. as b on a.knro = b.knro and a.isa = b.jasen
+			left join POHJADAT.REK&AVUOSI. as c on a.knro = c.knro and a.aiti = c.jasen
+		order by knro, jasen
+	;
+	quit;
+
+	/* Luodaan tulomuuttujat kuukausitason tulotiedoista */
+	proc sql;
+	create table TEMP.TEMP_TULOREK as
+	select 
+		hnro, 
+		kk,
+		SUM(CASE WHEN tuloera in ("tturva_palkka") THEN summa ELSE 0 END) as tturva_palkka,
+		SUM(CASE WHEN tuloera in ("tturva_etuus_tarveharkinta") THEN summa ELSE 0 END) as tturva_etuus_tarveharkinta,
+		SUM(CASE WHEN tuloera in ("tturva_etuus_vahennettava") THEN summa ELSE 0 END) as tturva_etuus_vahennettava
+	from POHJADAT.tturva_tulrek&AVUOSI.
+	group by hnro, kk
+	;
+	quit;
+
+	/* Lisätään kuukausitason tulomuuttujat starttidataan */
+	proc sql;
+	create table STARTDAT.START_TTURVA_KK as
+		select 
+			a.*,
+			coalesce(b.tturva_palkka, 0) as tulrek_palkka,
+			coalesce(b.tturva_etuus_tarveharkinta, 0) as tulrek_etuus_tarveharkinta,
+			coalesce(b.tturva_etuus_vahennettava, 0) as tulrek_etuus_vahennettava,
+			SUM(
+				coalesce(c.tturva_palkka, 0), coalesce(c.tturva_etuus_tarveharkinta, 0), 
+				coalesce(d.tturva_palkka, 0), coalesce(d.tturva_etuus_tarveharkinta, 0) 
+				) as tulrek_vanhempien_tulot
+		from TEMP.TEMP_TTURVA_KK_HNRO a
+			left join TEMP.TEMP_TULOREK b on a.hnro = b.hnro and a.akuuk = b.kk
+			left join TEMP.TEMP_TULOREK c on a.hnro_isa = c.hnro and a.akuuk = c.kk
+			left join TEMP.TEMP_TULOREK d on a.hnro_aiti = d.hnro and a.akuuk = d.kk
+	;
+	quit;
+
+PROC SORT DATA = STARTDAT.START_TTURVA_KK;
+BY hnro akuuk nollaus;
+RUN;
+
 %END;
 
 %MEND S_TTURVA_KK_Muokkaa;
@@ -314,7 +369,15 @@ DATA TEMP.&TULOSNIMI_TT._KK;
 SET STARTDAT.START_TTURVA_KK;
 BY hnro;
 
-RETAIN kertyma; 
+RETAIN kertyma tyossaoloehto_kk_first; 
+
+/* Määritetään työssäoloehdossa huomioidut kuukaudet */
+/* Tyossaoloehto_kk-muuttuja on juokseva työssäoloehtokuukausien määrä, muodostettu kuukausitason tulotietojen perusteella */
+/* Otetaan huomioon vain ensimmäinen havainto */
+IF first.hnro THEN tyossaoloehto_kk_first = tyossaoloehto_kk;
+
+/* Simuloidaan täyttääkö henkilö työssäoloehdon */
+%TyossaoloehtoKK(TYOSSAOLOEHTO, &LVUOSI, &KUUK, tyossaoloehto_kk_first)
 
 /* Tehdään omavastuupäivien vähennys vain, jos työttömyys ei ole alkanut edellisen vuoden aikana */
 IF tmedvuosi = 0 AND ppedvuosi = 0 AND apedvuosi = 0 THEN DO;
@@ -354,7 +417,7 @@ ELSE kertyma = 0;
 /* Simuloidaan vuoden sisällä kestorajojen perusteella tapahtuvat siirtymät ansiosidonnaisen ja työmarkkinatuen välillä
 Huom. tässä tärkeä käyttää vvvpvtq-muuttujaa, jolla valitaan kaikki jolla ansiopäivärahapäiviä vuoden aikana */
 IF vvvpvtq > 0 AND &APKESTOSIMUL = 1 THEN DO;
-	%AnsioSidKestoRajKK(kestomuutos, &LVUOSI, &KUUK, kertyma, tyohistv, lasktyohistv, appoaptapplisap, syntv, ikavu2, tmpvt_yht, appvtnetto_yht, tyopv_ed, tyopv_ed2, tyopv_ed3);
+	%AnsioSidKestoRajKK(kestomuutos, &LVUOSI, &KUUK, kertyma, tyohistv, lasktyohistv, appoaptapplisap, syntv, ikavu2, tmpvt_yht, appvtnetto_yht, TYOSSAOLOEHTO);
 
 	/* Siirretään ansiopäiväraha työmarkkinatueksi */
 	IF kestomuutos < 0 AND appvtnetto_yht > 0 THEN DO;
@@ -393,21 +456,21 @@ END;
 appvtnetto_yht = SUM(appertayspvt_eikor, apkortayspvt, ROUND(tayspv_suhde*SUM(appersovipvt_eikor, apkorsovipvt), 0.1)); /* Ansiopäivärahan luokat yhteensä */
 tmpvt_yht = SUM(tmpertayspvt_eikor, tmkortayspvt, tmpersovipvt_eikor, tmkorsovipvt);
 
-/* 3.2 Simuloidaan ansiopäiväraha, peruspäiväraha ja työmarkkinatuki */
+/* 3.2 Simuloidaan ansiopäiväraha, peruspäiväraha, työmarkkinatuki ja yleistuki */
 
 	/* Ansiopäiväraha */
 	IF appvtnetto_yht THEN DO;
 
 		/* Perus */
 		%AnsioSidKS(SIMUL_APPERTAYSEURKK, &LVUOSI, &KUUK, &INF, 
-					lapsimaara, 0, 0, LISAPAIVOIK, pepalkkavteke, sosetulot, kertyma, sum(kertyma, -appvtnetto_yht));
+					lapsimaara, 0, 0, LISAPAIVOIK, pepalkkavteke, tulrek_etuus_vahennettava, kertyma, sum(kertyma, -appvtnetto_yht));
 		SIMUL_APPERTAYSEUR = appertayspvt_eikor * (SIMUL_APPERTAYSEURKK / &TTPaivia);
 				
 		/* Korotettu */
 		IF apkortayspvt OR apkorsovipvt THEN DO;
 
 			%AnsioSidKS(SIMUL_APKORTAYSEURKK, &LVUOSI, &KUUK, &INF, 
-						lapsimaara, 1, 0, LISAPAIVOIK, pepalkkavteke, sosetulot, kertyma, sum(kertyma, -appvtnetto_yht));
+						lapsimaara, 1, 0, LISAPAIVOIK, pepalkkavteke, tulrek_etuus_vahennettava, kertyma, sum(kertyma, -appvtnetto_yht));
 			/* Korotusosa erikseen! */
 			SIMUL_APKORILMTAYS = apkortayspvt * (SIMUL_APPERTAYSEURKK / &TTPaivia);
 			SIMUL_APKORTAYSEUR = apkortayspvt * (SIMUL_APKORTAYSEURKK / &TTPaivia);
@@ -417,7 +480,7 @@ tmpvt_yht = SUM(tmpertayspvt_eikor, tmkortayspvt, tmpersovipvt_eikor, tmkorsovip
 		IF appersovipvt_eikor OR apkorsovipvt THEN DO;
 
 			%SoviteltuKS(SIMUL_APPERSOVIEURKK, &LVUOSI, &KUUK, &INF, 
-						 1, 0, lapsimaara, SIMUL_APPERTAYSEURKK, sovipalkka, pepalkkavteke, 0);
+						 1, 0, lapsimaara, SIMUL_APPERTAYSEURKK, tulrek_palkka, pepalkkavteke, 0);
 			SIMUL_APPERSOVIEUR = appersovipvt_eikor * (SIMUL_APPERSOVIEURKK / &TTPaivia);
 		END;
 
@@ -425,7 +488,7 @@ tmpvt_yht = SUM(tmpertayspvt_eikor, tmkortayspvt, tmpersovipvt_eikor, tmkorsovip
 		IF apkorsovipvt THEN DO;
 
 			%SoviteltuKS(SIMUL_APKORSOVIEURKK, &LVUOSI, &KUUK, &INF, 
-						 1, 1, lapsimaara, SIMUL_APKORTAYSEURKK, sovipalkka, pepalkkavteke, 0);
+						 1, 1, lapsimaara, SIMUL_APKORTAYSEURKK, tulrek_palkka, pepalkkavteke, 0);
 			SIMUL_APKORILMSOVI = apkorsovipvt * (SIMUL_APPERSOVIEURKK / &TTPaivia);
 			SIMUL_APKORSOVIEUR = apkorsovipvt * (SIMUL_APKORSOVIEURKK / &TTPaivia);
 		END;
@@ -436,14 +499,14 @@ tmpvt_yht = SUM(tmpertayspvt_eikor, tmkortayspvt, tmpersovipvt_eikor, tmkorsovip
 
 		/* Perus */
 		%PerusPRahaKS(SIMUL_PPPERTAYSEURKK, &LVUOSI, &KUUK, &INF,
-					  0, 0, 0, lapsimaara, 0, 0, sosetulot);
+					  0, 0, 0, lapsimaara, 0, 0, tulrek_etuus_vahennettava);
 		SIMUL_PPPERTAYSEUR = pppertayspvt_eikor * (SIMUL_PPPERTAYSEURKK / &TTPaivia);
 
 		/* Korotettu */
 		IF ppkortayspvt OR ppkorsovipvt THEN DO;
 
 			%PerusPRahaKS(SIMUL_PPKORTAYSEURKK, &LVUOSI, &KUUK, &INF,
-						  0, 1, 0, lapsimaara, 0, 0, sosetulot);
+						  0, 1, 0, lapsimaara, 0, 0, tulrek_etuus_vahennettava);
 			SIMUL_PPKORTAYSEUR = ppkortayspvt * (SIMUL_PPKORTAYSEURKK / &TTPaivia);
 			SIMUL_PPKORILMTAYS = ppkortayspvt * (SIMUL_PPPERTAYSEURKK / &TTPaivia);
 		END;
@@ -452,7 +515,7 @@ tmpvt_yht = SUM(tmpertayspvt_eikor, tmkortayspvt, tmpersovipvt_eikor, tmkorsovip
 		IF pppersovipvt_eikor OR ppkorsovipvt THEN DO;
 
 			%SoviteltuKS(SIMUL_PPPERSOVIEURKK, &LVUOSI, &KUUK, &INF, 
-						 0, 0, lapsimaara, SIMUL_PPPERTAYSEURKK, sovipalkka, 0, 0);
+						 0, 0, lapsimaara, SIMUL_PPPERTAYSEURKK, tulrek_palkka, 0, 0);
 			SIMUL_PPPERSOVIEUR = pppersovipvt_eikor * (SIMUL_PPPERSOVIEURKK / &TTPaivia);
 		END;
 
@@ -460,7 +523,7 @@ tmpvt_yht = SUM(tmpertayspvt_eikor, tmkortayspvt, tmpersovipvt_eikor, tmkorsovip
 		IF ppkorsovipvt THEN DO;
 
 			%SoviteltuKS(SIMUL_PPKORSOVIEURKK, &LVUOSI, &KUUK, &INF, 
-						 0, 1, lapsimaara, SIMUL_PPKORTAYSEURKK, sovipalkka, 0, 0);
+						 0, 1, lapsimaara, SIMUL_PPKORTAYSEURKK, tulrek_palkka, 0, 0);
 			SIMUL_PPKORSOVIEUR = ppkorsovipvt * (SIMUL_PPKORSOVIEURKK / &TTPaivia);
 			SIMUL_PPKORILMSOVI = ppkorsovipvt * (SIMUL_PPPERSOVIEURKK / &TTPaivia);
 		END;
@@ -471,16 +534,16 @@ tmpvt_yht = SUM(tmpertayspvt_eikor, tmkortayspvt, tmpersovipvt_eikor, tmkorsovip
 
 		/* Perus */
 		%TyomTukiKS(SIMUL_TMPERTAYSEURKK, &LVUOSI, &KUUK, &INF,
-				   (ikavu2 < &TarvHarkIka.) or not max(dtyhtep, vvvmkq), tmosvanhtulot, 0, lapsimaara, tmosvanhlapsimaara,
-				   tmomattulot, 0, tmosvanhtulot, vanh_omaishoitohp, 0, sosetulot);
+				   ((ikavu2 < &TarvHarkIka.) AND (TYOLLISTYMISPALVELU=0)), TYOSSAOLOEHTO, 0, lapsimaara, tmosvanhlapsimaara,
+				   SUM(tulrek_etuus_tarveharkinta, POTULOT), 0, tulrek_vanhempien_tulot, 0, 0, tulrek_etuus_vahennettava);
 		SIMUL_TMPERTAYSEUR = tmpertayspvt_eikor * (SIMUL_TMPERTAYSEURKK / &TTPaivia);  
 
 		/* Korotettu */
 		IF tmkortayspvt OR tmkorsovipvt THEN DO;
 
 			%TyomTukiKS(SIMUL_TMKORTAYSEURKK, &LVUOSI, &KUUK, &INF,
-					   (ikavu2 < &TarvHarkIka.) or not max(dtyhtep, vvvmkq), tmosvanhtulot, 0, lapsimaara, tmosvanhlapsimaara,
-					   tmomattulot, 0, tmosvanhtulot, vanh_omaishoitohp, 1, sosetulot);
+					   ((ikavu2 < &TarvHarkIka.) AND (TYOLLISTYMISPALVELU=0)), TYOSSAOLOEHTO, 0, lapsimaara, tmosvanhlapsimaara,
+					   SUM(tulrek_etuus_tarveharkinta, POTULOT), 0, tulrek_vanhempien_tulot, 0, 1, tulrek_etuus_vahennettava);
 			SIMUL_TMKORTAYSEUR = tmkortayspvt * (SIMUL_TMKORTAYSEURKK / &TTPaivia);
 			SIMUL_TMKORILMTAYS = tmkortayspvt * (SIMUL_TMPERTAYSEURKK / &TTPaivia);
 		END;
@@ -489,7 +552,7 @@ tmpvt_yht = SUM(tmpertayspvt_eikor, tmkortayspvt, tmpersovipvt_eikor, tmkorsovip
 		IF tmpersovipvt_eikor OR tmkorsovipvt THEN DO;
 
 			%SoviteltuKS(SIMUL_TMPERSOVIEURKK, &LVUOSI, &KUUK, &INF, 
-						 0, 0, lapsimaara, SIMUL_TMPERTAYSEURKK, sovipalkka, 0, 0);
+						 0, 0, lapsimaara, SIMUL_TMPERTAYSEURKK, tulrek_palkka, 0, 0);
 			SIMUL_TMPERSOVIEUR = tmpersovipvt_eikor * (SIMUL_TMPERSOVIEURKK / &TTPaivia);
 		END;
 
@@ -497,9 +560,23 @@ tmpvt_yht = SUM(tmpertayspvt_eikor, tmkortayspvt, tmpersovipvt_eikor, tmkorsovip
 		IF tmkorsovipvt THEN DO;
 
 			%SoviteltuKS(SIMUL_TMKORSOVIEURKK, &LVUOSI, &KUUK, &INF, 
-						 0, 1, lapsimaara, SIMUL_TMKORTAYSEURKK, sovipalkka, 0, 0);
+						 0, 1, lapsimaara, SIMUL_TMKORTAYSEURKK, tulrek_palkka, 0, 0);
 			SIMUL_TMKORSOVIEUR = tmkorsovipvt * (SIMUL_TMKORSOVIEURKK / &TTPaivia);
 			SIMUL_TMKORILMSOVI = tmkorsovipvt * (SIMUL_TMPERSOVIEURKK / &TTPaivia);
+		END;
+	END;
+
+	/* Yleistuki */
+	IF pppvt_yht OR tmpvt_yht THEN DO;
+		/* Perus */
+		%YleistukiKS(SIMUL_YLEISTAYSEURKK, &LVUOSI, &KUUK, &INF, TYOLLISTYMISPALVELU, TYOSSAOLOEHTO, tmosvanhlapsimaara, 
+					SUM(tulrek_etuus_tarveharkinta, POTULOT), tulrek_vanhempien_tulot, tulrek_etuus_vahennettava);
+		SIMUL_YLEISTAYSEUR = SUM(pppertayspvt_eikor, ppkortayspvt, tmpertayspvt_eikor, tmkortayspvt) * (SIMUL_YLEISTAYSEURKK / &TTPaivia);
+
+		/* Soviteltu yleistuki */
+		IF pppersovipvt_eikor OR ppkorsovipvt OR tmpersovipvt_eikor OR tmkorsovipvt THEN DO; 
+			%SoviteltuKS(SIMUL_YLEISSOVEURKK, &LVUOSI, &KUUK, &INF, 0, 0, 0, SIMUL_YLEISTAYSEURKK, tulrek_palkka, 0, 0);
+			SIMUL_YLEISSOVEUR = SUM(pppersovipvt_eikor, ppkorsovipvt, tmpersovipvt_eikor, tmkorsovipvt) * (SIMUL_YLEISSOVEURKK / &TTPaivia);
 		END;
 	END;
 
@@ -511,8 +588,9 @@ PERUSPR = SUM(SIMUL_PPPERTAYSEUR, SIMUL_PPKORTAYSEUR, SIMUL_PPKORSOVIEUR, SIMUL_
 PERILMAKOR = SUM(SIMUL_PPPERTAYSEUR, SIMUL_PPKORILMTAYS, SIMUL_PPKORILMSOVI, SIMUL_PPPERSOVIEUR);
 ANSIOPR = SUM(SIMUL_APPERTAYSEUR, SIMUL_APKORTAYSEUR, SIMUL_APKORSOVIEUR, SIMUL_APPERSOVIEUR);
 ANSIOILMKOR = SUM(SIMUL_APPERTAYSEUR, SIMUL_APKORILMTAYS, SIMUL_APKORILMSOVI, SIMUL_APPERSOVIEUR);
+YLEISTUKI = SUM(SIMUL_YLEISTAYSEUR, SIMUL_YLEISSOVEUR);
 
-TTURVA_SIMUL = SUM(YHTTMTUKI, PERUSPR, ANSIOPR, IFN(&LVUOSI <= 2024, VUORKORV_DATA, 0));
+TTURVA_SIMUL = SUM(YHTTMTUKI, PERUSPR, ANSIOPR, YLEISTUKI, IFN(&LVUOSI <= 2024, VUORKORV_DATA, 0));
 TTURVA_DATA = SUM(TMTUKI_DATA, PERUSPR_DATA, ANSIOPR_DATA, IFN(&LVUOSI <= 2024, VUORKORV_DATA, 0));
 
 /* Päivät */
@@ -533,7 +611,9 @@ TTURVA_PV_DATA TTURVA_PV_SIMUL
 SIMUL_APPERTAYSEUR SIMUL_APKORTAYSEUR SIMUL_APPERSOVIEUR SIMUL_APKORSOVIEUR
 SIMUL_PPPERTAYSEUR SIMUL_PPKORTAYSEUR SIMUL_PPPERSOVIEUR SIMUL_PPKORSOVIEUR
 SIMUL_TMPERTAYSEUR SIMUL_TMKORTAYSEUR SIMUL_TMPERSOVIEUR SIMUL_TMKORSOVIEUR
-VUORKORV_DATA;
+VUORKORV_DATA
+
+	YLEISTUKI SIMUL_YLEISTAYSEUR SIMUL_YLEISSOVEUR;
 
 DO OVER PISTE;
 	IF PISTE <= 0 THEN PISTE = .;
@@ -560,6 +640,7 @@ LABEL
 	PERILMAKOR			= "Peruspäiväraha ilman korotuksia, euro, KK-malli"
 	ANSIOPR				= "Ansiopäiväraha, euro, KK-malli"
 	ANSIOILMKOR 		= "Ansiopäiväraha ilman korotuksia, euro, KK-malli"
+	YLEISTUKI 			= "Yleistuki, euro, KK-malli"
 
 	ANSIOPR_DATA		= "Ansiopäiväraha, euro, KK-data"
 	TMTUKI_DATA			= "Työmarkkinatuki, euro, KK-data"
@@ -590,7 +671,8 @@ PROC SUMMARY DATA = TEMP.&TULOSNIMI_TT._KK NWAY;
 		TMTUKIPV_SIMUL PERUSPRPV_SIMUL ANSIOPRPV_SIMUL
 		TMTUKIPV_DATA PERUSPRPV_DATA ANSIOPRPV_DATA
 		TTURVA_PV_SIMUL TTURVA_PV_DATA
-		VUORKORV_DATA;
+		VUORKORV_DATA YLEISTUKI;
+
 	OUTPUT OUT = TEMP.&TULOSNIMI_TT. (DROP = _:) SUM = ;
 RUN;
 

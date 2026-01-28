@@ -1,7 +1,5 @@
 /******************************************************************************
-* Kuvaus: Parametritaulujen sekä indeksien hallinnointiohjelmat
-* Toimii perusvuodella 2020
-* Päivitetty viimeksi: 19.1.2023				     					      
+* Kuvaus: Parametritaulujen sekä indeksien hallinnointiohjelmat				     					      
 ******************************************************************************/
 
 /*=============================================================================
@@ -43,8 +41,8 @@ ohjelmassa, jossa sitä kutsutaan.
 
 	%do QZ = &ALKU %to &LOPPU;
 		%GLOBAL ansio64&QZ ansio64kolmas&QZ IndKel&QZ TEL8020&QZ
-				ind51&QZ ind51loka&QZ IndOpt2010&QZ palkvahpros&QZ palkvahpros100&QZ
-				elvakmaks&QZ korelvakmaks&QZ
+				ind51&QZ ind51loka&QZ IndKuphi2000&QZ
+				palkvahpros&QZ palkvahpros100&QZ elvakmaks&QZ korelvakmaks&QZ
 				svpro&QZ svprmaks&QZ elkorsvmaks&QZ tyotvakmaks&QZ vuokraind&QZ;
 	%end;
 
@@ -109,13 +107,13 @@ ohjelmassa, jossa sitä kutsutaan.
 		%end;
 
 		/*=====================================================================
-		Opetustoimen hintaindeksi 2010
+		Kuntien peruspalveluiden hintaindeksi 2000
 		---------------------------------------------------------------------*/
 		%do QZ = &ALKU %to &LOPPU;
-		select IndOpt2010 into :IndOpt2010&QZ
+		select IndKuphi2000 into :IndKuphi2000&QZ
 			from &indtaulu
 			where vuosi = &QZ;
-		%put NOTE: OPETUSTOIMEN HINTAINDEKSI &QZ: &&IndOpt2010&QZ;
+		%put NOTE: KUNTIEN PERUSPALVELUIDEN HINTAINDEKSI &QZ: &&IndKuphi2000&QZ;
 		%end;
 
 		/*=====================================================================
@@ -269,8 +267,8 @@ lisätä tauluihin päivitettäviä indeksejä, sekä muokata pyöristystarkkuutta.
 	-------------------------------------------------------------------------*/
 	%if %length(&PTOIMTUKI) > 0 %then %do;
 		%luo(&PTOIMTUKI)
-		%paivita(YksinKR1, IndKel, &PTOIMTUKI, .01, 2011, 463.77)
-		%paivita(YksinKR2, IndKel, &PTOIMTUKI, .01, 2011, 463.77)
+		%paivita(YksinKR1, IndKel, &PTOIMTUKI, .01, 2011, 449.86)
+		%paivita(YksinKR2, IndKel, &PTOIMTUKI, .01, 2011, 449.86)
 	%end;
 
 	/*=========================================================================
@@ -413,8 +411,8 @@ lisätä tauluihin päivitettäviä indeksejä, sekä muokata pyöristystarkkuutta.
 		%PaivitaPhoito(PHRaja4, ansio64, &PPHOITO, 1)
 		%PaivitaPhoito(PHRaja5, ansio64, &PPHOITO, 1)
 		%PaivitaPhoito(PHVahenn, ansio64, &PPHOITO, 1)
-		%PaivitaPhoito(PHYlaRaja, IndOpt2010, &PPHOITO, 1)
-		%PaivitaPhoito(PHAlaRaja, IndOpt2010, &PPHOITO, 1)
+		%PaivitaPhoito(PHYlaRaja, IndKuphi2000, &PPHOITO, 1)
+		%PaivitaPhoito(PHAlaRaja, IndKuphi2000, &PPHOITO, 1)
 	%end;
 
 	/*=========================================================================

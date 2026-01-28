@@ -67,7 +67,7 @@
 	* Tulostaulukoiden esivalinnat ; 
 
 	%LET TULOSLAAJ = 1 ; 	 * Mikrotason tulosaineiston laajuus (1 = suppea, 2 = laaja (kaikki pohja-aineiston muuttujat)) ;
-	%LET MUUTTUJAT = TUKIKESK TUKIKESK_DATA TUKIKOR TUKIKOR_DATA ASUMLISA ASUMLISA_DATA OPLAIN OPLAIN_DATA; * Taulukoitavat muuttujat (summataulukot) ;
+	%LET MUUTTUJAT = TUKIKESK opintoraha_ke TUKIKOR opintoraha_ko ASUMLISA opintuki_asumlisa OPLAIN opintuki_takaus; * Taulukoitavat muuttujat (summataulukot) ;
 	%LET YKSIKKO = 1;		 * Tulostaulukoiden yksikkˆ (1 = henkilˆ, 2 = kotitalous) ;
 	%LET LUOK_HLO1 = ; * Taulukoinnin 1. henkilˆluokitus (jos YKSIKKO = 1)
 							   Vaihtoehtoina: 
@@ -141,7 +141,7 @@
 	(KEEP = hnro knro ikavu ikakk asko tkopira odorsyko odorkeko odorsyke odorkeke odalsy odalke odmksyko odmksyke odmkkeko odmkkeke odlksy odlkke odoksy odokke odta
 	svatva svatvp per_apuraha aloituspvm cllkm yrvah
 	maksvuok jasenia yastukikr astukikr_l15 astukikr_l24 astukikr_l25
-	TUKIKOR_DATA TUKIKESK_DATA ASUMLISA_DATA OPLAIN_DATA);
+	opintoraha_ke opintoraha_ko opintuki_asumlisa opintuki_takaus);
 
 	WHERE (tkopira > 0 OR sum(odorsyko, odorkeko) NE 0 OR sum(odorsyke, odorkeke) NE 0 OR sum(odalsy, odalke) NE 0 OR sum(odlksy, odlkke) NE 0);
 
@@ -435,7 +435,7 @@ IF ASUMLISA > 0 THEN ASUMLISA = SUM(ASUMLISA, -ASUMLISA_TAK);
 * Asetetaan muuttujien 0-arvot tyhjiksi, jotta lukum‰‰r‰t voidaan laskea suoraan ;
 
 ARRAY PISTE 
-TUKIKESK_DATA TUKIKOR_DATA ASUMLISA_DATA OPLAIN_DATA TUKIKESK TUKIKESK_ILMHUOLT TUKIKESK_ILMOP TUKIKESK_ILMHUOLTOP
+opintoraha_ke opintoraha_ko opintuki_asumlisa opintuki_takaus TUKIKESK TUKIKESK_ILMHUOLT TUKIKESK_ILMOP TUKIKESK_ILMHUOLTOP
 	TUKIKOR TUKIKOR_ILMHUOLT TUKIKOR_ILMOP TUKIKOR_ILMHUOLTOP ASUMLISA OPLAIN TUKIKESK_TAK TUKIKOR_TAK ASUMLISA_TAK;
 DO OVER PISTE;
 	IF PISTE <= 0 THEN PISTE = .;
@@ -458,7 +458,7 @@ TUKIKESK_TAK = 'Keskiasteen opintorahan takaisinperint‰, MALLI'
 TUKIKOR_TAK = 'Korkea-asteen opintorahan takaisinperint‰, MALLI' 
 ASUMLISA_TAK = 'Asumislis‰n takaisinperint‰, MALLI';
 
-KEEP hnro knro TUKIKESK_DATA TUKIKOR_DATA ASUMLISA_DATA OPLAIN_DATA TUKIKESK TUKIKESK_ILMHUOLT TUKIKESK_ILMOP TUKIKESK_ILMHUOLTOP
+KEEP hnro knro opintoraha_ke opintoraha_ko opintuki_asumlisa opintuki_takaus TUKIKESK TUKIKESK_ILMHUOLT TUKIKESK_ILMOP TUKIKESK_ILMHUOLTOP
 	TUKIKOR TUKIKOR_ILMHUOLT TUKIKOR_ILMOP TUKIKOR_ILMHUOLTOP ASUMLISA OPLAIN TUKIKESK_TAK TUKIKOR_TAK ASUMLISA_TAK;
 
 RUN;

@@ -32,7 +32,7 @@ ESIMERKKILASKENNASSA LASKETAAN PIENTALOILLE, MAAPOHJALLE JA VAPAA-AJAN ASUNNOILL
   - Ansiotasoindeksiin (ansio64) perustuva inflaatiokorjaus: INF = ATI ;
 
 %LET INF = 1.00; * Syötä lukuarvo, KHI tai ATI;
-%LET AVUOSI = 2025; * Perusvuosi inflaatiokorjausta varten ;
+%LET AVUOSI = 2026; * Perusvuosi inflaatiokorjausta varten ;
 %LET PINDEKSI_VUOSI = pindeksi_vuosi; * Käytettävä indeksien parametritaulukko ;
 
 * Käytettävien tiedostojen nimet;
@@ -62,8 +62,8 @@ ESIMERKKILASKENNASSA LASKETAAN PIENTALOILLE, MAAPOHJALLE JA VAPAA-AJAN ASUNNOILL
 /* 2.1 Fiktiivinen data */
 
 * Lainsäädäntövuosi (2009-);
-%LET MINIMI_KIVERO_VUOSI = 2025;
-%LET MAKSIMI_KIVERO_VUOSI = 2025;
+%LET MINIMI_KIVERO_VUOSI = 2026;
+%LET MAKSIMI_KIVERO_VUOSI = 2026;
 
 /******************************************************/
 /* KÄYTETÄÄN SEKÄ PIENTALOJEN ETTÄ VAPAA-AJAN ASUNTOJEN KIINTEISTÖVERON LASKENNASSA */

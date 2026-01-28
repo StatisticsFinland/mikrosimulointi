@@ -49,7 +49,7 @@ kotitalouksille.
   - Ansiotasoindeksiin (ansio64) perustuva inflaatiokorjaus: INF = ATI ;
 
 %LET INF = 1.00; * Syötä lukuarvo, KHI tai ATI;
-%LET AVUOSI = 2025; * Perusvuosi inflaatiokorjausta varten ;
+%LET AVUOSI = 2026; * Perusvuosi inflaatiokorjausta varten ;
 %LET PINDEKSI_VUOSI = pindeksi_vuosi; * Käytettävä indeksien parametritaulukko ;
 
 * Simuloinnissa käytettävien lakimakrotiedostojen nimet ;
@@ -118,8 +118,8 @@ kotitalouksille.
 
 /* 2.0 Lainsäädäntövuosi ja -kuukausi*/
 
-%LET MINIMI_KOKO_VUOSI = 2025;
-%LET MAKSIMI_KOKO_VUOSI = 2025;
+%LET MINIMI_KOKO_VUOSI = 2026;
+%LET MAKSIMI_KOKO_VUOSI = 2026;
 
 %LET MINIMI_KOKO_KUUK = 12;
 %LET MAKSIMI_KOKO_KUUK = 12;
@@ -301,7 +301,7 @@ Kirkollinen veroprosentti desimaaliprosenttilukuna, >= 0, esim. 1.20
 %LET MINIMI_KOKO_EAKRYHMA = 1;
 %LET MINIMI_KOKO_EALAMMRYHMA = 1;	
 %LET MINIMI_KOKO_KELRYHMA = 1;
-%LET MINIMI_KOKO_KUNNVERO = 7.54;
+%LET MINIMI_KOKO_KUNNVERO = 7.57;
 %LET MINIMI_KOKO_KIRKVERO = 0;
 
 /* 2.4 Asuntoon liittyviä tietoja */
@@ -333,6 +333,7 @@ ASKORKO = Asuntolainan korko e/kk; Jos OMISTUS = 0, tällä ei ole vaikutusta
 2 Työtön (oletus: ansiosidonnainen)
 21 Peruspäiväraha
 22 Työmarkkinatuki
+23 Yleistuki
 3 Sairausvakuutuksen päiväraha (oletus: normaali)
 31 Vanhempainpäiväraha (oletus: normaali)
 311 Raskausraha (8/2022 lähtien) / Äidin korotettu vanhempainraha (7/2022 asti)
@@ -501,24 +502,19 @@ TTPAIVAT: Henkilölle aiemmin maksettujen työttömyyspäivärahapäivien lukumäärä (k
 /* 2.9 Muuttujien johdonmukaisuuden varmistaminen, varoitukset */
 
 /* Asuntolainan korot otetaan huomioon vain omistusasunnosa */
-
 %IF &MINIMI_KOKO_OMISTUS = 0 AND &MINIMI_KOKO_ASKOROT NE 0 %THEN %PUT WARNING: Asuntolainan korot otetaan huomioon vain omistusasunnosa;
 
 /* Helsinki on aina kuulunut kalleusluokkaan 1 */
-
 %IF (&MINIMI_KOKO_YAKRYHMA = 1 AND &MINIMI_KOKO_EAKRYHMA = 1) AND &MINIMI_KOKO_KELRYHMA NE 1 %THEN %PUT WARNING: Helsinki on aina kuulunut kalleusluokkaan 1 (KELRYHMA);
 
 /* Kotihoidon tukea voi saada puolisoista vain toinen */
 /* Jos kyse on puolisoista, viitehenkilö ei voi saada kotihoidon tukea */
-
 %IF &MINIMI_KOKO_PUOLISO = 1 AND &MINIMI_KOKO_TILANNE = 4 AND &MINIMI_KOKO_TILANNE_PUOL = 4 %THEN %PUT WARNING: Kotihoidon tukea voi saada puolisoista vain toinen;
 
 /* Korotusosa ja muutosturva eivät päde yhtäaikaa */
-
 %IF &MINIMI_KOKO_KOROTUS = 1 AND &MINIMI_KOKO_MTURVA = 1 %THEN %PUT WARNING: Korotusosa ja muutosturva eivät päde yhtäaikaa;
 
 /* Vuonna 2017 ja 2025 vuosikeskiarvoistaminen ei huomioi oikein opiskelijoiden siirtoa yleiseen asumistuen ja opintotuen asumislisän välillä */
-
 %IF &VUOSIKA = 1 AND (%SUBSTR(&MINIMI_KOKO_TILANNE, 1, 1) = 5 OR (&MINIMI_KOKO_PUOLISO = 1 AND %SUBSTR(&MINIMI_KOKO_TILANNE_PUOL, 1, 1) = 5)) AND &MINIMI_KOKO_VUOSI <= 2017 AND &MAKSIMI_KOKO_VUOSI >= 2017 %THEN %DO;
 	%PUT WARNING: Vuonna 2017 vuosikeskiarvoistaminen ei huomioi oikein opiskelijoiden siirtoa yleiseen asumistukeen;
 	%PUT WARNING: Valitse VUOSIKA = 2 ja haluamasi lainsäädäntökuukausi!;
@@ -526,6 +522,12 @@ TTPAIVAT: Henkilölle aiemmin maksettujen työttömyyspäivärahapäivien lukumäärä (k
 
 %IF &VUOSIKA = 1 AND (%SUBSTR(&MINIMI_KOKO_TILANNE, 1, 1) = 5 OR (&MINIMI_KOKO_PUOLISO = 1 AND %SUBSTR(&MINIMI_KOKO_TILANNE_PUOL, 1, 1) = 5)) AND &MINIMI_KOKO_VUOSI <= 2025 AND &MAKSIMI_KOKO_VUOSI >= 2025 %THEN %DO;
 	%PUT WARNING: Vuonna 2025 vuosikeskiarvoistaminen ei huomioi oikein opiskelijoiden siirtoa yleisltä asumistuelta;
+	%PUT WARNING: Valitse VUOSIKA = 2 ja haluamasi lainsäädäntökuukausi!;
+%END;
+
+/* Vuonna 2026 vuosikeskiarvo ei laske oikein työmarkkinatukea, peruspäivärahaa ja yleistukea */
+%IF &VUOSIKA = 1 AND (%SUBSTR(&MINIMI_KOKO_TILANNE, 1, 1) = 2 OR (&MINIMI_KOKO_PUOLISO = 1 AND %SUBSTR(&MINIMI_KOKO_TILANNE_PUOL, 1, 1) = 2)) AND &MINIMI_KOKO_VUOSI <= 2026 AND &MAKSIMI_KOKO_VUOSI >= 2026 %THEN %DO;
+	%PUT WARNING: Vuonna 2026 vuosikeskiarvo ei laske oikein työmarkkinatukea, peruspäivärahaa ja yleistukea;
 	%PUT WARNING: Valitse VUOSIKA = 2 ja haluamasi lainsäädäntökuukausi!;
 %END;
 
@@ -716,7 +718,6 @@ IF SUBSTRN(KOKO_TILANNE&suff, 1, 1) = 2 THEN DO;
 	YHTLAPSIATTURVA&suff = SUM(KOKO_LAPSIA_ALLE3, KOKO_LAPSIA_3_6, KOKO_LAPSIA_7_9, KOKO_LAPSIA_10_15, KOKO_LAPSIA_16, KOKO_LAPSIA_17);
 
 	IF KOKO_TILANNE&suff = 2 THEN DO;
-
 		%IF &VUOSIKA = 2 %THEN %DO;
 			%AnsioSidKS (TYOTPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, YHTLAPSIATTURVA&suff, KOKO_KOROTUS, KOKO_MTURVA, 0, KOKO_EDPALKKA&suff, 0, KOKO_TTPAIVAT, 0, aktiivi=KOKO_AKTIIVI);
 			IF (KOKO_KOROTUS OR KOKO_MTURVA) AND KOKO_VUOSI >= 2013 THEN DO;
@@ -732,8 +733,8 @@ IF SUBSTRN(KOKO_TILANNE&suff, 1, 1) = 2 THEN DO;
 			END;
 		%END;
 	END;
-	ELSE IF KOKO_TILANNE&suff = 21 THEN DO;
 
+	ELSE IF KOKO_TILANNE&suff = 21 THEN DO;
 		%IF &VUOSIKA = 2 %THEN %DO;
 			%PerusPRahaKS (TYOTPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, 0, (KOKO_KOROTUS OR KOKO_MTURVA), KOKO_PUOLISO, YHTLAPSIATTURVA&suff, 0, 0, 0, aktiivi=KOKO_AKTIIVI);
 		%END;
@@ -742,8 +743,8 @@ IF SUBSTRN(KOKO_TILANNE&suff, 1, 1) = 2 THEN DO;
 		%END;
 		IF (KOKO_KOROTUS OR KOKO_MTURVA) AND KOKO_VUOSI >= 2013 THEN TYOTKOROSA&suff = &TTPaivia * &KorotusOsa;
 	END;
-	ELSE IF KOKO_TILANNE&suff = 22 THEN DO; 
 
+	ELSE IF KOKO_TILANNE&suff = 22 THEN DO; 
     	%IF &VUOSIKA = 2 %THEN %DO; 
 			%IF (&onkopuoliso = 0) %THEN %DO;
                	%TyomTukiKS (TYOTPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, 1, 0, KOKO_PUOLISO, YHTLAPSIATTURVA&suff, 0, 0, KOKO_PALKKA_PUOL, 0, 0, (KOKO_KOROTUS OR KOKO_MTURVA), 0, aktiivi=KOKO_AKTIIVI); 
@@ -754,20 +755,27 @@ IF SUBSTRN(KOKO_TILANNE&suff, 1, 1) = 2 THEN DO;
 		%END;
         %ELSE %DO; 
 			%IF (&onkopuoliso = 0) %THEN %DO;
-           		%TyomTukiVS (TYOTPR&suff, KOKO_VUOSI, INF, 1, 0, KOKO_PUOLISO, YHTLAPSIATTURVA&suff, 0, 0, KOKO_PALKKA_PUOL , 0, 0, (KOKO_KOROTUS OR KOKO_MTURVA), 0, aktiivi=KOKO_AKTIIVI); 
+           		%TyomTukiVS (TYOTPR&suff, KOKO_VUOSI, INF, 1, 0, KOKO_PUOLISO, YHTLAPSIATTURVA&suff, 0, 0, KOKO_PALKKA_PUOL, 0, 0, (KOKO_KOROTUS OR KOKO_MTURVA), 0, aktiivi=KOKO_AKTIIVI); 
 			%END;
 			%ELSE %DO;
 				%TyomTukiVS (TYOTPR&suff, KOKO_VUOSI, INF, 1, 0, KOKO_PUOLISO, YHTLAPSIATTURVA&suff, 0, 0, SUM(KOKO_PALKKA, TYOTPR), 0, 0, (KOKO_KOROTUS OR KOKO_MTURVA), 0, aktiivi=KOKO_AKTIIVI); 
 			%END;
 		 %END; 
 		 IF (KOKO_KOROTUS OR KOKO_MTURVA) AND KOKO_VUOSI >= 2013 THEN TYOTKOROSA&suff = &TTPaivia * &KorotusOsa;
-      END;
+    END;
+
+	ELSE IF KOKO_TILANNE&suff = 23 THEN DO;
+    	%IF &VUOSIKA = 2 %THEN %DO;
+			%YleistukiKS (TYOTPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, 0, 1, 0, 0, 0, 0);
+		%END;
+		%ELSE %DO;
+			%YleistukiVS(TYOTPR&suff, KOKO_VUOSI, INF, 0, 1, 0, 0, 0, 0);
+		%END;
+	END;
 
 
 	/* 4.1.1 Sovitellut päivärahat */
-
 	IF KOKO_PALKKA&suff > 0 THEN DO;
-
 		%IF &VUOSIKA = 2 %THEN %DO;
 			%SoviteltuKS (TYOTPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, IFN(KOKO_TILANNE&suff = 2, 1, 0), (KOKO_KOROTUS OR KOKO_MTURVA), YHTLAPSIATTURVA&suff, TYOTPR&suff, KOKO_PALKKA&suff, KOKO_EDPALKKA&suff, 0, aktiivi=KOKO_AKTIIVI);
 		%END;
@@ -802,10 +810,10 @@ IF SUBSTRN(KOKO_TILANNE&suff, 1, 1) = 3 THEN DO;
 	IF KOKO_TILANNE&suff = 3 OR KOKO_TILANNE&suff = 32 THEN DO;
 
 		%IF &VUOSIKA = 2 %THEN %DO;
-			%SairVakPrahaKS (SAIRPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, 0, YHTLAPSIASAIRVAK&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
+			%SairVakPrahaKS (SAIRPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, 0, YHTLAPSIASAIRVAK&suff, KOKO_IKA&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
 		%END;
 		%ELSE %DO;
-			%SairVakPrahaVS (SAIRPR&suff, KOKO_VUOSI, INF, 0, YHTLAPSIASAIRVAK&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
+			%SairVakPrahaVS (SAIRPR&suff, KOKO_VUOSI, INF, 0, YHTLAPSIASAIRVAK&suff, KOKO_IKA&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
 		%END;
 	END;
 
@@ -814,10 +822,10 @@ IF SUBSTRN(KOKO_TILANNE&suff, 1, 1) = 3 THEN DO;
 	IF KOKO_TILANNE&suff = 31 THEN DO;
 
 		%IF &VUOSIKA = 2 %THEN %DO;
-			%SairVakPrahaKS (SAIRPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, 1, YHTLAPSIASAIRVAK&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
+			%SairVakPrahaKS (SAIRPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, 1, YHTLAPSIASAIRVAK&suff, KOKO_IKA&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
 		%END;
 		%ELSE %DO;
-			%SairVakPrahavS (SAIRPR&suff, KOKO_VUOSI, INF, 1, YHTLAPSIASAIRVAK&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
+			%SairVakPrahavS (SAIRPR&suff, KOKO_VUOSI, INF, 1, YHTLAPSIASAIRVAK&suff, KOKO_IKA&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
 		%END;
 	END;
 	
@@ -838,7 +846,7 @@ IF SUBSTRN(KOKO_TILANNE&suff, 1, 1) = 3 THEN DO;
 	IF KOKO_TILANNE&suff = 312 THEN DO;
 
 		%IF &VUOSIKA = 2 %THEN %DO;
-			 %KorVanhRahaKS (SAIRPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, 0, YHTLAPSIASAIRVAK&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
+			%KorVanhRahaKS (SAIRPR&suff, KOKO_VUOSI, KOKO_KUUK, INF, 0, YHTLAPSIASAIRVAK&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
 		%END;
 		%ELSE %DO;
 			%KorVanhRahaVS (SAIRPR&suff, KOKO_VUOSI, INF, 0, YHTLAPSIASAIRVAK&suff, TULO&suff, tulonhankk = SVHANKVAH&suff);
@@ -1439,6 +1447,11 @@ THKULUT_AR1 = MAX(SUM(KOKO_TULONHANKKULUT, KOKO_AYMAKSUT, KOKO_TYOMATKAKULUT), 0
 THKULUT_AR2 = MAX(SUM(KOKO_TULONHANKKULUT_PUOL, KOKO_AYMAKSUT_PUOL, KOKO_TYOMATKAKULUT_PUOL), 0);
 ARRAY THKULUT_AR{*} THKULUT_AR1 THKULUT_AR2;
 
+/* Ikä */
+IKA_AR1 = KOKO_IKA;
+IKA_AR2 = KOKO_IKA_PUOL;
+ARRAY IKA_AR{*} IKA_AR1 IKA_AR2;
+
 /* Muita verottomia tuloja */
 MUUSEKALTULO = SUM(ELATTUKI, ASUMTUKI, ASUMLISAYHT, ELASUMTUKI, OPLAINA, OPLAINA_PUOL, LAPSIKORO, LAPSIKORO_PUOL);
 
@@ -1465,7 +1478,7 @@ IF (&VUOSIKA = 1 AND KOKO_VUOSI >= 2019) OR (&VUOSIKA = 2 AND ((KOKO_VUOSI = 201
 %IF &VUOSIKA = 2 %THEN %DO;
 	IF KOKO_TOIMTUKI_OIKEUS = 1 THEN DO;
 		%ToimTukiKS (TOIMTUKI, KOKO_VUOSI, KOKO_KUUK, INF, KOKO_KELRYHMA, 1, IFN(KOKO_PUOLISO, 2, 1), 0, KOKO_LAPSIA_17,
-		SUM(KOKO_LAPSIA_10_15, KOKO_LAPSIA_16), SUM(KOKO_LAPSIA_ALLE3, KOKO_LAPSIA_3_6, KOKO_LAPSIA_7_9), LAPSLIS, NETTOTYOTULO_AR, SUM(MUUNETTOTULO, MUUSEKALTULO), SUM(KOKO_VUOKRA_VASTIKE, KOKO_VESI), PHMAKSUT, THKULUT_AR);
+		SUM(KOKO_LAPSIA_10_15, KOKO_LAPSIA_16), SUM(KOKO_LAPSIA_ALLE3, KOKO_LAPSIA_3_6, KOKO_LAPSIA_7_9), LAPSLIS, NETTOTYOTULO_AR, SUM(MUUNETTOTULO, MUUSEKALTULO), SUM(KOKO_VUOKRA_VASTIKE, KOKO_VESI), PHMAKSUT, THKULUT_AR, IKA_AR);
 	END;
 	ELSE DO;
 		TOIMTUKI = 0;
@@ -1478,7 +1491,7 @@ IF (&VUOSIKA = 1 AND KOKO_VUOSI >= 2019) OR (&VUOSIKA = 2 AND ((KOKO_VUOSI = 201
 %ELSE %DO;
 	IF KOKO_TOIMTUKI_OIKEUS = 1 THEN DO;
 		%ToimTukiVS (TOIMTUKI, KOKO_VUOSI, INF, KOKO_KELRYHMA, 1, IFN(KOKO_PUOLISO, 2, 1), 0, KOKO_LAPSIA_17,
-		SUM(KOKO_LAPSIA_10_15, KOKO_LAPSIA_16), SUM(KOKO_LAPSIA_ALLE3, KOKO_LAPSIA_3_6, KOKO_LAPSIA_7_9), LAPSLIS, NETTOTYOTULO_AR, SUM(MUUNETTOTULO, MUUSEKALTULO), SUM(KOKO_VUOKRA_VASTIKE, KOKO_VESI), PHMAKSUT, THKULUT_AR);
+		SUM(KOKO_LAPSIA_10_15, KOKO_LAPSIA_16), SUM(KOKO_LAPSIA_ALLE3, KOKO_LAPSIA_3_6, KOKO_LAPSIA_7_9), LAPSLIS, NETTOTYOTULO_AR, SUM(MUUNETTOTULO, MUUSEKALTULO), SUM(KOKO_VUOKRA_VASTIKE, KOKO_VESI), PHMAKSUT, THKULUT_AR, IKA_AR);
 	END;
 	ELSE DO;
 		TOIMTUKI = 0;
@@ -1504,7 +1517,7 @@ DROP testi taulu_: /* Pudotetaan kaikki taulu_-alkuiset */ kkuuk lapsia
 	 OPRAHA_ILMHUOLT OPRAHA_ILMOP OPRAHA_ILMHUOLTOP OPRAHA_ILMHUOLT_PUOL OPRAHA_ILMOP_PUOL OPRAHA_ILMHUOLTOP_PUOL
 	 VOSUUSEISOVA ELATTUKI_YKSILAPSI
 	 EVESI TYOTULOT TYOTULOT_PUOL TYO_OSUUS TYO_OSUUS_PUOL TYO_VEROT TYO_VEROT_PUOL
-	 MUUT_VEROT MUUT_VEROT_PUOL NETTOTYOTULO_AR1 NETTOTYOTULO_AR2 THKULUT_AR1 THKULUT_AR2
+	 MUUT_VEROT MUUT_VEROT_PUOL NETTOTYOTULO_AR1 NETTOTYOTULO_AR2 THKULUT_AR1 THKULUT_AR2 IKA_AR1 IKA_AR2
 	 OPINRAHA_YA_HUOM OPPIMAT;
 
 RUN;

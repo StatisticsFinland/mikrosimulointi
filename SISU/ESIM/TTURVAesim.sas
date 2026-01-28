@@ -13,7 +13,9 @@
 %IF &EG NE 1 %THEN %DO;
 
 %LET TULOSNIMI_TT = tturva_esim_&SYSDATE._1; * Simuloidun tulostiedoston nimi ;
-%LET VUOSIKA = 1;		* 1 = Vuosikeskiarvo, 2 = datassa annetun kuukauden lainsäädäntö ;
+%LET VUOSIKA = 2;		* 1 = Vuosikeskiarvo, 2 = datassa annetun kuukauden lainsäädäntö. 
+							HUOM! Älä käytä vuosikeskiarvoa kun lasket peruspäivärahaa, 
+							työmarkkinatukea ja yleistukea lainsäädäntövuodelle 2026;
 %LET VALITUT = _ALL_;	* Tulostaulukossa näytettävät muuttujat ;
 %LET EROTIN = 2;		* Tulosteessa käytettävä desimaalierotin, 1 = piste tai 2 = pilkku;
 %LET DESIMAALIT = 2;	* Tulosteessa käytettävä desimaalien määrä (0-9);
@@ -29,7 +31,7 @@
   - Ansiotasoindeksiin (ansio64) perustuva inflaatiokorjaus: INF = ATI ;
 
 %LET INF = 1.00; * Syötä lukuarvo, KHI tai ATI;
-%LET AVUOSI = 2025; * Perusvuosi inflaatiokorjausta varten ;
+%LET AVUOSI = 2026; * Perusvuosi inflaatiokorjausta varten ;
 %LET PINDEKSI_VUOSI = pindeksi_vuosi; * Käytettävä indeksien parametritaulukko ;
 
 * Käytettävien tiedostojen nimet; 
@@ -59,8 +61,8 @@
 /* 2.1 Fiktiivinen data */
 
 * Lainsäädäntövuosi (1985-);
-%LET MINIMI_TTURVA_VUOSI = 2025;
-%LET MAKSIMI_TTURVA_VUOSI = 2025;
+%LET MINIMI_TTURVA_VUOSI = 2026;
+%LET MAKSIMI_TTURVA_VUOSI = 2026;
 
 * Lainsäädäntökuukausi (1-12);
 %LET MINIMI_TTURVA_KUUK = 12;
@@ -108,10 +110,10 @@
 %LET MAKSIMI_TTURVA_PUOLTULO = 0;
 %LET KYNNYS_TTURVA_PUOLTULO = 1000; 
 
-*Omat pääomatulot (e/kk) (tarveharkitussa työmarkkinatuessa);
+*Omat tarveharkinnassa huomioitavat tulot (e/kk);
 %LET MINIMI_TTURVA_OMATULO = 0; 
 %LET MAKSIMI_TTURVA_OMATULO = 0;
-%LET KYNNYS_TTURVA_OMATULO = 1000; 
+%LET KYNNYS_TTURVA_OMATULO = 500; 
 
 *Asuuko saaja vanhempien luona (1 = tosi, 0 = epätosi);
 %LET MINIMI_TTURVA_OSITT = 0; 
@@ -129,12 +131,12 @@
 *Sovittelun perusteena oleva tulo (e/kk) (työttömyysaikana saatu työtulo);
 %LET MINIMI_TTURVA_SOVTULO = 0;
 %LET MAKSIMI_TTURVA_SOVTULO = 0;
-%LET KYNNYS_TTURVA_SOVTULO = 100;
+%LET KYNNYS_TTURVA_SOVTULO = 1000;
 
 *Vähennettävä muu sosiaalietuus (e/kk);
 %LET MINIMI_TTURVA_VAHSOSET = 0; 
 %LET MAKSIMI_TTURVA_VAHSOSET = 0;
-%LET KYNNYS_TTURVA_VAHSOSET = 100; 
+%LET KYNNYS_TTURVA_VAHSOSET = 300; 
 
 *Aktiivimallin alennettu työttömyyspäiväraha (1 = tosi, 0 = epätosi);
 %LET MINIMI_TTURVA_AKTIIVI = 0;
@@ -155,6 +157,8 @@
 DATA OUTPUT.&TULOSNIMI_TT;
 
 DO TTURVA_VUOSI = &MINIMI_TTURVA_VUOSI TO &MAKSIMI_TTURVA_VUOSI;
+	    IF &VUOSIKA = 1 AND TTURVA_VUOSI = 2026 
+		THEN PUTLOG "WARNING: Älä käytä vuosikeskiarvioa (VUOSIKA=1) kun lasket peruspäivärahaa, työmarkkinatukea tai yleistukea vuodelle 2026 (TTURVA_VUOSI=2026)";
 DO TTURVA_KUUK = &MINIMI_TTURVA_KUUK TO &MAKSIMI_TTURVA_KUUK;
 
 DO TTURVA_TOIMINTA = &MINIMI_TTURVA_TOIMINTA TO &MAKSIMI_TTURVA_TOIMINTA;
@@ -225,25 +229,26 @@ RUN;
 DATA OUTPUT.&TULOSNIMI_TT;
 SET OUTPUT.&TULOSNIMI_TT;
 
-/* 3.2.1 Työmarkkinatuki */
-
 IF TTURVA_TOIMINTA = 1 THEN DO;
 
-	IF TTURVA_TYOSSAOLO = 0 THEN DO;
-
+	/* 3.2.1 Työmarkkinatuki */
+	IF TTURVA_TYOSSAOLO = 0 AND TTURVA_VUOSI >= 1994 THEN DO;
 		IF &VUOSIKA = 2 THEN DO;
 			%TyomTukiKS(TMTUKIK, TTURVA_VUOSI, TTURVA_KUUK, INF, (TTURVA_OMATULO > 0 OR TTURVA_PUOLTULO > 0), TTURVA_OSITT, TTURVA_PUOLISO, TTURVA_LAPSIA, TTURVA_HUOLL, TTURVA_OMATULO, TTURVA_PUOLTULO, TTURVA_VANHTULO, 0, (TTURVA_OIKEUSKOR = 1), TTURVA_VAHSOSET, aktiivi=TTURVA_AKTIIVI);
 		END;
-		ELSE DO;
+		ELSE IF TTURVA_VUOSI <= 2026 THEN DO;
 			%TyomTukiVS(TMTUKIK, TTURVA_VUOSI, INF, (TTURVA_OMATULO > 0 OR TTURVA_PUOLTULO > 0), TTURVA_OSITT, TTURVA_PUOLISO, TTURVA_LAPSIA, TTURVA_HUOLL, TTURVA_OMATULO, TTURVA_PUOLTULO, TTURVA_VANHTULO, 0, (TTURVA_OIKEUSKOR = 1), TTURVA_VAHSOSET, aktiivi=TTURVA_AKTIIVI);
 		END;
+		ELSE DO;
+			TMTUKIK = 0;
+		END;
+		/* Soviteltu työmarkkinatuki */
 		IF TTURVA_SOVTULO > 0 THEN DO;
-			TMTUKIK = TMTUKIK + TTURVA_VAHSOSET;
 			IF &VUOSIKA = 2 THEN DO;
-				%SoviteltuKS(TMTUKIK, TTURVA_VUOSI, TTURVA_KUUK, INF, 0, 0, TTURVA_LAPSIA, TMTUKIK, TTURVA_SOVTULO, 0, TTURVA_KOULTUKI, aktiivi=TTURVA_AKTIIVI, vahsosetuus=TTURVA_VAHSOSET );
+				%SoviteltuKS(TMTUKIK, TTURVA_VUOSI, TTURVA_KUUK, INF, 0, 0, TTURVA_LAPSIA, TMTUKIK, TTURVA_SOVTULO, 0, TTURVA_KOULTUKI, aktiivi=TTURVA_AKTIIVI);
 			END;
-			ELSE DO;
-				%SoviteltuVS(TMTUKIK, TTURVA_VUOSI, INF, 0, 0, TTURVA_LAPSIA, TMTUKIK, TTURVA_SOVTULO, 0, TTURVA_KOULTUKI, aktiivi=TTURVA_AKTIIVI, vahsosetuus=TTURVA_VAHSOSET);
+			ELSE IF TTURVA_VUOSI <= 2026 THEN DO;
+				%SoviteltuVS(TMTUKIK, TTURVA_VUOSI, INF, 0, 0, TTURVA_LAPSIA, TMTUKIK, TTURVA_SOVTULO, 0, TTURVA_KOULTUKI, aktiivi=TTURVA_AKTIIVI);
 			END;
 		END;
 
@@ -252,23 +257,24 @@ IF TTURVA_TOIMINTA = 1 THEN DO;
 	
 	END;
 
-/* 3.2.2 Peruspäiväraha */
-
-	ELSE IF (TTURVA_TYOSSAOLO = 1 OR TTURVA_VUOSI < 1994) AND TTURVA_TYOTKASS = 0 THEN DO;
-
+	/* 3.2.2 Peruspäiväraha */
+	IF (TTURVA_TYOSSAOLO = 1 OR TTURVA_VUOSI < 1994) AND TTURVA_TYOTKASS = 0 THEN DO;
 		IF &VUOSIKA = 2 THEN DO;
 			%PerusPRahaKS(PERUSPRAHAK, TTURVA_VUOSI, TTURVA_KUUK, INF, (TTURVA_OMATULO > 0 OR TTURVA_PUOLTULO > 0), (TTURVA_OIKEUSKOR = 1), TTURVA_PUOLISO, TTURVA_LAPSIA, TTURVA_OMATULO, TTURVA_PUOLTULO, TTURVA_VAHSOSET, aktiivi=TTURVA_AKTIIVI);
 		END;
-		ELSE DO;
+		ELSE IF TTURVA_VUOSI <= 2026 THEN DO;
 			%PerusPRahaVS(PERUSPRAHAK, TTURVA_VUOSI, INF,(TTURVA_OMATULO > 0 OR TTURVA_PUOLTULO > 0), (TTURVA_OIKEUSKOR = 1), TTURVA_PUOLISO, TTURVA_LAPSIA, TTURVA_OMATULO, TTURVA_PUOLTULO, TTURVA_VAHSOSET, aktiivi=TTURVA_AKTIIVI);
 		END;
+		ELSE DO;
+			PERUSPRAHAK = 0;
+		END;
+		/* Soviteltu peruspäiväraha */
 		IF TTURVA_SOVTULO > 0 THEN DO;
-			PERUSPRAHAK = PERUSPRAHAK + TTURVA_VAHSOSET;
 			IF &VUOSIKA = 2 THEN DO;
-				%SoviteltuKS(PERUSPRAHAK, TTURVA_VUOSI, TTURVA_KUUK, INF, 0, 0, TTURVA_LAPSIA, PERUSPRAHAK, TTURVA_SOVTULO, 0, TTURVA_KOULTUKI, aktiivi=TTURVA_AKTIIVI, vahsosetuus=TTURVA_VAHSOSET);
+				%SoviteltuKS(PERUSPRAHAK, TTURVA_VUOSI, TTURVA_KUUK, INF, 0, 0, TTURVA_LAPSIA, PERUSPRAHAK, TTURVA_SOVTULO, 0, TTURVA_KOULTUKI, aktiivi=TTURVA_AKTIIVI);
 			END;
-			ELSE DO;
-				%SoviteltuVS(PERUSPRAHAK, TTURVA_VUOSI, INF, 0, 0, TTURVA_LAPSIA, PERUSPRAHAK, TTURVA_SOVTULO, 0, TTURVA_KOULTUKI, aktiivi=TTURVA_AKTIIVI, vahsosetuus=TTURVA_VAHSOSET);
+			ELSE IF TTURVA_VUOSI <= 2026 THEN DO;
+				%SoviteltuVS(PERUSPRAHAK, TTURVA_VUOSI, INF, 0, 0, TTURVA_LAPSIA, PERUSPRAHAK, TTURVA_SOVTULO, 0, TTURVA_KOULTUKI, aktiivi=TTURVA_AKTIIVI);
 			END;
 		END;
 
@@ -277,16 +283,15 @@ IF TTURVA_TOIMINTA = 1 THEN DO;
 
 	END;
 
-/* 3.2.3 Ansiosidonnainen päiväraha */
-
-	ELSE IF TTURVA_TYOSSAOLO = 1 AND TTURVA_TYOTKASS = 1 THEN DO; 
-
+	/* 3.2.3 Ansiosidonnainen päiväraha */
+	IF TTURVA_TYOSSAOLO = 1 AND TTURVA_TYOTKASS = 1 THEN DO; 
 		IF &VUOSIKA = 2 THEN DO;
 			%AnsioSidKS(ANSIOSIDK, TTURVA_VUOSI, TTURVA_KUUK, INF, TTURVA_LAPSIA, (TTURVA_OIKEUSKOR = 1), (TTURVA_OIKEUSKOR = 2), (TTURVA_OIKEUSKOR = 3), TTURVA_KUUKPALK, TTURVA_VAHSOSET, TTURVA_PAIVAT, 0, aktiivi=TTURVA_AKTIIVI);
 		END;
 		ELSE DO;
 			%AnsioSidVS(ANSIOSIDK, TTURVA_VUOSI, INF, TTURVA_LAPSIA, (TTURVA_OIKEUSKOR = 1), (TTURVA_OIKEUSKOR = 2), (TTURVA_OIKEUSKOR = 3), TTURVA_KUUKPALK, TTURVA_VAHSOSET, TTURVA_PAIVAT, 0, aktiivi=TTURVA_AKTIIVI);
 		END;
+		/* Soviteltu ansiopäiväraha */
 		IF TTURVA_SOVTULO > 0 THEN DO;
 			ANSIOSIDK = ANSIOSIDK + TTURVA_VAHSOSET;
 			IF &VUOSIKA = 2 THEN DO;
@@ -301,12 +306,36 @@ IF TTURVA_TOIMINTA = 1 THEN DO;
 		ANSIOSIDV = ANSIOSIDK * 12;
 
 	END;
+
+	/* 3.2.4 Yleistuki */
+	IF TTURVA_TYOTKASS = 0 THEN DO;
+		IF &VUOSIKA = 2 THEN DO;
+			%YleistukiKS(YLEISTUKIK, TTURVA_VUOSI, TTURVA_KUUK, INF, 0, TTURVA_TYOSSAOLO, TTURVA_HUOLL, TTURVA_OMATULO, TTURVA_VANHTULO, TTURVA_VAHSOSET);
+		END;
+		ELSE IF TTURVA_VUOSI >= 2026 THEN DO;
+			%YleistukiVS(YLEISTUKIK, TTURVA_VUOSI, INF, 0, TTURVA_TYOSSAOLO, TTURVA_HUOLL, TTURVA_OMATULO, TTURVA_VANHTULO, TTURVA_VAHSOSET);
+		END;
+		ELSE DO;
+			YLEISTUKIK = 0;
+		END;
+		/* Soviteltu yleistuki */
+		IF TTURVA_SOVTULO > 0 THEN DO;
+			IF &VUOSIKA = 2 THEN DO;
+				%SoviteltuKS(YLEISTUKIK, TTURVA_VUOSI, TTURVA_KUUK, INF, 0, 0, 0, YLEISTUKIK, TTURVA_SOVTULO, 0, 0);
+			END;
+			ELSE IF TTURVA_VUOSI >= 2026 THEN DO;
+				%SoviteltuVS(YLEISTUKIK, TTURVA_VUOSI, INF, 0, 0, 0, YLEISTUKIK, TTURVA_SOVTULO, 0, 0);
+			END;
+		END;
+
+		YLEISTUKIP = YLEISTUKIK / &TTPaivia;
+		YLEISTUKIV = YLEISTUKIK * 12;
+
+	END;
+
 END;
 
-
-
-/* 3.2.4 Vuorottelukorvaus */
-
+/* 3.2.5 Vuorottelukorvaus */
 ELSE IF TTURVA_TOIMINTA = 2 AND TTURVA_TYOSSAOLO = 1 THEN DO;
 
 	IF &VUOSIKA = 2 THEN DO;
@@ -345,13 +374,14 @@ TTURVA_KOULTUKI = 'Työvoimapoliittinen koulutus, (0/1)'
 TTURVA_KUUKPALK = 'Työttömyyttä edeltävä palkka, (e/kk)'
 TTURVA_SOVTULO = 'Työttömyyden aikana saadut työtulot, (e/kk)'
 TTURVA_VANHTULO = 'Vanhempien veronalaiset tulot, (e/kk)'
-TTURVA_OMATULO = 'Omat (pääoma)tulot, (e/kk)'
+TTURVA_OMATULO = 'Omat tarveharkinnassa huomioitavat tulot, (e/kk)'
 TTURVA_PUOLTULO = 'Puolison veronalaiset tulot, (e/kk)'
 TTURVA_PUOLISO = 'Onko puolisoa, (0/1)'
 TTURVA_OSITT = 'Asuu vanhempien luona, (0/1)'
 TTURVA_VAHSOSET = 'Vähennettävä muu sosiaalietuus, (e/kk)'
 TTURVA_AKTIIVI = 'Aktiivimallin työttömyysturvan alennus'
 TTURVA_HUOLL = 'Alle 18-v. lasten lkm vanhempien perheessä'
+TTURVA_PAIVAT = 'Maksettujen työttömyyspäivärahapäivien lukumäärä (kertymä)'
 INF = 'Inflaatiokorjauksessa käytettävä kerroin'
 
 TMTUKIK = 'Työmarkkinatuki, (e/kk)'
@@ -363,6 +393,9 @@ PERUSPRAHAV = 'Peruspäiväraha, (e/v)'
 ANSIOSIDK = 'Ansiosidonnainen päiväraha, (e/kk)'
 ANSIOSIDP = 'Ansiosidonnainen päiväraha, (e/pv)'
 ANSIOSIDV = 'Ansiosidonnainen päiväraha, (e/v)'
+YLEISTUKIK = 'Yleistuki, (e/kk)'
+YLEISTUKIV = 'Yleistuki, (e/v)'
+YLEISTUKIP = 'Yleistuki, (e/pv)'
 VUORKORVV = 'Vuorottelukorvaus, (e/v)'
 VUORKORVK = 'Vuorottelukorvaus, (e/kk)'
 VUORKORVP = 'Vuorottelukorvaus, (e/pv)';

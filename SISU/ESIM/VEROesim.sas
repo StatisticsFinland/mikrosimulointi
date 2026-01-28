@@ -28,7 +28,7 @@
   - Ansiotasoindeksiin (ansio64) perustuva inflaatiokorjaus: INF = ATI ;
 
 %LET INF = 1.00; * Syötä lukuarvo, KHI tai ATI;
-%LET AVUOSI = 2025; * Perusvuosi inflaatiokorjausta varten ;
+%LET AVUOSI = 2026; * Perusvuosi inflaatiokorjausta varten ;
 %LET PINDEKSI_VUOSI = pindeksi_vuosi; * Käytettävä indeksien parametritaulukko ;
 
 * Käytettävien tiedostojen nimet;
@@ -59,8 +59,8 @@
 /* 2.1 Fiktiivinen data */
 
 * Lainsäädäntövuosi (1980-);
-%LET MINIMI_VERO_VUOSI = 2025;
-%LET MAKSIMI_VERO_VUOSI = 2025;
+%LET MINIMI_VERO_VUOSI = 2026;
+%LET MAKSIMI_VERO_VUOSI = 2026;
 
 * Palkkatulo (e/v);
 %LET MINIMI_VERO_PTULO = 50000;
@@ -269,8 +269,8 @@
 %LET KYNNYS_VERO_PUOLALIJ = 200;
 
 * Kunnallinen veroprosentti (jos ei automaattisesti keskiarvo);
-%LET MINIMI_VERO_KUNNPROS = 7.54; 
-%LET MAKSIMI_VERO_KUNNPROS = 7.54;
+%LET MINIMI_VERO_KUNNPROS = 7.57; 
+%LET MAKSIMI_VERO_KUNNPROS = 7.57;
 %LET KYNNYS_VERO_KUNNPROS = 1;
 
 * Kirkollinen veroprosentti (jos ei automaattisesti keskiarvo);

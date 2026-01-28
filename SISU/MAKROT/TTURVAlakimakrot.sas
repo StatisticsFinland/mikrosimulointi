@@ -27,6 +27,9 @@
 19. AnsioSidKestoRaj = Ansiopäivärahan ja vuorottelukorvauksen enimmäis- ja vähimmäiskeston rajaus
 20. AnsioSidKestoRajKK = Kuukausimallin Ansiopäivärahan ja vuorottelukorvauksen enimmäis- ja vähimmäiskeston rajaus
 21. Omavastuupv = Omavastuupäivien simulointi (kuukausimalli)
+22. TyossaoloehtoKK = Työssäoloehto (kuukausimalli)
+23. YleistukiKS = Yleistuki kuukausitasolla
+24. YleistukiVS = Yleistuki kuukausitasolla vuosikeskiarvona
 */ 
 
 
@@ -164,7 +167,6 @@ DROP temp vuosipraha;
 %MEND AnsioSidVS;
 
 
-
 /*  4. Makro laskee työmarkkinatuen kuukausitasolla */
 
 *Makron parametrit:  
@@ -173,7 +175,7 @@ DROP temp vuosipraha;
 	mkuuk: Kuukausi, jonka lainsäädäntöä käytetään 
 	minf: Deflaattori euromääräisten parametrien kertomiseksi 
 	tarvhark: Onko kyseessä tarveharkittu työmarkkinatuki (0/1)
-	ositt: Onko kyseessä osittainen työmarkkinatuki (0/1)
+	tyossaoloehto: Täyttääkö työssäoloehdon (1=kyllä, 0=ei)
 	puoliso: Onko saajalla puolisoa (0/1)
 	lapsia: Lapsien lkm perheessä 
 	huoll: Muiden huollettavien lkm perheessä, jos kyseessä osittainen tmtuki
@@ -185,80 +187,93 @@ DROP temp vuosipraha;
 	vahsosetuus: Päivärahasta vähennettävä muu sosiaalietuus, e/kk
 	aktiivi: Aktiivimallin leikkuri;
 
-%MACRO TyomTukiKS(tulos, mvuosi, mkuuk, minf, tarvhark, ositt, puoliso, lapsia, huoll, omatulo, puoltulo, vanhtulot, vanhomaishp, oikeuskor, vahsosetuus, aktiivi=0)/
+%MACRO TyomTukiKS(tulos, mvuosi, mkuuk, minf, tarvhark, tyossaoloehto, puoliso, lapsia, huoll, omatulo, puoltulo, vanhtulot, vanhomaishp, oikeuskor, vahsosetuus, aktiivi=0)/
 DES = 'TTURVA: Työmarkkinatuki kuukausitasolla';
 
 %HaeParam&TYYPPI(&mvuosi, &mkuuk, &TTURVA_PARAM, PARAM.&PTTURVA);
 %ParamInf&TYYPPI(&mvuosi, &mkuuk, &TTURVA_MUUNNOS, &minf);
 
-*Lapsikorotukset;
-IF &lapsia <= 0 THEN lapsikor = 0;
-ELSE IF &lapsia < 2 THEN lapsikor = &TyomLapsPros * &TTLaps1;
-ELSE IF &lapsia < 3 THEN lapsikor = &TyomLapsPros * &TTLaps2;
-ELSE lapsikor = &TyomLapsPros * &TTLaps3;
+%LuoKuuID(kuuid, &mvuosi, &mkuuk);
 
-*Täysmääräinen työmarkkinatuki;
-temp = &TTPAIVIA * SUM(&TTPerus, lapsikor);
-IF &oikeuskor NE 0 AND &mvuosi >= 2010 AND &mvuosi <= 2024 THEN temp = SUM(temp, &TTPAIVIA * &KorotusOsa);
+IF kuuid >= mdy(5, 1, 2026) THEN &tulos = 0;
+ELSE DO;
 
-*Tarveharkittu tuki;
+	*Lapsikorotukset;
+	IF &lapsia <= 0 THEN lapsikor = 0;
+	ELSE IF &lapsia < 2 THEN lapsikor = &TyomLapsPros * &TTLaps1;
+	ELSE IF &lapsia < 3 THEN lapsikor = &TyomLapsPros * &TTLaps2;
+	ELSE lapsikor = &TyomLapsPros * &TTLaps3;
 
-IF &tarvhark NE 0 THEN DO;
+	*Täysmääräinen työmarkkinatuki;
+	temp = &TTPAIVIA * SUM(&TTPerus, lapsikor);
+	IF &oikeuskor NE 0 AND &mvuosi >= 2010 AND &mvuosi <= 2024 THEN temp = SUM(temp, &TTPAIVIA * &KorotusOsa);
 
-	*Perheellisen tarveharkinta;
-	IF &puoliso NE 0 OR &lapsia > 0 THEN DO;
-		raja = SUM(&RajaHuolt, &lapsia * &RajaLaps );
+	*Tarveharkittu tuki;
 
-		*Puolison tuloista tehtävä vähennys;
-		*Vuonna 2013 työttömyysturvan tarveharkinta puolisojen tulojen perusteella poistui; 
-		IF &puoliso NE 0 AND &mvuosi < 2013 THEN DO;
-			tulo =  SUM(&puoltulo, -&PuolVah);
-			IF tulo < 0 THEN tulo =  0;
-		END;
+	IF &tarvhark NE 0 THEN DO;
 
-		tulo = SUM(tulo, &omatulo);
+		*Perheellisen tarveharkinta;
+		IF &puoliso NE 0 OR &lapsia > 0 THEN DO;
+			raja = SUM(&RajaHuolt, &lapsia * &RajaLaps );
 
-		IF tulo > raja THEN temp = SUM(temp, -&TarvPros2 * SUM(tulo, -raja));
-	END;
-
-	*Yksinäisen tarveharkinta;
-	ELSE IF &omatulo > &RajaYks THEN temp = SUM(temp, -&TarvPros1 * SUM(&omatulo -&RajaYks));
-
-	IF temp < 0 THEN temp = 0;
-END;
-
-*Osittainen tuki; 
-IF &ositt NE 0 THEN DO;
-
-	IF &mvuosi >= 2003 THEN DO;
-		raja = SUM(&OsRaja, &huoll * &OsRajaKor);
-
-		*Vuodesta 2025 lähtien vanhempien omaishoidon tuen hoitopalkkiot vähennetään vanhempien tuloista;
-		IF &mvuosi >= 2025 THEN vanhempientulot = MAX(SUM(&vanhtulot, -&vanhomaishp), 0);
-		ELSE vanhempientulot = &vanhtulot;
-
-			*Tietyn rajan jälkeen vanhemman tulot pienentävät osittaista työmarkkinatukea. Tuki on kuitenkin minimissään tietty prosentti täydestä tuesta.;
-			IF vanhempientulot > raja THEN DO;
-				testi = temp;
-				temp  = SUM(temp, -&OsTarvPros * SUM(vanhempientulot, -raja));
-				IF temp < &OsPros * testi THEN temp = &OsPros * testi;
+			*Puolison tuloista tehtävä vähennys;
+			*Vuonna 2013 työttömyysturvan tarveharkinta puolisojen tulojen perusteella poistui; 
+			IF &puoliso NE 0 AND &mvuosi < 2013 THEN DO;
+				tulo =  SUM(&puoltulo, -&PuolVah);
+				IF tulo < 0 THEN tulo =  0;
 			END;
 
+			tulo = SUM(tulo, &omatulo);
+
+			IF tulo > raja THEN temp = SUM(temp, -&TarvPros2 * SUM(tulo, -raja));
+		END;
+
+		*Yksinäisen tarveharkinta;
+		ELSE IF &omatulo > &RajaYks THEN temp = SUM(temp, -&TarvPros1 * SUM(&omatulo -&RajaYks));
+
+		IF temp < 0 THEN temp = 0;
 	END;
 
-	*Ennen vuotta 2003 osittainen tyomtukeen ei vaikuttanut vanhempien tulot vaan se oli aina tietty osuus täysmääräisestä.;
-	ELSE temp = &OsPros * temp;
+	*Osittainen tuki, jos ei ole täyttänyt työssäoloehtoa ja asuu vanhempien luona; 
+	IF &tyossaoloehto = 0 THEN DO;
+
+		IF &mvuosi >= 2003 THEN DO;
+			raja = SUM(&OsRaja, &huoll * &OsRajaKor);
+
+			*Vuodesta 2025 lähtien vanhempien omaishoidon tuen hoitopalkkiot vähennetään vanhempien tuloista;
+			IF &mvuosi >= 2025 THEN vanhempientulot = MAX(SUM(&vanhtulot, -&vanhomaishp), 0);
+			ELSE vanhempientulot = &vanhtulot;
+
+				*Tietyn rajan jälkeen vanhemman tulot pienentävät osittaista työmarkkinatukea. Tuki on kuitenkin minimissään tietty prosentti täydestä tuesta.;
+				IF vanhempientulot > raja THEN DO;
+					testi = temp;
+					temp  = SUM(temp, -&OsTarvPros * SUM(vanhempientulot, -raja));
+					IF temp < &OsPros * testi THEN temp = &OsPros * testi;
+				END;
+
+		END;
+
+		*Ennen vuotta 2003 osittainen tyomtukeen ei vaikuttanut vanhempien tulot vaan se oli aina tietty osuus täysmääräisestä.;
+		ELSE temp = &OsPros * temp;
+	END;
+
+
+	*Aktiivimallin leikkuri;
+	IF &aktiivi = 1 AND 2018 =< &mvuosi <= 2019 THEN temp = SUM(temp * SUM(1, -&AlePros)); 
+
+	* Lopullisen tuen määrä on pienempi kahdesta vaihtoehdosta: ;
+	* 1. Tarveharkittu tuki 2. Täysi tuki, josta vähennetty muut sosiaalietuudet ;
+	temp = MIN(temp, (&TTPAIVIA * SUM(&TTPerus, lapsikor) - &vahsosetuus));
+
+	
+	IF temp < 0 THEN temp = 0;
+	IF &mvuosi < 1994 THEN temp = .;
+
+	&tulos = temp;
+	DROP raja testi temp tulo lapsikor vanhempientulot;
+
 END;
 
-*Aktiivimallin leikkuri;
-IF &aktiivi = 1 AND 2018 =< &mvuosi <= 2019 THEN temp = SUM(temp * SUM(1, -&AlePros)); 
-	
-temp = temp - &vahsosetuus;
-IF temp < 0 THEN temp = 0;
-IF &mvuosi < 1994 THEN temp = .;
-
-&tulos = temp;
-DROP raja testi temp tulo lapsikor vanhempientulot;
 %MEND TyomTukiKS;
 
 
@@ -318,47 +333,58 @@ DES = 'TTURVA: Peruspäiväraha kuukausitasolla';
 %HaeParam&TYYPPI(&mvuosi, &mkuuk, &TTURVA_PARAM, PARAM.&PTTURVA);
 %ParamInf&TYYPPI(&mvuosi, &mkuuk, &TTURVA_MUUNNOS, &minf);
 
-*Lapsikorotukset;
-IF &lapsia <= 0 THEN lapsikor = 0;
-ELSE IF &lapsia < 2 THEN lapsikor = &TTLaps1;
-ELSE IF &lapsia < 3 THEN lapsikor = &TTLaps2;
-ELSE lapsikor = &TTLaps3;
+%LuoKuuID(kuuid, &mvuosi, &mkuuk);
 
-*Täysmääräinen peruspäiväraha;
-temp = &TTPAIVIA * SUM(&TTPerus, lapsikor);
-IF &muutturva NE 0 THEN temp = SUM(temp, &TTPAIVIA * &KorotusOsa);
+IF kuuid >= mdy(5, 1, 2026) THEN &tulos = 0;
+ELSE DO;
 
-*Tarveharkittu tuki, voimassa ennen vuotta 1994;
-IF &tarvhark NE 0 AND &mvuosi < 1994 THEN DO;
+	*Lapsikorotukset;
+	IF &lapsia <= 0 THEN lapsikor = 0;
+	ELSE IF &lapsia < 2 THEN lapsikor = &TTLaps1;
+	ELSE IF &lapsia < 3 THEN lapsikor = &TTLaps2;
+	ELSE lapsikor = &TTLaps3;
 
-	*Perheellisen tarveharkinta;
-	IF &puoliso NE 0 OR &lapsia > 0 THEN DO;
-		raja = SUM(&RajaHuolt, &lapsia * &RajaLaps );
+	*Täysmääräinen peruspäiväraha;
+	temp = &TTPAIVIA * SUM(&TTPerus, lapsikor);
+	IF &muutturva NE 0 THEN temp = SUM(temp, &TTPAIVIA * &KorotusOsa);
 
-		IF &puoliso NE 0 THEN DO;
-			tulo =  SUM(&puoltulo, -&PuolVah);
-			IF tulo < 0 THEN tulo =  0;
+	*Tarveharkittu tuki, voimassa ennen vuotta 1994;
+	IF &tarvhark NE 0 AND &mvuosi < 1994 THEN DO;
+
+		*Perheellisen tarveharkinta;
+		IF &puoliso NE 0 OR &lapsia > 0 THEN DO;
+			raja = SUM(&RajaHuolt, &lapsia * &RajaLaps );
+
+			IF &puoliso NE 0 THEN DO;
+				tulo =  SUM(&puoltulo, -&PuolVah);
+				IF tulo < 0 THEN tulo =  0;
+			END;
+
+			tulo = SUM(tulo, &omatulo);
+
+			IF tulo > raja THEN temp = SUM(temp, -&TarvPros2 * SUM(tulo, -raja));
 		END;
 
-		tulo = SUM(tulo, &omatulo);
+		*Yksinäisen tarveharkinta;
+		ELSE IF &omatulo > &RajaYks THEN temp = SUM(temp, -&TarvPros1 * SUM(&omatulo -&RajaYks));
 
-		IF tulo > raja THEN temp = SUM(temp, -&TarvPros2 * SUM(tulo, -raja));
+		IF temp < 0 THEN temp = 0;
 	END;
 
-	*Yksinäisen tarveharkinta;
-	ELSE IF &omatulo > &RajaYks THEN temp = SUM(temp, -&TarvPros1 * SUM(&omatulo -&RajaYks));
+	*Aktiivimallin leikkuri;
+	IF &aktiivi = 1 AND 2018 =< &mvuosi <= 2019 THEN temp = SUM(temp * SUM(1, -&AlePros)); 
+
+	* Lopullisen tuen määrä on pienempi kahdesta vaihtoehdosta: ;
+	* 1. Tarveharkittu tuki 2. Täysi tuki, josta vähennetty muut sosiaalietuudet ;
+	temp = MIN(temp, (&TTPAIVIA * SUM(&TTPerus, lapsikor) - &vahsosetuus));
 
 	IF temp < 0 THEN temp = 0;
+
+	&tulos = temp;
+	DROP raja temp tulo lapsikor;
+
 END;
 
-*Aktiivimallin leikkuri;
-IF &aktiivi = 1 AND 2018 =< &mvuosi <= 2019 THEN temp = SUM(temp * SUM(1, -&AlePros)); 
-
-temp = temp - &vahsosetuus;
-IF temp < 0 THEN temp = 0;
-
-&tulos = temp;
-DROP raja temp tulo lapsikor;
 %MEND PerusPRahaKS;
 
 
@@ -416,6 +442,8 @@ DES = 'TTURVA: Soviteltu työttömyyspäiväraha kuukausitasolla';
 %HaeParam&TYYPPI(&mvuosi, &mkuuk, &TTURVA_PARAM, PARAM.&PTTURVA);
 %ParamInf&TYYPPI(&mvuosi, &mkuuk, &TTURVA_MUUNNOS, &minf);
 
+%LuoKuuID(kuuid, &mvuosi, &mkuuk);
+
 IF &koultuki NE 0 THEN DO;
 	sovsuoja = &SovSuojaKoul;
 	sovpros = &SovProsKoul;
@@ -429,21 +457,26 @@ ELSE DO;
 	sovpros = &SovPros;
 END;
 
-*Sovitellun laskukaava. Ei sovitella jos alle suojaosan;
+* Sovitellun laskukaava. Ei sovitella jos alle suojaosan;
 IF &tyotulo < sovsuoja THEN temp2 = &praha;
 
-*Muuten sovitellaan;
+* Muuten sovitellaan;
 ELSE DO; 
+* Soviteltu työmarkkinatuki, peruspäiväraha tai yleistuki;
 	temp2 = &praha - (sovpros * (&tyotulo - sovsuoja));
-	IF temp2 < 0 THEN temp2 = 0;
-* Jos on ansiosidonnainen päiväraha, asetetaan maksimi ja minimi ;
+	temp2 = MAX(temp2, 0);
+	* Soviteltu ansiopäiväraha;
 	IF &ansiosid NE 0 THEN DO;
+		* Sovitellussa ansiopäivärahassa määritetään maksimit ja minimit maksettavalle tuelle;
 		IF &oikeuskor NE 0 AND &mvuosi > 2002 THEN ylaraja = 1;
 		ELSE ylaraja = &SovRaja;
-
-		IF SUM(temp2, &tyotulo) > ylaraja * (1 - &VahPros) * &rahapalkka THEN temp2 = SUM(ylaraja * (1 - &VahPros) * &rahapalkka, -&tyotulo);
-
-		IF &mvuosi >= 1994 THEN DO;
+		* Soviteltu ansiopäiväraha ja työtulot eivät voi ylittää päivärahan perusteena olevan palkan määrää;
+		IF SUM(temp2, &tyotulo) > ylaraja * (1 - &VahPros) * &rahapalkka 
+			THEN temp2 = SUM(ylaraja * (1 - &VahPros) * &rahapalkka, -&tyotulo);
+		* Soviteltu ansiopäiväraha on aina vähintään perusosan suuruinen;
+		IF kuuid >= mdy(5, 1, 2026) THEN temp2 = MAX(temp2, (&TTPerus * &TTPAIVIA - (sovpros * &tyotulo)));
+		ELSE DO;
+			* Ennen yleistukea ansiopäiväraha oli aina vähintään peruspäivärahan suuruinen;
 			%PerusPRahaKS(perus, &mvuosi, &mkuuk, &minf, 0, &oikeuskor, 0, &lapsia, 0, 0, 0, aktiivi=&aktiivi);
 			temp2 = MAX(temp2, perus - sovpros * (&tyotulo - sovsuoja) * (&tyotulo > sovsuoja));
 		END;
@@ -451,9 +484,8 @@ ELSE DO;
 END;
 
 temp2 = temp2 - &vahsosetuus;
-IF temp2 < 0 THEN temp2 = 0;
+&tulos = MAX(temp2, 0);
 
-&tulos = temp2;
 DROP ylaraja sovsuoja sovpros temp2 perus;
 %MEND SoviteltuKS;
 
@@ -967,6 +999,7 @@ ELSE &tulos = 0;
 DROP raja taysi temp;
 %MEND OsittTmTTuloS;
 
+
 /*  19. Ansiopäivärahan ja vuorottelukorvauksen enimmäis- ja vähimmäiskeston rajaus  */
 
 *Makron parametrit: 
@@ -989,7 +1022,6 @@ DES = 'TTURVA: Ansiopäivärahan ja vuorottelukorvauksen enimmäis- ja vähimmäiskes
 
 %HaeParam&TYYPPI(&mvuosi, &mkuuk, &TTURVA_PARAM, PARAM.&PTTURVA);
 %ParamInf&TYYPPI(&mvuosi, &mkuuk, &TTURVA_MUUNNOS, 1);
-
 
 *Ansiopäivärahan rajoitus;
 IF NOT &vuorkorv THEN DO;
@@ -1026,8 +1058,8 @@ ELSE DO;
 END;
 
 &tulos = temp;
-
 DROP ENIMMAISKESTO KALENTERIPV;
+
 %MEND;
 
 
@@ -1040,73 +1072,68 @@ DROP ENIMMAISKESTO KALENTERIPV;
 	kertymapv: Ansiopäivärahan kertymä ns. nettona eli sovitellut päivät kokonaisina
 	tyohistv: Henkilön työhistoria vuosina
 	lasktyohistv: Henkilön laskennallinen työhistoria vuosina lisäpäiväoikeutta varten (vuositulojen jako 510:llä)
-	taytkk: kuukausi jolloin kertymä on tullut täyteen (1-12, . jos ei ole täyttynyt, 99 jos täyttynyt aineistossa muttei simuloidussa lainsäädännössä, -99 jos lisäpäiväoikeus jo ed. vuonna)
-	ikavu: ikä vuosina vuoden lopussa
-	ikakk: ikävuoden ylttävät kuukaudet vuoden lopussa (0-11)
-	tmtukipv: työmarkkinatukipäivät nettona eli sovitellut päivät kokonaisina
-	tyooloehto: täyttääkö työoloehdon (0/1)
-	vuorkorv: onko kyseessä vuorottelukorvauksen rajaus (0/1)
+	lisapaivoik: Henkilöllä oikeus työttömyysturvan lisäpäiviin (1=kyllä, 0=ei)
+	syntv: Syntymävuosi
+	ikavu: Ikä vuosina vuoden lopussa
+	tmtukipv: Työmarkkinatukipäivät nettona eli sovitellut päivät kokonaisina
+	ansiopv: Ansiosidonnaiset päivärahapäivät nettona eli sovitellut päivät kokonaisina
+	tyossaoloehto: Täyttääkö työssäoloehdon (1=kyllä, 0=ei)
 ;
 
-%MACRO AnsioSidKestoRajKK(tulos, mvuosi, mkuuk, kertymapv, tyohistv, lasktyohistv, lisapaivoik, syntv, ikavu, tmtukipv, ansiopv, tyopv_ed1, tyopv_ed2, tyopv_ed3)/
+%MACRO AnsioSidKestoRajKK(tulos, mvuosi, mkuuk, kertymapv, tyohistv, lasktyohistv, lisapaivoik, syntv, ikavu, tmtukipv, ansiopv, tyossaoloehto)/
 DES = 'TTURVA: Ansiopäivärahan ja vuorottelukorvauksen enimmäis- ja vähimmäiskeston rajaus';
 
 %HaeParam&TYYPPI(&mvuosi, &mkuuk, &TTURVA_PARAM, PARAM.&PTTURVA);
 %ParamInf&TYYPPI(&mvuosi, &mkuuk, &TTURVA_MUUNNOS, 1);
 
-*Arvioidaan ketkä ovat täyttäneet työssäoloehdon. Tätä käytetään vain päättelemään, ketkä ovat oikeutettuja pitempään kestoluokkaan;
-IF &LVUOSI > 2017 THEN DO;
-	IF &ikavu <= &KestoIkaRaja+1 THEN TYOOLOVKO= ROUND( SUM( &tyopv_ed1, MIN(12, &TyoEhtoTarkJKK-12) /12 * &tyopv_ed2, MAX(0, (&TyoEhtoTarkJKK-24)/12 *&tyopv_ed3)) / 7);
-
-	*Yli 59-vuotiaille data riittää huonosti, joten heistä kaikkien oletetaan täyttäneen työssäoloehdon yli 58 vuotiaana;
-	ELSE TYOOLOVKO = 99;
-	TYOOLOEHTO= (TYOOLOVKO >= &TyoEhtoVko);
-END;
-
 *Määritetään kullekin enimmäiskesto;
-IF &mvuosi >= 2017 AND &lasktyohistv >= &LisaPvTyoHist AND TYOOLOEHTO = 1 AND (&ikavu > &KestoIkaRaja) THEN ENIMMAISKESTO = &AnsioSidKesto3;
+IF &mvuosi >= 2017 AND &lasktyohistv >= &LisaPvTyoHist AND tyossaoloehto = 1 AND (&ikavu > &KestoIkaRaja) THEN ENIMMAISKESTO = &AnsioSidKesto3;
 ELSE IF &mvuosi >= 2014 AND &tyohistv <= &KestoLyhEhtoV THEN ENIMMAISKESTO = &AnsioSidKesto2;
 ELSE ENIMMAISKESTO = &AnsioSidKesto;
 
+*Nollataan enimmäiskesto, jos työssäoloehto ei ole täyttynyt;
+IF tyossaoloehto = 0 THEN ENIMMAISKESTO = 0;
 
 *Lisäpäiväoikeuden simulointi;
 	*Jos lisäpäiväoikeus on täyttynyt aikaisempina vuosina niin ei ruveta muuttamaan;
-	if first.hnro AND &lisapaivoik THEN LISAPAIVOIK = 1;
+	IF first.hnro AND &lisapaivoik THEN LISAPAIVOIK = 1;
 
 	*Määritellään enimmäiskeston täyttymiskuukausi lisäpäiväoikeuden tarkistusta varten;
-	if (&kertymapv >= enimmaiskesto) AND SUM(&kertymapv,-&ansiopv) < enimmaiskesto THEN TAYTKK=1;
-	ELSE TAYTKK=0;
+	IF (&kertymapv >= ENIMMAISKESTO) AND SUM(&kertymapv, -&ansiopv) < ENIMMAISKESTO THEN TAYTKK = 1;
+	ELSE TAYTKK = 0;
 
 	*Jos enimmäiskeston täyttymiskuukautena täyttää ikä- ja työhistoriaehdon niin sitten oikeutettu ansiopäivärahan lisäpäiviin;
-	IF TAYTKK=1 AND &lasktyohistv >= &LisaPvTyoHist AND ((1957<=&syntv<=1960 and &ikavu>= 61) OR (1961<=&syntv<=1962 and &ikavu>= 62) OR (&syntv=1963 and &ikavu>= 63) OR (&syntv=1964 and &ikavu>= 64)) THEN LISAPAIVOIK=1;
+	IF TAYTKK = 1 AND &lasktyohistv >= &LisaPvTyoHist AND
+		((1957 <= &syntv <= 1960 AND &ikavu >= 61) OR (1961 <= &syntv <= 1962 AND &ikavu >= 62) OR
+		(&syntv = 1963 AND &ikavu >= 63) OR (&syntv = 1964 AND &ikavu >= 64)) THEN LISAPAIVOIK = 1;
+
 	*Levitetään lisäpäiväoikeus myös tuleville kuukausille;
-	%DO i=1 %to 11;
-		IF lag&i.(LISAPAIVOIK)=1 AND lag&i.(hnro)=hnro THEN  LISAPAIVOIK=1; 
+	%DO i = 1 %TO 11;
+		IF lag&i.(LISAPAIVOIK) = 1 AND lag&i.(hnro) = hnro THEN LISAPAIVOIK = 1; 
 	%END;
 
 *Jos lisäpäiväoikeus niin muutetaan työmarkkinatuet ansiopäivärahoiksi;
-IF LISAPAIVOIK=1 THEN temp= &tmtukipv; 
+IF LISAPAIVOIK = 1 THEN temp = &tmtukipv; 
 
 *Jos enimmäiskesto ei ole täyttynyt, mutta datassa kuitenkin on, niin muutetaan tmtukipäivät ansiopäivärahoiksi.
-	Tehdään tämä vain niille, jotka ovat siirtyneet ansiopäivärahalta työmarkkinatuelle;
+Tehdään tämä vain niille, jotka ovat siirtyneet ansiopäivärahalta työmarkkinatuelle;
 ELSE DO;
-	%DO i=1 %to 11;
-		IF &tmtukipv NE 0 AND lag&i.(&ansiopv) NE 0 AND lag&i.(hnro) = hnro THEN  SIIRTYNYT = 1;
+	%DO i = 1 %to 11;
+		IF &tmtukipv NE 0 AND lag&i.(&ansiopv) NE 0 AND lag&i.(hnro) = hnro THEN SIIRTYNYT = 1;
 	%END;
-
 
 	IF &tmtukipv > 0 AND &kertymapv < ENIMMAISKESTO AND SIIRTYNYT = 1 THEN temp = MIN(&tmtukipv, SUM(ENIMMAISKESTO, -&kertymapv));
 
-*Jos enimmäiskesto on täyttynyt, mutta datassa on ansiopäivärahapäiviä, otetaan ansiopäivärahoja pois;
-	ELSE IF &kertymapv > ENIMMAISKESTO THEN temp = MAX(-&ansiopv, SUM(ENIMMAISKESTO,-&kertymapv));
-
-	ELSE temp=0;
+	*Jos enimmäiskesto on täyttynyt, mutta datassa on ansiopäivärahapäiviä, otetaan ansiopäivärahoja pois;
+	ELSE IF &kertymapv > ENIMMAISKESTO THEN temp = MAX(-&ansiopv, SUM(ENIMMAISKESTO, -&kertymapv));
+	ELSE temp = 0;
 END;
 
 &tulos = temp;
+DROP temp ENIMMAISKESTO LISAPAIVOIK TAYTKK SIIRTYNYT;
 
-DROP temp TYOOLOVKO TYOOLOEHTO;
 %MEND;
+
 
 /*  21. Omavastuupäivät  */
 
@@ -1117,7 +1144,6 @@ DROP temp TYOOLOVKO TYOOLOEHTO;
 	aivuosi: Aineistovuosi 
 	aikuuk:  Aineistokuukausi
 ;
-
 
 %MACRO Omavastuupv(TULOS, mvuosi, mkuuk, aivuosi, aikuuk);
 
@@ -1133,3 +1159,111 @@ IF omav_avuosi>0 and omav_avuosi NE &OmavastuuPv THEN &TULOS=SUM(&OmavastuuPv,-o
 ELSE &TULOS=0;
 
 %MEND;
+
+
+/*  22. Työssäoloehto (kuukausimalli)  */
+
+*Makron parametrit: 
+	tulos: Makron tulosmuuttuja, työssäoloehto
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	mkuuk: Kuukausi, jonka lainsäädäntöä käytetään
+	tyossaoloehto_kk: Työssäoloehtokuukausien määrä, laskettu edelliseltä 28 kuukaudelta 1.9.2024 voimaan astuneen lainsäädännön mukaan
+;
+
+%MACRO TyossaoloehtoKK(tulos, mvuosi, mkuuk, tyossaoloehto_kk)/
+DES = 'TTURVA: Työssäoloehdon muodostus';
+
+%HaeParam&TYYPPI(&mvuosi, &mkuuk, &TTURVA_PARAM, PARAM.&PTTURVA);
+%ParamInf&TYYPPI(&mvuosi, &mkuuk, &TTURVA_MUUNNOS, 1);
+
+/* Arvioidaan ketkä ovat täyttäneet työssäoloehdon */
+IF &tyossaoloehto_kk >= &TyoEhtoKK THEN &tulos = 1;
+	ELSE &tulos = 0;
+
+%MEND;
+
+
+/*  23. Yleistuki kuukausitasolla */
+
+*Makron parametrit: 
+	tulos: Makron tulosmuuttuja, yleistuki, e/kk 
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	mkuuk: Kuukausi, jonka lainsäädäntöä käytetään
+	minf: Deflaattori euromääräisten parametrien kertomiseksi
+	tyollistymispalvelu: Onko työllistymistä edistävissä palveluissa (1=kyllä, 0=ei)
+	tyossaoloehto: Täyttääkö työssäoloehdon (1=kyllä, 0=ei)
+	huoll: Vanhempien huollettavien lukumäärä
+	omatulo: Oman tulon määrä (ei sisällä sovittellussa huomioitavia palkkatuloja), e/kk
+	vanhtulot: Vanhempien kuukausitulot, jos kyseessä osittainen tuki, e/kk
+	vahsosetuus: Päivärahasta vähennettävät muut sosiaalietuudet, e/kk
+;
+
+%MACRO YleistukiKS(tulos, mvuosi, mkuuk, minf, tyollistymispalvelu, tyossaoloehto, huoll, omatulo, vanhtulot, vahsosetuus)/
+DES = 'TTURVA: Yleistuki kuukausitasolla';
+
+%HaeParam&TYYPPI(&mvuosi, &mkuuk, &TTURVA_PARAM, PARAM.&PTTURVA);
+%ParamInf&TYYPPI(&mvuosi, &mkuuk, &TTURVA_MUUNNOS, &minf);
+
+%LuoKuuID(kuuid, &mvuosi, &mkuuk);
+
+IF kuuid < mdy(5, 1, 2026) THEN &tulos = 0;
+ELSE DO;
+
+	*Täysmääräinen yleistuki;
+	temp = &TTPAIVIA * &TTPerus;
+
+	*Tarveharkittu tuki;
+	IF &tyollistymispalvelu = 0 THEN DO;
+		IF &omatulo > &RajaYks THEN temp = SUM(temp, -&TarvPros1 * SUM(&omatulo, -&RajaYks));
+		temp = MAX(temp, 0);
+	END;
+
+	*Osittainen tuki, jos ei ole täyttänyt työssäoloehtoa ja asuu vanhempien luona; 
+	IF &tyossaoloehto = 0 THEN DO;
+		*Vanhempien huollettavien määrä korottaa sovelletavaa rajaa;
+		raja = SUM(&OsRaja, &huoll * &OsRajaKor);
+		*Tietyn rajan jälkeen vanhemman tulot pienentävät osittaista työmarkkinatukea. Tuki on minimissään tietty prosentti täydestä tuesta.;
+		IF &vanhtulot > raja THEN DO;
+			temp  = MAX(SUM(temp, -&OsTarvPros * SUM(&vanhtulot, -raja)), &OsPros * temp);
+		END;
+	END;
+
+	* Lopullisen tuen määrä on pienempi kahdesta vaihtoehdosta: ;
+	* 1. Tarveharkittu tuki 2. Täysi tuki, josta vähennetty muut sosiaalietuudet ;
+	temp = MIN(temp, SUM(&TTPAIVIA * &TTPerus, -&vahsosetuus));
+	
+	&tulos = MAX(temp, 0);
+	DROP temp raja;
+
+END;
+
+%MEND YleistukiKS;
+
+
+/* 24. Yleistuki kuukausitasolla vuosikeskiarvona */
+
+*Makron parametrit:  
+	tulos: Makron tulosmuuttuja, yleistuki, e/kk (vuosikeskiarvo)
+	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
+	minf: Deflaattori euromääräisten parametrien kertomiseksi 
+	tarvhark: Simuloidaanko tarveharkinta (0=kyllä/1=ei)
+	ositt: Simloidaanko osittaisena (0=kyllä/1=ei)
+	huoll: Vanhempien huollettavien lukumäärä
+	omatulo: Oman muun tulon määrä, e/kk
+	vanhtulot: Vanhempien kuukausitulot, jos kyseessä osittainen tuki, e/kk
+	vahsosetuus: Päivärahasta vähennettävä muu sosiaalietuus, e/kk;
+
+%MACRO YleistukiVS(tulos, mvuosi, minf, tarvhark, ositt, huoll, omatulo, vanhtulot, vahsosetuus)/
+DES = 'TTURVA: Yleistuki kuukausitasolla vuosikeskiarvona';
+
+	vuosipraha = 0;
+
+	%DO i = 1 %TO 12;
+		%YleistukiKS(temp, &mvuosi, &i, &minf, &tarvhark, &ositt, &huoll, &omatulo, &vanhtulot, &vahsosetuus);
+		vuosipraha = SUM(vuosipraha, temp);
+	%END;
+
+&tulos = vuosipraha / 12;
+DROP vuosipraha temp;
+
+%MEND YleistukiVS;

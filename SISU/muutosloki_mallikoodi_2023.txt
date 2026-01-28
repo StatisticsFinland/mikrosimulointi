@@ -1,12 +1,123 @@
-Ôªø*************************************************************************************************
+*************************************************************************************************
 * SISU-MALLIN MUUTOSLOKI                                                                        *
 * AINEISTOVUOSI 2023  	                                                                        *	
 *                                                                                               *	
-* T√§h√§n dokumenttiin merkit√§√§n SISU-malliin tehdyt muutokset.					*
+* T‰h‰n dokumenttiin merkit‰‰n SISU-malliin tehdyt muutokset.					*
 * Lokista ilmenee yleiskuvaus muutoksesta ja tiedostot, joihin muutoksia on tehty.      	*
 *				                                                                *
 *************************************************************************************************
 
+*************************************************************************************************
+**************************   UUSI MALLIVERSIO 26.00 JAETTU 28.1.2026  ***************************
+*************************************************************************************************
+Malliversio 26.00 toimii viimeisimm‰ll‰ aineistovuoden 2023 rekisteriaineistolla.
+
+Viimeisin rekisteriaineisto sijainnissa:
+D:\mikrosimulointi\data\rek\rek2023\rek2023.40\
+*************************************************************************************************
+
+27.	Tehty vuoden 2026 alkuun menness‰ vahvistettuihin lakimuutoksiin liittyv‰t parametrip‰ivitykset. 
+
+	../PARAM/pindeksi_vuosi.sas7bdat
+	../PARAM/pindeksi_kuuk.sas7bdat
+	../PARAM/pasumtuki.sas7bdat
+	../PARAM/pelasumtuki.sas7bdat
+	../PARAM/pkansel.sas7bdat
+	../PARAM/pkivero.sas7bdat
+	../PARAM/pkotihtuki.sas7bdat
+	../PARAM/pllisa.sas7bdat
+	../PARAM/popintuki.sas7bdat
+	../PARAM/pphoito.sas7bdat
+	../PARAM/psairvak.sas7bdat
+	../PARAM/ptoimtuki.sas7bdat
+	../PARAM/ptturva.sas7bdat
+	../PARAM/pvero.sas7bdat
+	../PARAM/ptamaksu.sas7bdat
+	../PARAM/PARAMindeksit.sas
+	../OHJAUS/kaikki_param.sas7bdat
+
+26.	Muutettu VEROsimul ohjelman koodia (rivit 190, 199 ja 200) niin, ett‰ lains‰‰d‰ntˆvuodesta
+	2026 alkaen k‰ytet‰‰n uutta kunnallis- ja kirkollisveroprosentin muuttujaa (ayri26 & kayri26).
+
+	../SIMUL_2023/VEROsimul.sas
+
+25.	Lis‰tty uusi aineisto (tturva_tulrek2023) TTURVA_KK-osamallin k‰ytett‰v‰ksi. Tiedosto
+	sis‰lt‰‰ tulorekisterist‰ muodostetut kuukausitason tulotiedot, joita tarvitaan
+	tyˆttˆmyysturvan simuloinnissa. K‰ytt‰j‰ voi muokata muodostuss‰‰ntˆj‰ tulrek_summaus-
+	ohjelmalla. Kuukausitason tulomuuttujat korvaavat lakimakroissa aiemmin k‰ytetyt
+	Kelan ja Fivan aineistojen tulomuuttujat (esim. sovipalkka).
+
+	../DATA/POHJADAT/tulrek_summaus.sas
+	../MAKROT/TTURVAlakimakrot.sas
+	../SIMUL_2023/TTURVA_KK_simul.sas
+
+24.	Lis‰tty yleistuen simulointi malliin. Yleistuen simuloinnissa k‰ytet‰‰n tyˆmarkkinatuki-
+	ja perusp‰iv‰rahap‰ivien lukum‰‰ri‰. TTURVA_KK-osamalli hyˆdynt‰‰ tulorekisterist‰
+	muodostettuja kuukausitason tulotietoja tarveharkinnan ja sovittelun simuloinnissa.
+	Lis‰ksi tarkennettu tarveharkinnan simulointia hyˆdynt‰m‰ll‰ tietoa siit‰ onko tuki
+	maksettu tyˆllistymist‰ edist‰vien palvelujen piiriss‰ olevalle. Yleistuki astuu voimaan
+	5/2026 ja samalla tyˆmarkkinatuki ja perusp‰iv‰raha poistuvat lains‰‰d‰nnˆst‰.
+
+	../MAKROT/TTURVAlakimakrot.sas
+	../SIMUL_2023/TTURVA_KK_simul.sas
+	../SIMUL_2023/TTURVA_simul.sas
+	../SIMUL_2023/KOKOsimul.sas
+	../SIMUL_2023/VEROsimul.sas
+	../SIMUL_2023/TOIMTUKIsimul.sas
+	../ESIM/TTURVAesim.sas
+	../ESIM/KOKOesim.sas
+
+23. 	Lis‰tty TOIMTUKIsimul-ohjelmaan i‰n vienti ToimTukiKS-makroon, ja viety makroon 150 euron
+	ansiotulov‰hennyksen suojaosan poisto t‰ysi-ik‰isilt‰ 2026 alkaen.
+
+	../MAKROT/TOIMTUKIlakimakrot.sas
+	../SIMUL_2023/TOIMTUKIsimul.sas
+	../ESIM/TOIMTUKIesim.sas
+	../ESIM/KOKOesim.sas
+
+22.	Poistettu ay-j‰senmaksujen verov‰hennysoikeus vuodesta 2026 alkaen.
+
+	../MAKROT/VEROlakimakrot.sas
+
+21.	Lis‰tty TTURVA_KK-osamalliin tyˆss‰oloehdon simulointi uuden Tulorekisterist‰ muodostetun
+	muuttujan avulla. Siirret‰‰n lis‰ksi kaikki ansiop‰iv‰rahap‰iv‰t tyˆmarkkinatukip‰iviksi,
+	jos tyˆss‰oloehto ei t‰yty ja ansiosidonnaisen kestoa simuloidaan (%LET APKESTOSIMUL = 1;).
+
+	../MAKROT/TTURVAlakimakrot.sas
+	../SIMUL_2023/TTURVA_KK_simul.sas
+
+20.	Korjattu SAIRVAK-osamallin etuuksien maksussa sovellettavien ala- ja yl‰ik‰rajojen k‰yttˆ
+	esimerkkilaskelmissa. Lis‰tty puuttuva ik‰muuttuja makrokutsuihin.
+
+	../MAKROT/SAIRVAKlakimakrot.sas
+	../ESIM/KOKOesim.sas
+	../ESIM/SAIRVAKesim.sas
+	../SIMUL_2023/SAIRVAKsimul.sas
+
+19.	Lis‰tty SAIRVAK-osamalliin osasairausp‰iv‰rahat omiksi erikseen. Lopputuloksena uudet
+	muuttujat SAIROSPR ja SAIROSPR_TYONANT.
+	
+	../SIMUL_2023/SAIRVAKsimul.sas
+	../SIMUL_2023/KOKOsimul.sas
+	
+18.	P‰ivitetty TOIMTUKI-osamallin enimm‰isasumismenojen parametritaulut vuosille 2026-2030.
+
+	../PARAM/asummenorajat_2026.sas7bdat
+	../PARAM/asummenorajat_2027.sas7bdat
+	../PARAM/asummenorajat_2028.sas7bdat
+	../PARAM/asummenorajat_2029.sas7bdat
+	../PARAM/asummenorajat_2030.sas7bdat
+
+17.	P‰ivitetty VVERO-osamallin parametritaulut arvonlis‰veromuutosten mukaisiksi.
+
+	../PARAM/pvvero.sas7bdat
+
+16.	Lis‰tty kuntien peruspalveluiden hintaindeksi (IndKuphi2000), joka korvaa opetustoimen
+	hintaindeksin (IndOpt2010) k‰ytˆn indeksisidonnaisten parametrien PHYlaRaja ja PHAlaRaja
+	indeksikorotuksessa.
+
+	../PARAM/PARAMindeksit.sas
+	../PARAM/pindeksi_vuosi.sas7bdat
 
 *************************************************************************************************
 **************************   UUSI MALLIVERSIO 25.50 JAETTU 18.12.2025  **************************
@@ -15,14 +126,14 @@
 15.	Julkaistu VM:n talven 2025 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
 	parametritaulut vuosille 2024-2030.	
 
-14.	Asetettu toimeentulotuessa huomioitavien kuntakohtaisten enimm√§isasumismenojen k√§ytt√§minen
-	vakioasetukseksi. Lis√§tty my√∂s mahdollisuus k√§ytt√§√§ deflaattoria n√§ihin parametreihin.
-	Lis√§ksi korjattu vuoden 2023 parametritaulukko sis√§lt√§m√§√§n oikeat arvot.
+14.	Asetettu toimeentulotuessa huomioitavien kuntakohtaisten enimm‰isasumismenojen k‰ytt‰minen
+	vakioasetukseksi. Lis‰tty myˆs mahdollisuus k‰ytt‰‰ deflaattoria n‰ihin parametreihin.
+	Lis‰ksi korjattu vuoden 2023 parametritaulukko sis‰lt‰m‰‰n oikeat arvot.
 
 	../SIMUL_2023/TOIMTUKIsimul.sas
 	../PARAM/asummenorajat_2023.sas7bdat
 
-13.	Lis√§tty SAIRVAKsimul-osamalliin etuuksien maksussa sovellettavat ala- ja yl√§ik√§rajat.
+13.	Lis‰tty SAIRVAKsimul-osamalliin etuuksien maksussa sovellettavat ala- ja yl‰ik‰rajat.
 
 	../SIMUL_2023/SAIRVAKsimul.sas
 	../SIMUL_2023/SAIRVAKlakimakrot.sas
@@ -30,7 +141,7 @@
 	../PARAM/kaikkiparam.sas7bdat
 
 12. 	OPINTUKIsimul-osamallin koodia yksinkertaistettu ja simulointia tarkennettu. Rekisteriaineis-
-	ton uusien muuttujien avulla tiedet√§√§n nyt opintotukikuukausien jakautuminen kev√§t- ja syys-
+	ton uusien muuttujien avulla tiedet‰‰n nyt opintotukikuukausien jakautuminen kev‰t- ja syys-
 	lukukaudelle. 
 
 	../SIMUL_2023/OPINTUKIsimul.sas
@@ -43,17 +154,17 @@
 11.	Julkaistu VM:n syksyn 2025 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
 	parametritaulut vuosille 2024-2029.
 
-10. 	Lis√§tty kuntoutusrahat SAIRVAKsimul- ja KOKOsimul-ohjelmiin.
+10. 	Lis‰tty kuntoutusrahat SAIRVAKsimul- ja KOKOsimul-ohjelmiin.
 	
 	../SIMUL_2023/KOKOsimul.sas
 	../SIMUL_2023/SAIRVAKsimul.sas
 
 9.	Korjattu VEROsimul-osamallista kovakoodattuja vuosilukuja, jotta malli simuloi kunnallis- 
-	ja kirkollisverot lains√§√§d√§nt√∂vuodelle 2022 ja sit√§ ennen. 
+	ja kirkollisverot lains‰‰d‰ntˆvuodelle 2022 ja sit‰ ennen. 
 
 	../SIMUL_2023/VEROsimul.sas
 
-8.	Lis√§tty kiinteist√∂veron simulointiin saunarakennukset sek√§ erilliset talous- ja 
+8.	Lis‰tty kiinteistˆveron simulointiin saunarakennukset sek‰ erilliset talous- ja 
 	autotallirakennukset. Selkeytetty samalla kiinteistoveron simulointia.
 
 	../SIMUL_2023/KIVEROsimul.sas
@@ -62,50 +173,50 @@
 	../PARAM/pkivero.sas7bdat
 	../OHJAUS/kaikki_param.sas7bdat
 
-7.	Viety erityisen alij√§√§m√§hyvityksen poisto tuloverolain muutoksen mukaisesti. Muutos tulee
+7.	Viety erityisen alij‰‰m‰hyvityksen poisto tuloverolain muutoksen mukaisesti. Muutos tulee
 	voimaan 1.1.2027 alkaen.
 
 *************************************************************************************************
 **************************   UUSI MALLIVERSIO 25.30 JAETTU 16.06.2025  **************************
 *************************************************************************************************
 
-6.	Julkaistu VM:n kes√§n 2025 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
+6.	Julkaistu VM:n kes‰n 2025 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja 
 	parametritaulut vuosille 2024-2029.
 
 *************************************************************************************************
 **************************   UUSI MALLIVERSIO 25.20 JAETTU 28.5.2025  ***************************
 *************************************************************************************************
 
-5. 	Lis√§tty aineistoon uutena tulleet p√§iv√§hoitomaksut KOKOsimul-, PHOITOsimul ja TOIMTUKIsimul-
-	ohjelmiin. Muutos mahdollistaa p√§iv√§hoitomaksujen huomioinnin toimeentulotuessa ja simuloitujen 
-	p√§iv√§hoitomaksujen eurojen vertaamisen datan euroihin.
+5. 	Lis‰tty aineistoon uutena tulleet p‰iv‰hoitomaksut KOKOsimul-, PHOITOsimul ja TOIMTUKIsimul-
+	ohjelmiin. Muutos mahdollistaa p‰iv‰hoitomaksujen huomioinnin toimeentulotuessa ja simuloitujen 
+	p‰iv‰hoitomaksujen eurojen vertaamisen datan euroihin.
 
 	../SIMUL_2023/KOKOsimul.sas
 	../SIMUL_2023/PHOITOsimul.sas
 	../SIMUL_2023/TOIMTUKIsimul.sas
 
-4. 	Lis√§tty ulkomaan palkkojen muuttujat tpalk5, tulmuuh, tulmuuv ja tulmuusu ASUMTUKIsimulin 
-	ja TOIMTUKIsimulin ty√∂tulon laskentaan. TOIMTUKIsimulissa muuttujat tulmuuh ja tulmuusu
-	on lis√§tty veronalaiseen ty√∂tuloon ja tpalk5 ja tulmuuv verottomaan
+4. 	Lis‰tty ulkomaan palkkojen muuttujat tpalk5, tulmuuh, tulmuuv ja tulmuusu ASUMTUKIsimulin 
+	ja TOIMTUKIsimulin tyˆtulon laskentaan. TOIMTUKIsimulissa muuttujat tulmuuh ja tulmuusu
+	on lis‰tty veronalaiseen tyˆtuloon ja tpalk5 ja tulmuuv verottomaan
 
-3.	Tarkennettu opintolainan valtiontakauksen simulointia uusien muuttujien my√∂t√§. Siirryt√§√§n
-	k√§ytt√§m√§√§n simuloinnissa lainatakauskuukausia opintorahan tukikuukausien sijaan. Muutos kasvattaa
-	yhteenlasketun simuloidun lainatakauksen m√§√§r√§√§, mutta pienent√§√§ sen saajien m√§√§r√§√§. T√§m√§ on seurausta
-	siit√§, ettei keskiasteen opiskelijoille en√§√§ simuloida automaattisesti lainatakausta kaikille
+3.	Tarkennettu opintolainan valtiontakauksen simulointia uusien muuttujien myˆt‰. Siirryt‰‰n
+	k‰ytt‰m‰‰n simuloinnissa lainatakauskuukausia opintorahan tukikuukausien sijaan. Muutos kasvattaa
+	yhteenlasketun simuloidun lainatakauksen m‰‰r‰‰, mutta pienent‰‰ sen saajien m‰‰r‰‰. T‰m‰ on seurausta
+	siit‰, ettei keskiasteen opiskelijoille en‰‰ simuloida automaattisesti lainatakausta kaikille
 	tukikuukausille.
 
 	../SIMUL_2023/OPINTUKIsimul.sas
 
-2.	Lis√§tty tturva_kk-aineiston vuorottelukorvauksen m√§√§r√§ TTURVA_KK-osamallin tulosmuuttujiin
-	sek√§ KOKOsimulin tulosmuuttujaan TTURVA_SIMUL, kun k√§ytet√§√§n TTURVA_KK_simul-osamallia.
-	T√§m√§ yhten√§ist√§√§ KOKOsimul-ajojen TTURVA_SIMUL-muuttujan sis√§ll√∂t riippumatta siit√§, k√§ytet√§√§nk√∂
+2.	Lis‰tty tturva_kk-aineiston vuorottelukorvauksen m‰‰r‰ TTURVA_KK-osamallin tulosmuuttujiin
+	sek‰ KOKOsimulin tulosmuuttujaan TTURVA_SIMUL, kun k‰ytet‰‰n TTURVA_KK_simul-osamallia.
+	T‰m‰ yhten‰ist‰‰ KOKOsimul-ajojen TTURVA_SIMUL-muuttujan sis‰llˆt riippumatta siit‰, k‰ytet‰‰nkˆ
 	TTURVA-osamallista vuosi- vai kuukausiversiota.
 
 	../SIMUL_2023/TTURVA_KK_simul.sas
 	../SIMUL_2023/KOKOsimul.sas
 
-1.	Korjattu tulonhankkimisv√§hennyksen laskennassa havaittu virhe. V√§hennyst√§ oli aiemmin simuloitu
-	henkil√∂ille liikaa, jos ilmoitettuja tulonhankkimiskuluja oli aineistossa tai esimerkkilaskelmissa.
-	Korjaus on tehty VEROlakimakroon (riville 102) lis√§√§m√§√§ll√§ min-funktio tulos-muuttujan laskentaan.
+1.	Korjattu tulonhankkimisv‰hennyksen laskennassa havaittu virhe. V‰hennyst‰ oli aiemmin simuloitu
+	henkilˆille liikaa, jos ilmoitettuja tulonhankkimiskuluja oli aineistossa tai esimerkkilaskelmissa.
+	Korjaus on tehty VEROlakimakroon (riville 102) lis‰‰m‰‰ll‰ min-funktio tulos-muuttujan laskentaan.
 	
 	../MAKROT/VEROlakimakrot.sas

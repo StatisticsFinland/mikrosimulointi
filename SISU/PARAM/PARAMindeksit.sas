@@ -499,7 +499,7 @@ Tuottaa:
 	päivitys kutsumalla ParamPaivitys-makroa. Tässä esimerkki makrokutsusta:
 
 %ParamPaivitys(
-	pvuosi = 2025, 
+	pvuosi = 2026, 
 	tvuosi = 2030, 
 	indtaulu = param.pindeksi_vuosi,
 	popintuki = popintuki,
@@ -519,7 +519,7 @@ Tuottaa:
 
 2. Mahdollisuus vertailla uusia tauluja edellisiin:
 
-		%let vertailu_taulu = ptoimtuki;
+		%let vertailu_taulu = pvero;
 
 		proc compare	base = param.&vertailu_taulu 	compare = work.&vertailu_taulu;
 		run;

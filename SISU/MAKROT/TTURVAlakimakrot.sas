@@ -1087,12 +1087,12 @@ DES = 'TTURVA: Ansiopäivärahan ja vuorottelukorvauksen enimmäis- ja vähimmäiskes
 %ParamInf&TYYPPI(&mvuosi, &mkuuk, &TTURVA_MUUNNOS, 1);
 
 *Määritetään kullekin enimmäiskesto;
-IF &mvuosi >= 2017 AND &lasktyohistv >= &LisaPvTyoHist AND tyossaoloehto = 1 AND (&ikavu > &KestoIkaRaja) THEN ENIMMAISKESTO = &AnsioSidKesto3;
+IF &mvuosi >= 2017 AND &lasktyohistv >= &LisaPvTyoHist AND &tyossaoloehto = 1 AND (&ikavu > &KestoIkaRaja) THEN ENIMMAISKESTO = &AnsioSidKesto3;
 ELSE IF &mvuosi >= 2014 AND &tyohistv <= &KestoLyhEhtoV THEN ENIMMAISKESTO = &AnsioSidKesto2;
 ELSE ENIMMAISKESTO = &AnsioSidKesto;
 
 *Nollataan enimmäiskesto, jos työssäoloehto ei ole täyttynyt;
-IF tyossaoloehto = 0 THEN ENIMMAISKESTO = 0;
+IF &tyossaoloehto = 0 THEN ENIMMAISKESTO = 0;
 
 *Lisäpäiväoikeuden simulointi;
 	*Jos lisäpäiväoikeus on täyttynyt aikaisempina vuosina niin ei ruveta muuttamaan;

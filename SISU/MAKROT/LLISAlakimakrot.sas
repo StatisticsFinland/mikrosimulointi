@@ -16,7 +16,6 @@
 7. ElatTukiVS = Elatustuki kuukausitasolla vuosikeskiarvona
 8. LLisaK1S = Lapsilis‰ yhdest‰ lapsesta j‰rjestysluvun mukaan kuukausitasolla
 9. LLisaV1S = Lapsilis‰ yhdest‰ lapsesta j‰rjestysluvun mukaan kuukausitasolla vuosikeskiarvona
-10. AitLkm = Makro, jolla m‰‰ritell‰‰n ‰itiysavustukseen oikeuttavien lasten lukum‰‰r‰ vuodesta 2003 l‰htien
 */
 
 
@@ -290,27 +289,3 @@ raha = 0;
 &tulos = raha / 12;
 DROP raha temp;
 %MEND LLisaV1S;
-
-
-/* 10. Makro, jolla m‰‰ritell‰‰n ‰itiysavustukseen oikeuttavien lasten lukum‰‰r‰ 
-	   vuodesta 2003 l‰htien. Korkeintaan neloset otetaan huomioon. */
-
-* Makron parametrit:
-	aitlkm: ƒitiysavustukseen oikeuttavien lasten lukum‰‰r‰ 
-	luku: ƒitiysavustuksien kappalem‰‰r‰;
-
-%MACRO AitLkm(aitlkm, luku)/
-DES = 'LLISA: Makro, jolla m‰‰ritell‰‰n ‰itiysavustukseen oikeuttavien lasten lukum‰‰r‰ vuodesta 2003 l‰htien';
-
-SELECT (&luku);
-	WHEN(0) temp = 0;
-	WHEN(1) temp = 1;
-	WHEN(3) temp = 2;
-	WHEN(6) temp = 3;
-	WHEN(10) temp = 4;
-	OTHERWISE temp = 1;
-END;
-
-&aitlkm = temp;
-DROP temp;
-%MEND AitLkm;

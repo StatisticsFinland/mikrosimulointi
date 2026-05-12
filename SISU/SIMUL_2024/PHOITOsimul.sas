@@ -30,9 +30,9 @@
 
 	%IF &EG NE 1 %THEN %DO;
 	
-	%LET AVUOSI = 2023;		* Aineistovuosi (vvvv);
+	%LET AVUOSI = 2024;		* Aineistovuosi (vvvv);
 
-	%LET LVUOSI = 2023;		* Lainsäädäntövuosi (vvvv);
+	%LET LVUOSI = 2024;		* Lainsäädäntövuosi (vvvv);
 
 	%LET TYYPPI = SIMUL;	* Parametrien hakutyyppi: SIMUL (vuosikeskiarvo) tai SIMULX (parametrit haetaan tietylle kuukaudelle);
 
@@ -91,7 +91,7 @@
 	%LET LUOK_KOTI2 = ; 	  * Taulukoinnin 2. kotitalousluokitus ;
 	%LET LUOK_KOTI3 = ; 	  * Taulukoinnin 3. kotitalousluokitus ;
 
-	%LET EXCEL = 1; 		 * Viedäänkö tulostaulukko automaattisesti Exceliin (1 = Kyllä, 0 = Ei) ;
+	%LET EXCEL = 0; 		 * Viedäänkö tulostaulukko automaattisesti Exceliin (1 = Kyllä, 0 = Ei) ;
 
 	* Laskettavat tunnusluvut (jos tyhjä, niin ei lasketa);
 
@@ -155,7 +155,7 @@
 	DATA TEMP.PHOITO_PERHEET;
 		MERGE STARTDAT.START_PHOITO_LAPSET(IN = A KEEP = knro)
 			POHJADAT.&AINEISTO&AVUOSI(KEEP = hnro knro asko syvu syntkk ikavu ikakk svatva 
-			svatvp tkotihtu lbeltuki elasa elama tkopira lgktku yrvah);
+			svatvp tkotihtu lbeltuki elasaimp elamaveror tkopira lgktku yrvah);
 		BY knro;
 		IF A;
 	RUN;
@@ -188,7 +188,7 @@
 	  Käytetään laskennassa apumakroa Ika_Kuuk;
 
 	DATA TEMP.PHOITO_PERHEET;
-		MERGE TEMP.PHOITO_PERHEET (KEEP = knro hnro asko ikavu ikakk svatva svatvp tkotihtu lbeltuki elasa elama tkopira lgktku yrvah)
+		MERGE TEMP.PHOITO_PERHEET (KEEP = knro hnro asko ikavu ikakk svatva svatvp tkotihtu lbeltuki elasaimp elamaveror tkopira lgktku yrvah)
 		STARTDAT.START_PHOITO_LAPSET (KEEP = knro hnro hoiaikak hoiaikao);
 		BY knro hnro;
 
@@ -201,7 +201,7 @@
 		%IkaKuuk(IKA_KUUK3, 0, 17, SUM(12 * ikavu, ikakk));
 		LAPSI_KUUK_18 = IKA_KUUK3;
 
-		KEEP hnro knro asko svatva svatvp lbeltuki elasa elama tkotihtu LAPSI_KUUK_18 LAPSI_KUUK_17 LAPSI_KUUK_7 tkopira lgktku yrvah;
+		KEEP hnro knro asko svatva svatvp lbeltuki elasaimp elamaveror tkotihtu LAPSI_KUUK_18 LAPSI_KUUK_17 LAPSI_KUUK_7 tkopira lgktku yrvah;
 
 		LABEL
 		LAPSI_KUUK_18 = 'Kuukausien lukumäärä vuoden aikana, jolloin alle 18-vuotias, DATA'
@@ -214,7 +214,7 @@
 	PROC SUMMARY DATA = TEMP.PHOITO_PERHEET;
 		BY knro;
 		OUTPUT OUT = TEMP.PHOITO_ELASA(DROP = _TYPE_ _FREQ_) 
-		SUM(elasa) = ELASA_PERHE;
+		SUM(elasaimp) = ELASA_PERHE;
 	RUN;
 
 	PROC SQL;
@@ -259,7 +259,7 @@
 		VEROT_TULOT_DATA = MAX(SUM(svatva, svatvp, yrvah) / 12, 0);
 		ELATTUKI_DATA = lbeltuki / 12;
 		KOTIHTULO_DATA = SUM(tkotihtu, lgktku) / 12;
-		ELAMAKSUT_DATA = elama / 12;
+		ELAMAKSUT_DATA = elamaveror / 12;
 		ELATAPU_DATA = ELASA_PERHE / 12;
 
 		LABEL 

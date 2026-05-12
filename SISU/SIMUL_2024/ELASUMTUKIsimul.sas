@@ -31,9 +31,9 @@
 
 	%IF &EG NE 1 %THEN %DO;
 
-	%LET AVUOSI = 2023;								/* Aineistovuosi (vvvv) */
+	%LET AVUOSI = 2024;								/* Aineistovuosi (vvvv) */
 
-	%LET LVUOSI = 2023;								/* Lainsäädäntövuosi (vvvv) */
+	%LET LVUOSI = 2024;								/* Lainsäädäntövuosi (vvvv) */
 
 	%LET TYYPPI = SIMUL;							/* Parametrien hakutyyppi: SIMUL (vuosikeskiarvo) tai SIMULX (parametrit haetaan tietylle kuukaudelle);*/
 
@@ -144,11 +144,13 @@
 		DATA TEMP.TEMP_ELASUMTUKI_PERUS; 
 			SET POHJADAT.&AINEISTO&AVUOSI
 			(KEEP = hnro knro jasen puoliso aiti isa
-			halpinta maksvuok hoitvast omamaks omalamm aslaikor jasenia
-			ikavu tkansel leelake velake tkelake tperhel tansel tklaji velaji ttapel tlapel takuuel tulkelvp aslaji
-			eastukikr yastukikr elak svatva svatvp teinova tpeito einotpyjatva tnoosvab einotptosva tuosvv einotyjptva varhp
+			halpinta maksvuok hoitvast omamaks omalamm asukorot jasenia
+			ikavu tkansel leelake velake tkelake tperhel tansel ttapel tlapel takuuel tulkelvp aslaji
+			eastukikr yastukikr svatva svatvp teinova tpeito einotpyjatva tnoosvab einotptosva tuosvv einotyjptva varhp
 			teinovv tnoosvvb teinovvb tuosvvap toyjmyvvap toyjmavvap evlamm rakvuosi yrvah
 			odorsyko odorkeko odorsyke odorkeke
+			elake_kk vanhuuselake_kk tyokyvyttomyyselake_kk maatalouden_erityiselake_kk osa_aika_elake_kk
+			perhe_elake_kk takuuelake_kk muuelake_kk
 			psiraho pulkyso karvo posake_arvo_yht_AOT mtnetvaosvv elyosnetvvv pliikpos pmaatpos valopullinenvad);
 		RUN;
 
@@ -163,7 +165,7 @@
 				(SUM(hoitvast)/jasenia)*12 AS HOITVASTJ12,
 				SUM(omamaks)/jasenia AS OMAMAKSJ,
 				SUM(omalamm)/jasenia AS OMALAMMJ,
-				SUM(aslaikor)/jasenia AS ASLAIKORJ
+				SUM(asukorot)/jasenia AS ASLAIKORJ
 			FROM TEMP.TEMP_ELASUMTUKI_PERUS
 			GROUP BY knro
 			ORDER BY hnro;
@@ -188,11 +190,8 @@
 							/* saa kansaneläkelain mukaista työkyvyttömyyseläkettä, työttömyyseläkettä, yksilöllistä varhaiseläkettä tai leskeneläkettä */
 							(((tkansel > 0) AND (velake > 0)) OR ((tperhel > 0) AND (leelake > 0))))
 							OR
-							/* saa kansaneläkelain mukaista vanhuuseläkettä eläketuen perusteella. Tietoa ei aineistossa 2020 lähtien */
-							/*((tkansel > 0) AND (omalaji = 10))
-							OR*/
-							/* saa työ- tai virkasuhteen perusteella maksettavaa työkyvyttömyyseläkettä tai leskeneläkettä */
-							((tansel > 0) AND ((tklaji IN (2,9)) OR ((ikavu >= 18) AND (tklaji = 0) AND (velaji = 0))))
+							/* saa työ- tai virkasuhteen perusteella maksettavaa työkyvyttömyyseläkettä */
+							(tansel > 0)
 							OR
 							/* saa eläkettä perustuen lakisääteiseen tapaturmavakuutukseen tai liikennevakuutukseen */	
 							((ttapel > 0) AND (tlapel > 0))
@@ -205,27 +204,11 @@
 					/* vähintään 16-vuotias */	
 					(ikavu >= 16)
 					AND
-					(
-						(
-							/* saa kansaneläkelain mukaista työkyvyttömyyseläkettä, vanhuuseläkettä tai leskeneläkettä */
-							((tkansel > 0) OR ((tperhel > 0) AND (leelake > 0)))
-							OR
-							/* saa takuueläkettä */
-							(takuuel > 0)
-							OR
-							/* saa työ- tai virkasuhteen perusteella maksettavaa työkyvyttömyyseläkettä, vanhuuseläkettä tai leskeneläkettä */
-							(tansel > 0)
-							OR
-							/* saa eläkettä perustuen lakisääteiseen tapaturmavakuutukseen tai liikennevakuutukseen */
-							((ttapel > 0) OR (tlapel > 0))
-							OR
-							/* saa vastaavaa ulkomailta maksettavaa etuutta */	
-							(tulkelvp > 0)
-						)
-						AND	
-						/* ei saa pelkästään osa-aikaeläkettä */
-						(NOT ((velaji = 6) AND ((tperhel = 0) AND (leelake > 0))))
-					)
+					/* saa vanhuuseläkettä, työkyvyttömyyseläkettä, takuueläkettä, leskeneläkettä tai ulkomailta maksettavaa eläkettä */
+					(vanhuuselake_kk > 0 OR tyokyvyttomyyselake_kk > 0 OR takuuelake_kk > 0 OR perhe_elake_kk > 0 OR tulkelvp > 0)
+					AND
+					/* ei saa pelkästään osittaista vanhuuseläkettä (OVE) */
+					NOT(osa_aika_elake_kk = elake_kk AND elake_kk > 0)
 				%END;
 
 			);
@@ -358,7 +341,8 @@
 			CREATE TABLE STARTDAT.START_ELASUMTUKI_HENKI
 			AS SELECT a.hnro, a.knro, a.ELASUMTUKI_YKSIKKO, a.ONOIKEUSYKS, a.PONOIKEUSYKS, a.VONOIKEUSYKS,
 				b.HALPINTAJ, b.MAKSVUOKJ12, b.HOITVASTJ12, b.OMAMAKSJ, b.OMALAMMJ, b.ASLAIKORJ,
-				c.puoliso, c.tperhel, c.leelake, c.tkansel, c.velake, c.tkelake, c.ikavu, c.aslaji, c.eastukikr, c.yastukikr, c.elak,
+				c.puoliso, c.tperhel, c.leelake, c.tkansel, c.velake, c.tkelake, c.ikavu, c.aslaji, c.eastukikr, c.yastukikr,
+				c.elake_kk, c.vanhuuselake_kk, c.tyokyvyttomyyselake_kk, c.takuuelake_kk, c.perhe_elake_kk,
 				c.svatva, c.svatvp,	c.teinova, c.tpeito, c.einotpyjatva, c.tnoosvab, c.einotptosva, c.tuosvv, c.einotyjptva,
 				c.teinovv, c.tnoosvvb, c.teinovvb, c.tuosvvap, c.toyjmyvvap, c.toyjmavvap, c.odorsyko, c.odorkeko, c.odorsyke, c.odorkeke,
 				c.evlamm, c.rakvuosi, c.yrvah, c.varhp,
@@ -380,7 +364,7 @@
 			SAAYLLESK = ((ONOIKEUSYKS = 1) AND ((tperhel > 0) AND (leelake > 0)));	
 
 			/* Eläkkeensaajan asumistukeen vain puolison kautta oikeutettu saa alle 65-vuotiaalle maksettavaa kansaneläkelain mukaista varhennettua vanhuuseläkettä (0/1) */
-			PSAAVARVANH = ((PONOIKEUSYKS = 1) AND (((tkansel > 0) AND (varhp > 0)) AND ((16 <= ikavu) AND (ikavu < 65))));  	
+			PSAAVARVANH = ((PONOIKEUSYKS = 1) AND (((tkansel > 0) AND (varhp < 1)) AND ((16 <= ikavu) AND (ikavu < 65))));
 
 			/* Omakotitalo (0/1) */
 			OMAKOTITALO = (aslaji IN (1,2));
@@ -393,12 +377,9 @@
 			ELSE IF eastukikr = 1 AND yastukikr = 2 THEN KAYTKRYHMA = 2;
 			ELSE IF eastukikr = 2 THEN KAYTKRYHMA = 3;
 			ELSE IF eastukikr = 3 THEN KAYTKRYHMA = 4;
-			
-			/* Kuukausien lukumäärä, jolloin oikeutettu eläkkeensaajan asumistukeen yksin asuessaan (1-12):
-			Jos kyseessä on yleisen perhe-eläkkeen leskeneläkkeen saaja, kuukausia oletetaan olevan 12,
-			sillä elak-muuttuja ei sisällä niitä kuukausia, kun henkilö on saanut pelkkää perhe-eläkettä. */
-			IF ONOIKEUSYKS = 1 AND SAAYLLESK = 1 THEN ELAKEKUUKAUDET = 12;
-			ELSE IF ONOIKEUSYKS = 1 AND SAAYLLESK = 0 THEN ELAKEKUUKAUDET = MAX(elak, 0);
+
+			/* Kuukausien lukumäärä, jolloin oikeutettu eläkkeensaajan asumistukeen yksin asuessaan (1-12): */
+			IF ONOIKEUSYKS = 1 THEN ELAKEKUUKAUDET = max(vanhuuselake_kk, tyokyvyttomyyselake_kk, takuuelake_kk, perhe_elake_kk, 0);
 
 			/* Saadut veronalaiset tulot (e/v); vanhempiensa kautta oikeutetuille 0 (yrittäjävähennystä ei ole tehty) */
 			VERONAL_DATA = IFN(((ONOIKEUSYKS = 1) OR (PONOIKEUSYKS = 1)), SUM(svatva, svatvp, yrvah, 0), 0);

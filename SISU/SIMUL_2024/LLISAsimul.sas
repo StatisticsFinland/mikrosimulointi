@@ -31,9 +31,9 @@
 
 	%IF &EG NE 1 %THEN %DO;
 
-	%LET AVUOSI = 2023;		* Aineistovuosi (vvvv);
+	%LET AVUOSI = 2024;		* Aineistovuosi (vvvv);
 
-	%LET LVUOSI = 2023;		* Lains‰‰d‰ntˆvuosi (vvvv);
+	%LET LVUOSI = 2024;		* Lains‰‰d‰ntˆvuosi (vvvv);
 
 	%LET TYYPPI = SIMUL;	* Parametrien hakutyyppi: SIMUL (vuosikeskiarvo) tai SIMULX (parametrit haetaan tietylle kuukaudelle);
 
@@ -41,7 +41,7 @@
 
 	%LET AINEISTO = REK;	* K‰ytett‰v‰ aineisto (PALV = Palveluaineisto, REK = Rekisteriaineisto) ;
 
-	%LET TULOSNIMI_LL = llisa_simul_&SYSDATE._1 ; * Simuloidun tulostiedoston nimi ;
+	%LET TULOSNIMI_LL = llisa_simul_&SYSDATE._1; * Simuloidun tulostiedoston nimi ;
 
 	* Inflaatiokorjaus. Euro- tai markkam‰‰r‰isten parametrien haun yhteydess‰ suoritettavassa
 	  deflatoinnissa k‰ytett‰v‰n kertoimen voi syˆtt‰‰ itse INF-makromuuttujaan
@@ -132,16 +132,16 @@
 
 	RUN;
 
-	PROC SUMMARY DATA = POHJADAT.&AINEISTO&AVUOSI(KEEP = knro aitav AITAVLUKUM
+	PROC SUMMARY DATA = POHJADAT.&AINEISTO&AVUOSI(KEEP = knro aitav aitav_lkm
 		WHERE = (aitav > 0));
-	VAR aitav AITAVLUKUM;
+	VAR aitav aitav_lkm;
 	BY knro;
-	OUTPUT OUT = STARTDAT.START_AITAV(KEEP = knro aitav AITAVLUKUM) SUM=;
+	OUTPUT OUT = STARTDAT.START_AITAV(KEEP = knro aitav aitav_lkm) SUM=;
 	RUN;
 
 	DATA STARTDAT.START_ELTUKI;
 	SET POHJADAT.&AINEISTO&AVUOSI
-	(KEEP = hnro knro elivtu elasa lbeltuki ELTUKIKUUK);
+	(KEEP = hnro knro elivtu elasaimp lbeltuki ELTUKIKUUK);
 	WHERE ELTUKIKUUK > 0;
 	IF elivtu IN (20, 83, 84) THEN APUOLISO = 0; ELSE APUOLISO = 1;
 	LABEL 	
@@ -310,9 +310,9 @@ DATA TEMP.ELTUKI_HH;
 	josta v‰hennet‰‰n elatusapu;
 
 	%ElatTukiVS(ELATUSV, &LVUOSI, &INF, APUOLISO, 1);
-	ELATUSTUET_HH = MAX(SUM(ELTUKIKUUK * ELATUSV, -elasa), 0);
+	ELATUSTUET_HH = MAX(SUM(ELTUKIKUUK * ELATUSV, -elasaimp), 0);
 
-	KEEP knro elasa lbeltuki ELTUKIKUUK APUOLISO ELATUSTUET_HH;
+	KEEP knro elasaimp lbeltuki ELTUKIKUUK APUOLISO ELATUSTUET_HH;
 RUN;
 
 * Elatustuet kotitaloustasolla ;
@@ -328,8 +328,8 @@ RUN;
 
 DATA TEMP.AITAV_HH;
 	SET STARTDAT.START_AITAV;
-	%AitAvustVS(AITAVUST, &LVUOSI, &INF, AITAVLUKUM);
-	KEEP knro aitav AITAVLUKUM AITAVUST;
+	%AitAvustVS(AITAVUST, &LVUOSI, &INF, aitav_lkm);
+	KEEP knro aitav aitav_lkm AITAVUST;
 RUN;
 
 * Yhdistet‰‰n laskelmat;

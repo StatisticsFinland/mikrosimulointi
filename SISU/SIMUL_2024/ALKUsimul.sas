@@ -40,9 +40,9 @@ OPTIONS VALIDVARNAME = V7;
 
 %GLOBAL HAKEM LEVY KENO MVUOSI MUISTISSA TEMPTYHJ;
 
-%LET MVUOSI = 2023; /* Mallivuosi (aineiston perusvuosi) */
+%LET MVUOSI = 2024; /* Mallivuosi (aineiston perusvuosi) */
 
-%LET MUISTISSA = 0; /* Käytetäänkö muistia simuloinnin nopeuttamiseksi
+%LET MUISTISSA = 1; /* Käytetäänkö muistia simuloinnin nopeuttamiseksi
 					   0 = ei (suositus työasemakäytössä)
 					   1 = kyllä (suositus FIONA-etäkäyttöpalvelimella)
 					   Valinnalla 1 STARTDAT- ja TEMP-kirjastojen tiedostoja ei

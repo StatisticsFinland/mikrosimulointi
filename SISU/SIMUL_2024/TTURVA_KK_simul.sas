@@ -39,9 +39,9 @@
 
 		%IF &EG NE 1 %THEN %DO;
 
-			%LET AVUOSI = 2023;		* Aineistovuosi (vvvv);
+			%LET AVUOSI = 2024;		* Aineistovuosi (vvvv);
 
-			%LET LVUOSI = 2023;		* Lainsäädäntövuosi (vvvv);
+			%LET LVUOSI = 2024;		* Lainsäädäntövuosi (vvvv);
 
 			%LET TYYPPI = ESIM;		* Parametrien hakutyyppi: ESIM (parametrit datan kuukausille) tai SIMULX (parametrit haetaan tietylle kuukaudelle);
 
@@ -463,14 +463,14 @@ tmpvt_yht = SUM(tmpertayspvt_eikor, tmkortayspvt, tmpersovipvt_eikor, tmkorsovip
 
 		/* Perus */
 		%AnsioSidKS(SIMUL_APPERTAYSEURKK, &LVUOSI, &KUUK, &INF, 
-					lapsimaara, 0, 0, LISAPAIVOIK, pepalkkavteke, tulrek_etuus_vahennettava, kertyma, sum(kertyma, -appvtnetto_yht));
+					lapsimaara, 0, 0, 0, pepalkkavteke, tulrek_etuus_vahennettava, kertyma, sum(kertyma, -appvtnetto_yht));
 		SIMUL_APPERTAYSEUR = appertayspvt_eikor * (SIMUL_APPERTAYSEURKK / &TTPaivia);
 				
 		/* Korotettu */
 		IF apkortayspvt OR apkorsovipvt THEN DO;
 
 			%AnsioSidKS(SIMUL_APKORTAYSEURKK, &LVUOSI, &KUUK, &INF, 
-						lapsimaara, 1, 0, LISAPAIVOIK, pepalkkavteke, tulrek_etuus_vahennettava, kertyma, sum(kertyma, -appvtnetto_yht));
+						lapsimaara, 1, 0, 0, pepalkkavteke, tulrek_etuus_vahennettava, kertyma, sum(kertyma, -appvtnetto_yht));
 			/* Korotusosa erikseen! */
 			SIMUL_APKORILMTAYS = apkortayspvt * (SIMUL_APPERTAYSEURKK / &TTPaivia);
 			SIMUL_APKORTAYSEUR = apkortayspvt * (SIMUL_APKORTAYSEURKK / &TTPaivia);

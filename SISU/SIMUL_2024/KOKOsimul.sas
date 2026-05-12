@@ -36,9 +36,9 @@
 
 %IF &EG NE 1 %THEN %DO;
 
-%LET AVUOSI = 2023;		* Aineistovuosi (vvvv);
+%LET AVUOSI = 2024;		* Aineistovuosi (vvvv);
 
-%LET LVUOSI = 2023;		* Lainsäädäntövuosi (vvvv);
+%LET LVUOSI = 2024;		* Lainsäädäntövuosi (vvvv);
 						* HUOM! Jos käytät vuotta 2017/2025 ja ASUMTUKI-mallia;
 						* valitse TYYPPI_KOKO = SIMULX ja haluamasi lainsäädäntökuukausi;
 
@@ -309,10 +309,11 @@
 	 ptyhtyma tmetsp tmetspp tvaksp tvuokr tvuokr1 tjvkork  tmuukor tjmark tmuutp
 	 tsiraho tmyynt tmyynt1 fluotap tvahevas tptmuu tulkyhp ttapel tlapel ttappr tmuupr
 	 tvakpr tpotel tmuuel teanstu tmtatt kuto amstipe
-	 rsyhte hasepr hsotvkor elasa per_apuraha omakkiiv
-	 lveru elama saiprva vkpmkyv vkpopmkyv aiprva kreurv cdmky htkapr dtyhtet vvvmk1
+	 ase_siv_praha_yht
+	 rsyhte sotvammakorvaus elasaimp per_apuraha omakkiiv
+	 lveru elamaveror saiprva vkpmkyv vkpopmkyv aiprva kreurv cdmky htkapr dtyhtet vvvmk1
 	 vvvmk3 vvvmk5 tkoultuk etuki vtukia16 vtukiy16 lapsikorotus rielake ryelake lgkthr lgkthl lgktku
-	 lgos lgjhhr hkotihm odalsy odalke odmksyko odmksyke odmkkeko odmkkeke odkma verot svatvap svatpp lpvma lshma ltva ltvp lkuve lkive
+	 lgos lgjhhr tkotimuo odalsy odalke odmksyko odmksyke odmkkeko odmkkeke odkma verot svatvap svatpp lpvma lshma ltva ltvp lkuve lkive
 	 lelvak tnoosvvb teinovvb tuosvvap teinovv tnoosvab tuosvv einotptosva
 	 teinova tpeito bbyhte aitav lbeltuki yastuki eastuki totu_yhteensa
 	 hoimaksk hoimakso
@@ -360,8 +361,8 @@
 
 	/* Sekalaisia, ei-simuloituja, verottomia tuloja */
 
-	SEKAL_VEROTT_TULO = SUM(kuto, amstipe, rsyhte, hasepr, hsotvkor,
-		odkma, elasa, per_apuraha, ttyosuhdematkal, tpolkupyoraetuv, tavainh);
+	SEKAL_VEROTT_TULO = SUM(kuto, amstipe, rsyhte, ase_siv_praha_yht, sotvammakorvaus,
+		odkma, elasaimp, per_apuraha, ttyosuhdematkal, tpolkupyoraetuv, tavainh);
 
 	/* Sekalaisia, ei-simuloituja veroja */
 
@@ -369,7 +370,7 @@
 
 	/* Sekalaisia vähennyksiä tuloista, nyt vain elatusmaksut */
 
-	SEKAL_VAHENN = elama;
+	SEKAL_VAHENN = elamaveror;
 
 	/* Puhdas ansiotulo ja pääomatulo */
 
@@ -386,7 +387,7 @@
 
 	KANSEL_PERHEL_DATA = SUM(tkansel, tperhel, takuuel);
 	VEROTT_KANSEL_DATA = SUM(vtukiy16, vtukia16, etuki, lapsikorotus, rielake, ryelake);
-	KOTIHTUKI_DATA = SUM(MAX(lgkthr, 0), MAX(lgkthl, 0), lgktku, lgos, lgjhhr, hkotihm);
+	KOTIHTUKI_DATA = SUM(MAX(lgkthr, 0), MAX(lgkthl, 0), lgktku, lgos, lgjhhr, tkotimuo);
 	OPINTUKI_DATA = tkopira;
 	OPLAINA_DATA = SUM(MAX(odmksyko, 0), MAX(odmksyke, 0), MAX(odmkkeko, 0), MAX(odmkkeke, 0));
 	ASUMLISA_DATA = SUM(MAX(odalsy, 0), MAX(odalke, 0));
@@ -489,7 +490,7 @@
 
 	/* Pidetään vain tarpeelliset muuttujat */
 
-	KEEP hnro knro asko htkapr lgktku hkotihm
+	KEEP hnro knro asko htkapr lgktku tkotimuo
 	KUNNVE_DATA KIRKVE_DATA PRAHAMAKSU_DATA SAIRVAKMAKSU_DATA PALKVAK_DATA VALTVERO_DATA POVERO_DATA
 	PANSIO_DATA PPOMA_DATA MAKSP_VEROT_DATA OPLAINA_DATA PALKAT SEKAL_PRAHAT MUUT_EL MUU_ANSIO
 	YRIT_ANSIO YRIT_POTULO SEKAL_POTULO SEKAL_VEROT SEKAL_VAHENN SEKAL_VEROTT_TULO EI_SIMULTULOT
@@ -733,7 +734,7 @@ SET STARTDAT.START_KOKO;
 	KOTIHTUKI_SIMUL = KOTIHTUKI_DATA;
 %END;
 %ELSE %DO;
-	KOTIHTUKI_SIMUL = SUM(KOTIHTUKI, OSHOIT, JSHOIT, lgktku, hkotihm);
+	KOTIHTUKI_SIMUL = SUM(KOTIHTUKI, OSHOIT, JSHOIT, lgktku, tkotimuo);
 %END;
 
 /* Opintorahat ja asumislisä */

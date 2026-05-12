@@ -22,16 +22,18 @@ Koodissa muodostetaan seuraavat erät:
 		3.3.2 Oikeus eläkkeensaajan asumistukeen
 
 Muodostettavat aineistot ovat:
-	POHJADAT.tturva_tulrek2023.sas7bdat
-	POHJADAT.toimtuki_tulrek2023.sas7bdat
-	POHJADAT.asumtuki_tulrek2023.sas7bdat
+	POHJADAT.tturva_tulrekVVVV.sas7bdat
+	POHJADAT.toimtuki_tulrekVVVV.sas7bdat
+	POHJADAT.asumtuki_tulrekVVVV.sas7bdat
 
 Tarkempi kuvaus aineiston muodostuksesta löytyy tiedostosta tulrek_readme.txt.
 	
 ******************************************************************************************************/
 
+%let avuosi = 2024; /* Aineistovuosi */
+
 proc sql;
-create table POHJADAT.tturva_tulrek2023 as
+create table POHJADAT.tturva_tulrek&avuosi. as
 	/*** 1. TTURVA_KK ***/
 	/* 1.1 Työttömyysturvan sovittelussa huomioon otettavat palkkatulot bruttona
 	   https://www.finlex.fi/fi/lainsaadanto/2002/1290#part_3__chp_7__sec_6 */
@@ -46,7 +48,7 @@ create table POHJADAT.tturva_tulrek2023 as
             then summa
             else 0 end
         ) as summa
-    from POHJADAT.tulrek_palkka2023
+    from POHJADAT.tulrek_palkka&avuosi.
     group by hnro, kk
 
 	/* 1.2 Työttömyysturvan tarveharkinnassa huomioon otettavat etuustulot bruttona
@@ -65,7 +67,7 @@ create table POHJADAT.tturva_tulrek2023 as
 			then summa
 			else 0 end
 		) as summa
-    from POHJADAT.tulrek_etuus2023
+    from POHJADAT.tulrek_etuus&avuosi.
 	group by hnro, kk
 
 	/* 1.3 Työttömyysturvasta vähennettävä sosiaalietuus
@@ -87,14 +89,14 @@ create table POHJADAT.tturva_tulrek2023 as
 			then summa
 			else 0 end
 		) as summa
-    from POHJADAT.tulrek_etuus2023
+    from POHJADAT.tulrek_etuus&avuosi.
 	group by hnro, kk
 ;
 quit;
 
 /*
 proc sql;
-create table POHJADAT.toimtuki_tulrek2023 as
+create table POHJADAT.toimtuki_tulrek&avuosi. as
 	/*** 2. TOIMTUKI ***/
 	/* 2.1 Toimeentulotuessa huomioon otettavat palkkatulot nettona *//*
     select
@@ -113,7 +115,7 @@ create table POHJADAT.toimtuki_tulrek2023 as
             then -summa
             else 0 end
         ) as summa
-    from POHJADAT.tulrek_palkka2023
+    from POHJADAT.tulrek_palkka&avuosi.
     group by hnro, kk
 
 	/* 2.2 Toimeentulotuessa huomioon otettavat etuustulot nettona
@@ -133,13 +135,13 @@ create table POHJADAT.toimtuki_tulrek2023 as
             then -summa
             else 0 end
         ) as summa
-    from POHJADAT.tulrek_etuus2023
+    from POHJADAT.tulrek_etuus&avuosi.
     group by hnro, kk
 ;
 quit;
 
 proc sql;
-create table POHJADAT.asumtuki_tulrek2023 as
+create table POHJADAT.asumtuki_tulrek&avuosi. as
 	/*** 3. ASUMTUKI & ELASUMTUKI ***/
 	/* 3.1 Yleisessä ja eläkkeensaajan asumistuessa huomioon otettavat palkkatulot bruttona *//*
     union all
@@ -154,7 +156,7 @@ create table POHJADAT.asumtuki_tulrek2023 as
             then summa
 			else 0 end
         ) as summa
-    from POHJADAT.tulrek_palkka2023
+    from POHJADAT.tulrek_palkka&avuosi.
     group by hnro, kk
 
 	/* 3.2 Yleisessä asumistuessa huomioon otettavat etuustulot bruttona
@@ -173,7 +175,7 @@ create table POHJADAT.asumtuki_tulrek2023 as
 			then summa
 			else 0 end
 		) as summa
-    from POHJADAT.tulrek_etuus2023
+    from POHJADAT.tulrek_etuus&avuosi.
 	group by hnro, kk
 
 	/* 3.3 Eläkkeensaajan asumistuessa huomioon otettavat etuustulot bruttona
@@ -192,7 +194,7 @@ create table POHJADAT.asumtuki_tulrek2023 as
 			then summa
 			else 0 end
 		) as summa
-    from POHJADAT.tulrek_etuus2023
+    from POHJADAT.tulrek_etuus&avuosi.
 	group by hnro, kk
 
 	/* 3.3.2 Oikeus eläkkeensaajan asumistukeen
@@ -210,7 +212,7 @@ create table POHJADAT.asumtuki_tulrek2023 as
 			then summa
 			else 0 end
 		) as summa
-    from POHJADAT.tulrek_etuus2023
+    from POHJADAT.tulrek_etuus&avuosi.
 	group by hnro, kk
 ;
 quit;

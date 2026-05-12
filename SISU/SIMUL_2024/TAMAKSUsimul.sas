@@ -12,9 +12,9 @@
 /* 1. Mallia ohjaavat makromuuttujat */
 %MACRO Aloitus;
 
-	%LET AVUOSI = 2023;		* Aineistovuosi (vvvv);
+	%LET AVUOSI = 2024;		* Aineistovuosi (vvvv);
 
-	%LET LVUOSI = 2023;		* Lainsäädäntövuosi (vvvv);
+	%LET LVUOSI = 2024;		* Lainsäädäntövuosi (vvvv);
 
 	%LET AINEISTO = r23_tamaksu; 	* Käytettävä aineisto;
 
@@ -118,7 +118,7 @@ Palkkakäsitteet on avattu vuositiedot_suorituslajit.xls -tiedostossa.*/
 
 DATA STARTDAT.START_TAMAKSU;
 SET TEMP.TAMAKSU_POHJA
-(KEEP = hnro ykor palkka ikavu tsekt muulis autovere JARJESTYS);
+(KEEP = hnro ykor palkka ikavu sektoriluokka2 muulis autovere JARJESTYS);
 
 /* 2.2.2 Apumuuttujien luominen taulukkoon START_TAMAKSU */
 
@@ -139,11 +139,11 @@ DATA TEMP.TAMAKSU;
 SET STARTDAT.START_TAMAKSU;
 
 IF TAPALKKA > 0 THEN DO;
-	%SairVakMaksuVTAS(TASAVAMAKSUK, &LVUOSI, &INF, ikavu, (TAPALKKA / 12), tsekt);
-	%TyotVakMaksuVTAS(TATYVAMAKSUK, &LVUOSI, &INF, ikavu, (TAPALKKA / 12), tsekt);
-	%ElMaksuVTAS(TAELMAKSUK, &LVUOSI, &INF, ikavu, (TAPALKKA / 12), tsekt);
-	%RyHeMaksuVTAS(TARYHEMAKSUK,&LVUOSI, &INF, (TAPALKKA / 12), tsekt);
-	%TaTuMaksuVTAS(TATATUMAKSUK, &LVUOSI, &INF, (TAPALKKA / 12), tsekt);
+	%SairVakMaksuVTAS(TASAVAMAKSUK, &LVUOSI, &INF, ikavu, (TAPALKKA / 12), sektoriluokka2);
+	%TyotVakMaksuVTAS(TATYVAMAKSUK, &LVUOSI, &INF, ikavu, (TAPALKKA / 12), sektoriluokka2);
+	%ElMaksuVTAS(TAELMAKSUK, &LVUOSI, &INF, ikavu, (TAPALKKA / 12), sektoriluokka2);
+	%RyHeMaksuVTAS(TARYHEMAKSUK,&LVUOSI, &INF, (TAPALKKA / 12), sektoriluokka2);
+	%TaTuMaksuVTAS(TATATUMAKSUK, &LVUOSI, &INF, (TAPALKKA / 12), sektoriluokka2);
 END;
 
 /* Kerrotaan vuositasoiseksi kuukausitasoisesta */ 

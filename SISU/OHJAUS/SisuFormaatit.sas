@@ -274,15 +274,17 @@ VALUE $suorlaji (NOTSORTED MULTILABEL)
 
 /* TYÖNANTAJASEKTORI */
 
-VALUE tsekt (NOTSORTED MULTILABEL)
-1 = 'Yritykset'
-2 = 'Rahoitus- ja vakuutuslaitokset'
-3 = 'Kunnat ja kuntayhtymät'
-4 = 'Kotitalouksia palvelevat voittoa tavoittelemattomat yhteisöt'
-5 = 'Kotitaloudet'
-6 = 'Ulkomaat'
-8 = 'Valtionhallinto ja sosiaaliturvarahastot'
-9 = 'Asuntoyhteisöt';
+VALUE $sektoriluokka (NOTSORTED MULTILABEL)
+'111' = 'Yritykset'
+'112' = 'Asuntoyhteisöt'
+'12' = 'Rahoitus- ja vakuutuslaitokset'
+'1311' = 'Valtionhallinto'
+'1313' = 'Paikallishallinto'
+'1314' = 'Sosiaaliturvarahastot'
+'14' = 'Kotitaloudet'
+'15' = 'Kotitalouksia palvelevat voittoa tavoittelemattomat yhteisöt'
+'2' = 'Ulkomaat'
+'' = '';
 
 /* SUKUPUOLI */
 
@@ -343,12 +345,17 @@ VALUE elakelaji (NOTSORTED MULTILABEL)
 8 = 'Työuraeläke (ennen vuotta 2018 yksilöllinen varhaiseläke)'
 9 = 'Kuntoutustuki (määräaikainen työkyvyttömyyseläke)';
 
-/* VUOKRA-ASUNNON HALLINTAPERUSTE */
+/* ASUNNON HALLINTAPERUSTE */
 
-VALUE vuoksaan (NOTSORTED MULTILABEL)
-1 = 'Aravavuokra-asunto'
-2 = 'Korkotukivuokra-asunto'
-3 = 'Muu (vapaarahoitteinen) vuokra-asunto';
+VALUE hape (NOTSORTED MULTILABEL)
+1 = 'Omistaa talon'
+2 = 'Omistaa asunnon osakkeen'
+3 = 'Aravavuokra-asunto'
+4 = 'Korkotukivuokra-asunto'
+5 = 'Muu vuokra-asunto'
+6 = 'Asumisoikeusasunnot'
+7 = 'Muu hallintaperuste'
+9 = 'Tuntematon';
 
 /* SUHDE VIITEHENKILÖÖN */
 
@@ -381,22 +388,6 @@ VALUE ttlaji (NOTSORTED MULTILABEL)
 9 = 'Soviteltu tai vähennetty etuus'
 10 = 'Sääestepäivä'
 11 = 'Täytenä maksettu etuus';
-
-/* ELÄKKEENSAAJAN HOITOTUEN TASO */
-
-VALUE ehtm (NOTSORTED MULTILABEL)
-0 = 'Ei hoitotukea'
-1 = 'Perushoitotuki'
-2 = 'Korotettu hoitotuki'
-3 = 'Ylin hoitotuki';
-
-/* VAMMAISTUEN TASO */
-
-VALUE lhtm (NOTSORTED MULTILABEL)
-0 = 'Ei vammaistukea'
-1 = 'Perusvammaistuki'
-2 = 'Korotettu vammaistuki'
-3 = 'Ylin vammaistuki';
 
 RUN;
 

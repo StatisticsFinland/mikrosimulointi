@@ -30,15 +30,15 @@
 
 	%IF &EG NE 1 %THEN %DO;
 
-	%LET AVUOSI = 2023;		* Aineistovuosi (vvvv);
+	%LET AVUOSI = 2024;		* Aineistovuosi (vvvv);
 
-	%LET LVUOSI = 2023;		* Lains‰‰d‰ntˆvuosi (vvvv);
+	%LET LVUOSI = 2024;		* Lains‰‰d‰ntˆvuosi (vvvv);
 
 	%LET TYYPPI = SIMUL;	* Parametrien hakutyyppi: SIMUL (vuosikeskiarvo) tai SIMULX (parametrit haetaan tietylle kuukaudelle);
 
 	%LET LKUUK = 12;		* Lains‰‰d‰ntˆkuukausi, jos parametrit haetaan tietylle kuukaudelle;
 
-	%LET AINEISTO = REK;	* K‰ytett‰v‰ aineisto (PALV = Palveluaineisto, REK = Rekisteriaineisto) ;
+	%LET AINEISTO = REK;	* K‰ytett‰v‰ aineisto (REK = Rekisteriaineisto) ;
 
 	%LET TULOSNIMI_KE = kansel_simul_&SYSDATE._1; * Simuloidun tulostiedoston nimi ;
 
@@ -160,23 +160,28 @@
 		DATA STARTDAT.START_KANSEL;
 			SET POHJADAT.&AINEISTO&AVUOSI 
 			(
-			WHERE = ((ELAKUUK > 0) OR (lapsikorotus > 0) OR (rielake > 0) OR (ryelake > 0) OR (etuki > 0)
-			OR (vtukia16 > 0) OR (vtukiy16 > 0)	OR (KORJ_LAPEL > 0) OR (KORJ_ALKU > 0)
-			OR (jatko > 0))
+			WHERE = ((elake_kk > 0) OR (lapsikorotus > 0) OR (rielake > 0) OR (ryelake > 0) OR (etuki > 0)
+			OR (vtukia16 > 0) OR (vtukiy16 > 0)	OR (KORJ_LAPEL > 0) OR (alku > 0) OR (jatko > 0))
 	 
-			KEEP = hnro lasmu knro elak kelake etuki lapsikorotus rielake ryelake vakio pe_perus tayde ikakk vtukiy16
-			vtukia16 ehtm lhtm pelake velaji tklaji svatvp elakkeet tansel tmuuel ttapel tlapel tpotel
-			hrelake htperhe tuntelpe hpalktu lapper pe_perus alku jatko laptay lapel takuuelake ikavu velake tkelake
+			KEEP = hnro lasmu knro kelake lapsikorotus vakio pe_perus tayde ikakk
+			pelake svatvp elakkeet tansel tmuuel ttapel tlapel tpotel
+			hpalktu lapper pe_perus alku jatko laptay lapel takuuelake ikavu velake tkelake
 			svaltio muuttovv teanstu teleuve tkansel takuuel tulkp tulkelvp tepalkat toptiot tosinktp telps43 tmuukust 
 			tepalk tmerile tpalv trespa tepertyok1 tepertyok2 telps41 telps42 telps8 telps1 tutmp235 tutmp4 telps2 telps5 ttyoltuk
 			tmtatt tpjta tyhtat syvu leelake
 			tmaat1evyr tmaat1pevyr tliik1evyr tliikpevyr tporo1evyr ymaatattuloevyr elyelattuloevyr ymaatattulo elyelattulo 
-			KANSEL_TULO LAPSETULO LESK_JATKOTULO KPUOLISO TAYSORPO ELAKUUK LAPSKUUK RILIKUUK EHOITOKUUK LVTUKIKUUK
-			VTUKIKUUK KORJ_LAPEL KORJ_ALKU TAKUUEL_TULO ASUSUHT LYKKAYSK VARHENP
+			skerrke varhp lykkp vaki_vuodet
+			elake_kk vanhuuselake_kk tyokyvyttomyyselake_kk maatalouden_erityiselake_kk osa_aika_elake_kk
+			perhe_elake_yht perhe_elake_kk takuuelake_kk muuelake_kk
+			rielake ryelake rintamalisa_kk 
+			vtukiy16 vtukiy16_perus_kk vtukiy16_korotettu_kk vtukiy16_ylin_kk
+			vtukia16 vtukia16_perus_kk vtukia16_korotettu_kk vtukia16_ylin_kk
+			etuki etuki_perus_kk etuki_korotettu_kk etuki_ylin_kk
+			KANSEL_TULO LAPSETULO LESK_JATKOTULO KPUOLISO TAYSORPO LAPSKUUK KORJ_LAPEL TAKUUEL_TULO
 			);
 
 			ARRAY PISTE 
-			rielake kelake takuuelake lapsikorotus ryelake vtukiy16 vtukia16 etuki pelake;
+			kelake takuuelake lapsikorotus rielake ryelake vtukiy16 vtukia16 etuki pelake;
 			DO OVER PISTE;
 				IF PISTE <= 0 THEN PISTE = .;
 			END;
@@ -189,12 +194,10 @@
 			/* Kansanel‰kej‰rjestelm‰n leskenel‰ke */
 			IF sum(vakio, pe_perus) > 0 OR tayde > 0 THEN LEELAKEDATA = leelake;
 
-			/* Asuuko henkilˆ laitoksessa;
-			   tieto vain rekisteriaineistossa, palveluaineistossa tyhj‰n‰ [.] muuttujana */
+			/* Asuuko henkilˆ laitoksessa */
 			LAITOS = max(0, lasmu);
 
-			/* Kunnan kalleusryhm‰;
-			   tietoa ei ole aineistossa, eik‰ sill‰ ole merkityst‰ vuoden 2008 j‰lkeisess‰ lains‰‰d‰nnˆss‰ */
+			/* Kunnan kalleusryhm‰, ei ole merkityst‰ vuoden 2008 j‰lkeisess‰ lains‰‰d‰nnˆss‰ */
 			KRYHMA = 2; 
 
 			/* Muut el‰kkeet kuin kansanel‰ke ja takuuel‰ke;
@@ -202,10 +205,7 @@
 			MUUT_EL = MAX(SUM(tansel, ttapel, tlapel, tpotel, teanstu, tmuuel, teleuve, tulkelvp), 0); /*tulkelvp - ulkomaan el‰kkeet lis‰tty 28.3.2022*/
 
 			/* Onko kyseess‰ tyˆkyvyttˆmyysel‰ke */
-			IF ((tkelake > 0)
-				OR (tklaji IN (2,8,9))
-				OR (ttapel > 0)
-				OR (tlapel > 0)) THEN ONTYOKYVYTE = 1;
+			IF tyokyvyttomyyselake_kk > 0 THEN ONTYOKYVYTE = 1;
 			ELSE ONTYOKYVYTE = 0;
 
 			/* Tyˆtulo */
@@ -262,45 +262,26 @@ DATA TEMP.&TULOSNIMI_KE;
 	ennen vuotta 1997 pohjaosa siis simuloidaan kaikille el‰kel‰isille. */
 	IF 
 	(
-		/* on el‰kekuukausia */
-		(ELAKUUK > 0)
+		/* on vanhuus- tai tyˆkyvyttˆmyysel‰kkeen kuukausia */
+		(vanhuuselake_kk > 0 OR tyokyvyttomyyselake_kk > 0)
 		AND
-		/* ulkomailla syntyneiden osalta: on asunut riitt‰v‰n kauan Suomessa */
-		((muuttovv = .) OR ((muuttovv NE .) AND (SUM(&AVUOSI, -MAX(muuttovv, syvu + 16)) > &Karenssi)))
+		/* ei ole osittaisen vanhuusel‰kkeen (OVE) kuukausia */
+		osa_aika_elake_kk = 0
 		AND
-		/* ei ole osa-aikael‰kkeell‰ (osa-aikael‰kkeell‰ voi saada kansanel‰kett‰,
-		mutta el‰kkeen m‰‰r‰ lasketaan ns. ennakoidun el‰kkeen perusteella 
-		(eli tyˆel‰ke, jonka henkilˆ saisi, jos siirtyisi el‰kkeelle 63-vuotiaana)
-		eik‰ t‰t‰ tietoa ole aineistossa, joten osa-aikael‰kel‰iset rajataan
-		kokonaan pois) */
-		(NOT(velaji = 6))
+		/* on asunut riitt‰v‰n kauan Suomessa */
+		vaki_vuodet > &Karenssi
 		AND
-		/* ei ole sellainen henkilˆ, joka saa takuuel‰kett‰ mutta ei saa kansanel‰kett‰ */
-		(NOT((takuuel > 0) AND (tkansel = 0)))
-		AND
-		(
-			/* saa vanhuusel‰kett‰ tai tyˆkyvyttˆmyysel‰kett‰*/
-			((velake > 0) OR (tkelake > 0))
-			OR
-			/* on t‰ytt‰nyt 65 vuotta v‰hint‰‰n 1 kk ennen vuoden loppua */
-			((ikavu > 65) OR ((ikavu = 65) AND (ikakk > 0)))
-			OR
-			/* saa tyˆkyvyttˆmyysel‰kett‰ tyˆel‰kkeen‰ */
-			(tklaji IN (2,8,9))
-			OR
-			/* saa tapaturmavakuutukseen tai liikennevakuutukseen
-			perustuvaa tyˆkyvyttˆmyysel‰kett‰ */
-			((ttapel > 0) OR (tlapel > 0))	
-		) 
+		/* ei ole sellainen henkilˆ, joka saa takuuel‰kett‰, mutta ei saa kansanel‰kett‰ */
+		NOT((takuuel > 0) AND (tkansel = 0))
 	)
 	THEN DO;
 		IF &KDATATULO = 0 AND KANSEL_TULO NE . THEN DO;
-			%Kansanelake_SimpleVS(KANSANELAKE, &LVUOSI, &INF, LAITOS, KPUOLISO, KRYHMA, KANSEL_TULO, ASUSUHT, ikavu, ontyokyvyte = ONTYOKYVYTE, tyotulo = TYOTULO / 12);
+			%Kansanelake_SimpleVS(KANSANELAKE, &LVUOSI, &INF, LAITOS, KPUOLISO, KRYHMA, KANSEL_TULO, skerrke, ikavu, ontyokyvyte = ONTYOKYVYTE, tyotulo = TYOTULO / 12);
 		END;
 		ELSE DO;
-			%Kansanelake_SimpleVS(KANSANELAKE, &LVUOSI, &INF, LAITOS, KPUOLISO, KRYHMA, MUUT_EL / ELAKUUK * 12, ASUSUHT, ikavu, ontyokyvyte = ONTYOKYVYTE, tyotulo = TYOTULO / 12);
+			%Kansanelake_SimpleVS(KANSANELAKE, &LVUOSI, &INF, LAITOS, KPUOLISO, KRYHMA, MUUT_EL / elake_kk * 12, skerrke, ikavu, ontyokyvyte = ONTYOKYVYTE, tyotulo = TYOTULO / 12);
 		END;
-		KANSANELAKE = KANSANELAKE * (LYKKAYSK * VARHENP) * ELAKUUK;
+		KANSANELAKE = KANSANELAKE * (lykkp * varhp) * max(vanhuuselake_kk, tyokyvyttomyyselake_kk, 0);
 	END;
 
 	*Lapsikorotukset;
@@ -313,7 +294,7 @@ DATA TEMP.&TULOSNIMI_KE;
 	*Rintamalis‰t;
 	IF rielake > 0 THEN DO;
 		%KanseLLisatVS(RILISA, &LVUOSI, &INF, 1, 0, 0, 0, 0, 0, 1, 0, KRYHMA, 0);
-		RILISA = RILIKUUK * RILISA;
+		RILISA = rintamalisa_kk * RILISA;
 	END;
 
 	*Ylim‰‰r‰iset rintamalis‰t;
@@ -321,43 +302,82 @@ DATA TEMP.&TULOSNIMI_KE;
 		IF &KDATATULO = 0 AND KANSEL_TULO NE . THEN DO;
 			LASKLISAOSA = 0;
 			IF &LVUOSI < 1997 THEN DO;
-				%Kansanelake_SimpleVS(LASKLISAOSA, &LVUOSI, &INF, LAITOS, KPUOLISO, KRYHMA, KANSEL_TULO, ASUSUHT, ikavu);
+				%Kansanelake_SimpleVS(LASKLISAOSA, &LVUOSI, &INF, LAITOS, KPUOLISO, KRYHMA, KANSEL_TULO, skerrke, ikavu);
 				LASKLISAOSA = SUM(LASKLISAOSA, -&PerPohja);
 			END;
-			%YlimRintLisaVS(YLIMRILI, &LVUOSI, &INF, LASKLISAOSA, KANSANELAKE / ELAKUUK, KANSEL_TULO);
+			%YlimRintLisaVS(YLIMRILI, &LVUOSI, &INF, LASKLISAOSA, KANSANELAKE / max(vanhuuselake_kk, tyokyvyttomyyselake_kk, 0), KANSEL_TULO);
 		END;
 
 		ELSE DO;
 			LISAOSA = 0;
 			IF &LVUOSI < 1997 THEN DO;
-				%Kansanelake_SimpleVS(LISAOSA, &LVUOSI, &INF, LAITOS, KPUOLISO, KRYHMA, MUUT_EL, ASUSUHT, ikavu);
+				%Kansanelake_SimpleVS(LISAOSA, &LVUOSI, &INF, LAITOS, KPUOLISO, KRYHMA, MUUT_EL, skerrke, ikavu);
 				LISAOSA = SUM(LISAOSA, -&PerPohja);
 			END;
-			%YlimRintLisaVS(YLIMRILI, &LVUOSI, &INF, LISAOSA, kelake / ELAKUUK, MUUT_EL / 12);
+			%YlimRintLisaVS(YLIMRILI, &LVUOSI, &INF, LISAOSA, kelake / max(vanhuuselake_kk, tyokyvyttomyyselake_kk, 0), MUUT_EL / 12);
 		END;
 
-		YLIMRILI = RILIKUUK * YLIMRILI;
+		YLIMRILI = rintamalisa_kk * YLIMRILI;
 
 		DROP LASKLISAOSA LISAOSA; 
 	END;
 
-	*Hoitotuet ja veteraanilis‰;
+	*El‰kkeensaajan hoitotuki ja veteraanilis‰;
 	IF etuki > 0 THEN DO;
-		%KanseLLisatVS(EHOITUKI, &LVUOSI, &INF, 1, (ehtm = 4 OR (YLIMRILI > 0 AND ehtm IN (2,3))), (ehtm = 5), (ehtm = 1), (ehtm = 2), (ehtm = 3), 0, 0, KRYHMA, 0);
-		EHOITUKI = EHOITUKI * EHOITOKUUK;
+		EHOITUKI = 0;
+
+		IF etuki_perus_kk > 0 THEN DO;
+			%KanselLisatVS(EHOITUKI_P, &LVUOSI, &INF, 1, 0, 0, 1, 0, 0, 0, 0, KRYHMA, 0);
+			EHOITUKI = EHOITUKI + EHOITUKI_P * etuki_perus_kk;
+		END;
+		IF etuki_korotettu_kk > 0 THEN DO;
+			%KanselLisatVS(EHOITUKI_K, &LVUOSI, &INF, 1, (YLIMRILI > 0), 0, 0, 1, 0, 0, 0, KRYHMA, 0);
+			EHOITUKI = EHOITUKI + EHOITUKI_K * etuki_korotettu_kk;
+		END;
+		IF etuki_ylin_kk > 0 THEN DO;
+			%KanselLisatVS(EHOITUKI_Y, &LVUOSI, &INF, 1, (YLIMRILI > 0), 0, 0, 0, 1, 0, 0, KRYHMA, 0);
+			EHOITUKI = EHOITUKI + EHOITUKI_Y * etuki_ylin_kk;
+		END;
+
 	END;
 
-	*Vammaistuet;
+	*Alle 16-vuotiaan vammaistuki;
 	IF vtukia16 > 0 THEN DO;
-		%VammTukiVS(LVTUKI, &LVUOSI, &INF, 0, 1, 0, lhtm);
-		LVTUKI = LVTUKI * LVTUKIKUUK;
+		LVTUKI = 0;
+
+		IF vtukia16_perus_kk > 0 THEN DO;
+			%VammTukiVS(LVTUKI_AP, &LVUOSI, &INF, 0, 1, 0, 1);
+			LVTUKI = LVTUKI + LVTUKI_AP * vtukia16_perus_kk;
+		END;
+		IF vtukia16_korotettu_kk > 0 THEN DO;
+			%VammTukiVS(LVTUKI_AK, &LVUOSI, &INF, 0, 1, 0, 2);
+			LVTUKI = LVTUKI + LVTUKI_AK * vtukia16_korotettu_kk;
+		END;
+		IF vtukia16_ylin_kk > 0 THEN DO;
+			%VammTukiVS(LVTUKI_AY, &LVUOSI, &INF, 0, 1, 0, 3);
+			LVTUKI = LVTUKI + LVTUKI_AY * vtukia16_ylin_kk;
+		END;
+
 	END;
+
+	*16-vuotta t‰ytt‰neen vammaistuki;
 	IF vtukiy16 > 0 THEN DO;
-		%VammTukiVS(VTUKI, &LVUOSI, &INF, 1, 0, 0, lhtm);
-		VTUKI = VTUKI * VTUKIKUUK;
-		IF VTUKI <= 0 THEN VTUKI = .;
+		VTUKI = 0;
+
+		IF vtukiy16_perus_kk > 0 THEN DO;
+			%VammTukiVS(VTUKI_YP, &LVUOSI, &INF, 1, 0, 0, 1);
+			VTUKI = VTUKI + VTUKI_YP * vtukiy16_perus_kk;
+		END;
+		IF vtukiy16_korotettu_kk > 0 THEN DO;
+			%VammTukiVS(VTUKI_YK, &LVUOSI, &INF, 1, 0, 0, 2);
+			VTUKI = VTUKI + VTUKI_YK * vtukiy16_korotettu_kk;
+		END;
+		IF vtukiy16_ylin_kk > 0 THEN DO;
+			%VammTukiVS(VTUKI_YY, &LVUOSI, &INF, 1, 0, 0, 3);
+			VTUKI = VTUKI + VTUKI_YY * vtukiy16_ylin_kk;
+		END;
+
 	END;
-	DROP lhtm;
 
 	*Lapsenel‰ke;
 	IF KORJ_LAPEL > 0 THEN DO;
@@ -365,15 +385,15 @@ DATA TEMP.&TULOSNIMI_KE;
 			%LapsenElakeAVS(LAPSENELAKE, &LVUOSI, &INF, TAYSORPO, LAPSETULO, (lapper > 0 and laptay <= 0));
 		END;
 		ELSE DO;
-			%LapsenElakeAVS(LAPSENELAKE, &LVUOSI, &INF, TAYSORPO, SUM(hrelake, htperhe, tuntelpe) / 12, (lapper > 0 and laptay <= 0));
+			%LapsenElakeAVS(LAPSENELAKE, &LVUOSI, &INF, TAYSORPO, SUM(perhe_elake_yht, -laelake) / 12, (lapper > 0 and laptay <= 0));
 		END;
 		LAPSENELAKE = KORJ_LAPEL * LAPSENELAKE;
 	END;
 
 	*Lesken alku- ja jatkoel‰ke;
-	IF KORJ_ALKU > 0 THEN DO;
+	IF alku > 0 THEN DO;
 		%LeskenElakeAVS(LEALKUE, &LVUOSI, &INF, 1, KPUOLISO, KRYHMA, 0, hpalktu, svatvp, MUUT_EL, 0);
-		LEALKUE = LEALKUE * KORJ_ALKU;
+		LEALKUE = LEALKUE * alku;
 	END;
 	IF jatko > 0 THEN DO;
 		IF &KDATATULO = 0 THEN DO;
@@ -389,25 +409,25 @@ DATA TEMP.&TULOSNIMI_KE;
 	LESKENELAKE = SUM(LEALKUE, LEJATKOE);
 
 	*Maahanmuuttajan erityistuki simuloidaan ulkomailla syntyneille pienituloisille el‰kel‰isille;
-	IF ELAKUUK > 0 AND SVALTIO NE '246' AND 2003 <= &LVUOSI <= 2011 AND (KANSANELAKE NG 0 OR ASUSUHT NE 1) AND SUM(&AVUOSI, -muuttovv) > &KarenssiMamu AND muuttovv > 0 THEN DO;
+	IF elake_kk > 0 AND SVALTIO NE '246' AND 2003 <= &LVUOSI <= 2011 AND (KANSANELAKE NG 0 OR skerrke NE 1) AND SUM(&AVUOSI, -muuttovv) > &KarenssiMamu AND muuttovv > 0 THEN DO;
 		%MaMuErTukiVS(MMTUKI, &LVUOSI, &INF, LAITOS, KPUOLISO, KRYHMA, 0, 0);
 
 		*Tuki on alkanut ja p‰‰ttynyt keskell‰ vuotta (10/2003 - 2/2011), mik‰ otetaan seuraavassa huomioon;
 		%IF &LVUOSI = 2003 %THEN %DO;
 			%IF %UPCASE(&TYYPPI) = SIMULX %THEN %DO;
 				IF &LKUUK < 10 THEN MMTUKI = .;
-				ELSE MMTUKI = MMTUKI * 4 * ELAKUUK
+				ELSE MMTUKI = MMTUKI * 4 * elake_kk
 			%END;	
-			%ELSE %DO; MMTUKI = MMTUKI * 4 * MIN(ELAKUUK, 3); %END;
+			%ELSE %DO; MMTUKI = MMTUKI * 4 * MIN(elake_kk, 3); %END;
 		%END;
 		%ELSE %IF &LVUOSI = 2011 %THEN %DO;
 			%IF %UPCASE(&TYYPPI) = SIMULX %THEN %DO;
 				IF &LKUUK > 2 THEN MMTUKI = .;
-				ELSE MMTUKI = MMTUKI * 6 * ELAKUUK;
+				ELSE MMTUKI = MMTUKI * 6 * elake_kk;
 			%END;
-			%ELSE %DO; MMTUKI = MMTUKI * 6 * MIN(ELAKUUK, 2); %END;
+			%ELSE %DO; MMTUKI = MMTUKI * 6 * MIN(elake_kk, 2); %END;
 		%END;
-		%ELSE %DO; MMTUKI = MMTUKI * ELAKUUK; %END;
+		%ELSE %DO; MMTUKI = MMTUKI * elake_kk; %END;
 	END;
 
 
@@ -418,45 +438,29 @@ DATA TEMP.&TULOSNIMI_KE;
 		/* takuuel‰ke tullut k‰yttˆˆn vuonna 2011 */
 		(&LVUOSI >= 2011)
 		AND 
-		/* on el‰kekuukausia */
-		(ELAKUUK > 0)
+		/* on vanhuus-, tyˆkyvyttˆmyys- tai takuuel‰kekuukausia */
+		(vanhuuselake_kk > 0 OR tyokyvyttomyyselake_kk > 0 OR takuuelake_kk > 0)
 		AND 
-		/* ulkomailla syntyneiden osalta: on asunut riitt‰v‰n kauan Suomessa */
-		((muuttovv = .) OR ((muuttovv NE .) AND (SUM(&AVUOSI, -MAX(muuttovv, syvu + 16)) > &Karenssi)))
+		/* on asunut riitt‰v‰n kauan Suomessa */
+		vaki_vuodet > &Karenssi
 		AND
 		(
-			/* saa vanhuusel‰kett‰ kansanel‰kkeen‰ tai tyˆel‰kkeen‰ */
-			((velake > 0) OR (velaji IN (1,7)))
-			OR
-			/* saa tyˆkyvyttˆmyysel‰kett‰ kansanel‰kkeen‰ */
-			(tkelake > 0)
-			OR
-			/* saa tyˆkyvyttˆmyysel‰kett‰ tyˆel‰kkeen‰ */
-			(tklaji IN (2,8,9))
-			OR
-			/* saa tapaturmavakuutukseen tai liikennevakuutukseen
-			perustuvaa tyˆkyvyttˆmyysel‰kett‰ */
-			((ttapel > 0) OR (tlapel > 0))
-			OR
-			/* on t‰ytt‰nyt 65 vuotta v‰hint‰‰n 1 kk ennen vuoden loppua */
-			((ikavu > 65) OR ((ikavu = 65) AND (ikakk > 0)))
-			OR
 			/* simuloitunut kansanel‰kett‰ */
-			KANSANELAKE > 0 
+			KANSANELAKE > 0
 			OR 
 			/* saa takuuel‰kett‰ */
-			(takuuel > 0) 	
-		)	
+			(takuuel > 0)
+		)
 	)
 	THEN DO; 
 
 		IF &KDATATULO = 0 and TAKUUEL_TULO NE . THEN DO;
-			%TakuuElakeVS(TAKUUELA, &LVUOSI, &INF, SUM(TAKUUEL_TULO, KANSANELAKE, LESKENELAKE, LAPSENELAKE) / 12, VARHENP, ikavu, ontyokyvyte = ONTYOKYVYTE, tyotulo = TYOTULO / 12);
+			%TakuuElakeVS(TAKUUELA, &LVUOSI, &INF, SUM(TAKUUEL_TULO, KANSANELAKE, LESKENELAKE, LAPSENELAKE) / 12, varhp, ikavu, ontyokyvyte = ONTYOKYVYTE, tyotulo = TYOTULO / 12);
 		END;
 		ELSE DO;
-			%TakuuElakeVS(TAKUUELA, &LVUOSI, &INF, SUM(MUUT_EL, KANSANELAKE, LESKENELAKE, LAPSENELAKE) / ELAKUUK, VARHENP, ikavu, ontyokyvyte = ONTYOKYVYTE, tyotulo = TYOTULO / 12);
+			%TakuuElakeVS(TAKUUELA, &LVUOSI, &INF, SUM(MUUT_EL, KANSANELAKE, LESKENELAKE, LAPSENELAKE) / elake_kk, varhp, ikavu, ontyokyvyte = ONTYOKYVYTE, tyotulo = TYOTULO / 12);
 		END;
-		TAKUUELA = ELAKUUK * TAKUUELA;
+		TAKUUELA = TAKUUELA * max(vanhuuselake_kk, tyokyvyttomyyselake_kk, takuuelake_kk, 0);
 
 	END;
 
@@ -480,7 +484,7 @@ RILISA = 'Rintamalis‰t, MALLI'
 YLIMRILI = 'Ylim‰‰r‰iset rintamalis‰t, MALLI'
 EHOITUKI = 'El‰kkeensaajan hoitotuet, MALLI'
 LVTUKI = 'Alle 16-vuotiaan vammaistuki, MALLI'
-VTUKI = 'Vammaistuki, MALLI'
+VTUKI = '16-vuotta t‰ytt‰neen vammaistuki, MALLI'
 LAELAKEDATA = 'Lapsenel‰ke, DATA'
 LAPSENELAKE = 'Lapsenel‰ke, MALLI'
 LEELAKEDATA = 'Leskenel‰ke, DATA'
@@ -553,7 +557,7 @@ RUN;
 	ryelake = 'Ylim‰‰r‰iset rintamalis‰t, DATA'
 	etuki = 'El‰kkeensaajan hoitotuet, DATA'
 	vtukia16 = 'Alle 16-vuotiaan vammaistuki, DATA'
-	vtukiy16 = '16 vuotta t‰ytt‰neen vammaistuki, DATA'
+	vtukiy16 = '16-vuotta t‰ytt‰neen vammaistuki, DATA'
 	;
 
 	BY hnro;

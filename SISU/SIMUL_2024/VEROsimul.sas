@@ -31,9 +31,9 @@
 
 	%IF &EG NE 1 %THEN %DO;
 	
-	%LET AVUOSI = 2023;		/* Aineistovuosi (vvvv)*/
+	%LET AVUOSI = 2024;		/* Aineistovuosi (vvvv)*/
 
-	%LET LVUOSI = 2023;		/* Lainsäädäntövuosi (vvvv) */
+	%LET LVUOSI = 2024;		/* Lainsäädäntövuosi (vvvv) */
 
 	%LET AINEISTO = REK; 	/* Käytettävä aineisto (PALV = tulonjaon palveluaineisto, REK = mikrosimuloinnin rekisteriaineisto) */
 
@@ -166,11 +166,11 @@
 	 tpeito tperhel tpjta tpotel trespa tsiraho tsuurpu ttapel tkuntra tlapel ttappr ttyoltuk
 	 upuhdateisv tulkp htpuhdatvap tulkyhp tuosvv tuosvvap tutmp235
 	 tutmp4 tvahevas tptmuu tvakpr tvaksp tvuokr tvuokr1 tyhtat
-	 ptyhtyma tyot velatk vkoras vkorep vkortu vkotita
+	 ptyhtyma alematka_kk velatk asukorot vkortu vkotita
 	 vkotitki vkotitku vkotitp vkotitsh vlahj luhlomak vmatk vmuut1
 	 vmuutk vmuutav vohvah vopintov vthmp vulthanmu vthm4 vtyasv vtyomj
 	 vvevah vvvmk1 vvvmk3 vvvmk5 saiprva aiprva cdmky tkotihtu
-	 tkoultuk dtyhtet tkopira lgktku htkapr hkotihm takuuel
+	 tkoultuk dtyhtet tkopira lgktku htkapr tkotimuo takuuel
 	 tjmarkh tvahep50 tptvs tvahep20 tptsu50
 	 dtyhtep elivtu lylen tkapite tsijova
 	 palksiku_remontti palksiku_koti palksiku_oljy palkomos_remontti palkomos_koti palkomos_oljy
@@ -187,13 +187,13 @@
 	   lähinnä oleva tieto korotuskertoimella myöhemmin. */
 
 	/* Vuoden aineistossa äyrit seuraaville vuosille */
-	%IF ((&LVUOSI >= 2023) AND (&LVUOSI <= 2026)) %THEN %DO; 
+	%IF ((&LVUOSI >= 2024) AND (&LVUOSI <= 2026)) %THEN %DO; 
 		%LET LAYRI = %SUBSTR(&LVUOSI, 3, 2);
 		RENAME ayri&LAYRI = AYRI kayri&LAYRI = KAYRI;
 	%END;
 
-	%ELSE %IF &LVUOSI < 2023 %THEN %DO;
-		RENAME ayri23 = AYRI kayri23 = KAYRI; 
+	%ELSE %IF &LVUOSI < 2024 %THEN %DO;
+		RENAME ayri24 = AYRI kayri24 = KAYRI; 
 	%END;
 
 	%ELSE %IF &LVUOSI > 2026 %THEN %DO;
@@ -492,7 +492,7 @@
 		KOTIHTUKI_SIMUL = tkotihtu;
 	%END;
 	%ELSE %DO;
-		KOTIHTUKI_SIMUL = SUM(KOTIHTUKI, OSHOIT, JSHOIT, lgktku, hkotihm);
+		KOTIHTUKI_SIMUL = SUM(KOTIHTUKI, OSHOIT, JSHOIT, lgktku, tkotimuo);
 	%END;
 
 	%IF &OPINTUKI = 0 %THEN %DO; 
@@ -629,8 +629,8 @@
 	DROP TYOTMAKSU TYOTMAKSU1 TYOTMAKSU2 ELVAK ELVAK1 ELVAK2;
 
 	/* Tulonhankkimisvähennys, työmatkakuluvähennys, ay-jäsenmaksujen vähennys */
-	%TulonHankKulutS(THANKKULUT, &LVUOSI, &INF, SUM(PALKKA1, -tmerile), SUM(vthmp, luhlomak), vtyomj, vmatk, tyot); 
-	%TulonHankKulutS(THANKKULUTM, &LVUOSI, &INF, tmerile, SUM(vthmp, luhlomak), 0, 0, tyot);
+	%TulonHankKulutS(THANKKULUT, &LVUOSI, &INF, SUM(PALKKA1, -tmerile), SUM(vthmp, luhlomak), vtyomj, vmatk, alematka_kk); 
+	%TulonHankKulutS(THANKKULUTM, &LVUOSI, &INF, tmerile, SUM(vthmp, luhlomak), 0, 0, alematka_kk);
 	THANKKULUT2 = SUM(THANKKULUT, THANKKULUTM, vtyasv, THANKK);
 	PUHD_ANSIO = MAX(SUM(ANSIOT, -YRVAHA, - THANKKULUT2), 0);
 
@@ -818,20 +818,20 @@
 	/* Vähennykset pääomatuloista */
 	PO_VAHENN = SUM(YRVAHP, vulthanmu, POTAPP, vkortu, vohvah);
 
-	/* Erotellaan ensiasunnon koroista vähennyskelpoinen osuus */
-	%VahAsKorotS(ASKOROT, &LVUOSI, &INF, vkoras);
-	%VahAsKorotS(ENSASKOROT, &LVUOSI, &INF, vkorep);
+	/* Erotellaan asuntolainan koroista vähennyskelpoinen osuus (ansiasunnolle aina 0) */
+	%VahAsKorotS(ASKOROT, &LVUOSI, &INF, asukorot);
+	%VahAsKorotS(ENSASKOROT, &LVUOSI, &INF, 0);
 			
 	/* Pääomatulon vero, vapaaeht. eläkevakuutusmaksut huomioon otettuna */
 	%POTulonveroEritS(POVEROA, &LVUOSI, &INF, OSINKOP, SUM(POTULOT, -OSINKOP), SUM(PO_VAHENN, ASKOROT, ENSASKOROT), 0, SUM(vvevah));
 	IF SUM(PO_VAHENN, ASKOROT, ENSASKOROT) > 0 THEN DO;
-		%AlijHyvS(ALIJHYV, &LVUOSI, &INF, 0, cllkm, POTULOT, PO_VAHENN, vkoras, vkorep, 0,0);
+		%AlijHyvS(ALIJHYV, &LVUOSI, &INF, 0, cllkm, POTULOT, PO_VAHENN, asukorot, 0, 0,0);
 	END;
 	ELSE ALIJHYV = 0;
 			
 	/* Erityinen alijäämähyvitys */
-	IF SUM(PO_VAHENN, vkoras, vkorep, vvevah) > 0 THEN DO;
-		%AlijHyvEritS(ALIJHYVERIT, &LVUOSI, &INF, POTULOT, PO_VAHENN, vkoras, vkorep, SUM(vvevah));
+	IF SUM(PO_VAHENN, asukorot, 0, vvevah) > 0 THEN DO;
+		%AlijHyvEritS(ALIJHYVERIT, &LVUOSI, &INF, POTULOT, PO_VAHENN, asukorot, 0, SUM(vvevah));
 	END;
 	ELSE ALIJHYVERIT = 0;
 

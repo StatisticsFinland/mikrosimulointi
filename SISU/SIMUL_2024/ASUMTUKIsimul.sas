@@ -31,9 +31,9 @@
 
 	%IF &EG NE 1 %THEN %DO;
 
-	%LET AVUOSI = 2023;		* Aineistovuosi (vvvv);
+	%LET AVUOSI = 2024;		* Aineistovuosi (vvvv);
 
-	%LET LVUOSI = 2023;		* Lainsäädäntövuosi (vvvv);
+	%LET LVUOSI = 2024;		* Lainsäädäntövuosi (vvvv);
 							* HUOM! Jos käytät vuotta 2017/2025, valitse TYYPPI = SIMULX;
 							* ja haluamasi lainsäädäntökuukausi;
 
@@ -162,7 +162,7 @@
    		SET POHJADAT.&AINEISTO&AVUOSI
 		(KEEP = hnro knro jasenia elivtu yastukikr astukikr_l15 astukikr_l24 astukikr_l25
 		aslaji halpinta maksvuok hoitvast yastuki
-		omalamm omamaks rakvuosi aslaikor svatva
+		omalamm omamaks rakvuosi asukorot svatva
 		svatvp odorsyke odorkeke odorsyko odorkeko tnoosvvb teinovvb tuosvvap toyjmyvvap toyjmavvap
 		tepalkat toptiot tosinktp teinovv vlamm ikavu maakunta tulkp
 		telps43 tmuukust tepalk tmerile tpalv trespa tepertyok1 tepertyok2 telps41 telps42 telps8 telps1 
@@ -181,7 +181,7 @@
 			SUM(hoitvast)/jasenia AS hoitvast,
 			SUM(omalamm)/jasenia AS omalamm,
 			SUM(omamaks)/jasenia AS omamaks,
-			SUM(aslaikor)/jasenia AS aslaikor
+			SUM(asukorot)/jasenia AS asukorot
 		FROM STARTDAT.START_ASUMTUKI_HENKI
 		GROUP BY knro
 		ORDER BY hnro;
@@ -260,7 +260,7 @@
 	        SUM(halpinta) AS halpinta,
 	        SUM(omalamm) AS omalamm,
 	        SUM(omamaks) AS omamaks,
-	        SUM(aslaikor) AS aslaikor,
+	        SUM(asukorot) AS asukorot,
 	        SUM(odorsyke) AS odorsyke,
 	        SUM(odorkeke) AS odorkeke,
 			SUM(odorsyko) AS odorsyko,
@@ -354,7 +354,7 @@
 
    	OMALAMM = omalamm / 12;
    	OMAMAKS = omamaks / 12;
-   	ASLAIKOR = aslaikor / 12;
+   	ASLAIKOR = asukorot / 12;
 	OSVEROVAP_DATA = SUM(tnoosvvb, teinovvb, tuosvvap, toyjmyvvap, toyjmavvap, teinovv);
    	KUUKTULO_DATA = MAX(SUM(svatva, svatvp, yrvah, -odorsyke, -odorkeke, -odorsyko, -odorkeko, OSVEROVAP_DATA) / 12, 0);
 	OPTUKI_DATA = MAX(SUM(odorsyke, odorkeke, odorsyko, odorkeko) / 12, 0);

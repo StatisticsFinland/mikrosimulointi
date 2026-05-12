@@ -30,9 +30,9 @@
 
 		%IF &EG NE 1 %THEN %DO;
 
-			%LET AVUOSI = 2023;		* Aineistovuosi (vvvv);
+			%LET AVUOSI = 2024;		* Aineistovuosi (vvvv);
 
-			%LET LVUOSI = 2023;		* Lainsäädäntövuosi (vvvv);
+			%LET LVUOSI = 2024;		* Lainsäädäntövuosi (vvvv);
 
 			%LET TYYPPI = SIMUL;	* Parametrien hakutyyppi: SIMUL (vuosikeskiarvo) tai SIMULX (parametrit haetaan tietylle kuukaudelle);
 
@@ -177,15 +177,15 @@
 
 		DATA STARTDAT.START_TOIMTUKI;
 			SET POHJADAT.&AINEISTO&AVUOSI
-			(KEEP = hnro knro asko ikavu svatva svatvp verot ltvp omakkiiv elama korotv elivtu
-			bbyhte lapsikorotus rielake ryelake amstipe lbeltuki rsyhte hasepr elasa
-			hsotvkor yastuki eastuki maksvuok hoitvast omalamm omamaks
-			aslaikor sahko per_apuraha vtyomj vthmp vmatk lelvak lpvma tnoosvvb teinovvb tuosvvap
+			(KEEP = hnro knro asko ikavu svatva svatvp verot ltvp omakkiiv elamaveror korotv elivtu
+			bbyhte lapsikorotus rielake ryelake amstipe lbeltuki rsyhte ase_siv_praha_yht ase_siv_praha_kk elasaimp
+			sotvammakorvaus yastuki eastuki maksvuok hoitvast omalamm omamaks
+			asukorot sahko per_apuraha vtyomj vthmp vmatk lelvak lpvma tnoosvvb teinovvb tuosvvap
 			toyjmyvvap toyjmavvap teinovv paasoss tulkp tepalkat toptiot tosinktp telps43 tmuukust tpjta
 			tepalk tmerile tpalv trespa tepertyok1 tepertyok2 telps41 telps42 telps8 telps1 telps2 tutmp235 tutmp4 tmtatt
 			telps5 ttyoltuk tyhtat hoimaksk hoimakso
 			odorsyko odorkeko odorsyke odorkeke odalsy odalke odoksy odokke odmksyko odmksyke odmkkeko odmkkeke
-			varm lveru vvvmk1 vvvmk3 vvvmk5 dtyhtep korosapkw
+			lveru vvvmk1 vvvmk3 vvvmk5 dtyhtep korosapkw
 			dtyhtet korosatkg tmaat1evyr tmaat1pevyr tliik1evyr tliikpevyr tporo1evyr
 			ymaatattuloevyr elyelattuloevyr ymaatattulo	elyelattulo yrvahan yrvahpo kuntakoodi jasenia AILMKORQDAT ttyosuhdematkal tpolkupyoraetuv tavainh
 			psiraho pulkyso karvo posake_arvo_yht_AOT tpalk5 tulmuuh tulmuuv tulmuusu);
@@ -197,7 +197,7 @@
 			SET STARTDAT.START_TOIMTUKI;
 
 			* Niiden kuukausien osuus, jona henkilö ei ole ollut armeijassa tai siviilipalveluksessa;
-			EIAMSI = (12-varm)/12;
+			EIAMSI = (12 - ase_siv_praha_kk) / 12;
 
 			* Perheaseman määrittely;
 			IF asko IN (1, 2, 4, 5, 6) THEN ONAIK = 1;
@@ -222,7 +222,7 @@
 			VEROTTYOTULO = sum(tavainh, tpalk5, tulmuuv);
 
 			* Toimeentulotukeen vaikuttavat muut verovapaat tulot;
-			VEROTTUL_MUU = SUM(amstipe, per_apuraha, hsotvkor, rsyhte, elasa, hasepr, ttyosuhdematkal, tpolkupyoraetuv);
+			VEROTTUL_MUU = SUM(amstipe, per_apuraha, sotvammakorvaus, rsyhte, elasaimp, ase_siv_praha_yht, ttyosuhdematkal, tpolkupyoraetuv);
 
 			* Sekalaisia veroja;
 			SEKALVERO = korotv;
@@ -231,10 +231,10 @@
 			THANKK = SUM(vmatk, vtyomj, vthmp);
 
 			* Asumiskustannukset kuukautta kohden;
-			ASUMISKULUT_KK = SUM(maksvuok, hoitvast, aslaikor / 12, omalamm / 12, omamaks / 12, sahko / 12);
+			ASUMISKULUT_KK = SUM(maksvuok, hoitvast, asukorot / 12, omalamm / 12, omamaks / 12, sahko / 12);
 
 			*Maksetut elatusmaksut;
-			ELMAKSUT = elama;
+			ELMAKSUT = elamaveror;
 
 			* Eläkkeenlisät;
 			ELLISAT_DATA = SUM(lapsikorotus, rielake, ryelake);

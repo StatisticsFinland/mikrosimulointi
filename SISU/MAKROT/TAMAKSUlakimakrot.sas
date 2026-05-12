@@ -28,8 +28,7 @@
 	inf: Deflaattori euromääräisten parametrien kertomiseksi
 	ikavu: Ikä, vuosia
 	svpalkka: Työnantajamaksujen pohjalla olevat palkkatulot
-	sektori: Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
-		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
+	sektori: Työnantajasektori (Sektoriluokitus 2023);
 
 %MACRO SairVakMaksuKTAS(tulos, mvuosi, mkuuk, inf, ikavu, svpalkka, sektori)/
 DES = 'TAMAKSU: Työnantajan sairausvakuutusmaksu kuukausitasolla';
@@ -40,8 +39,8 @@ DES = 'TAMAKSU: Työnantajan sairausvakuutusmaksu kuukausitasolla';
 
 	IF 16 LE &ikavu LE 67 AND &svpalkka GT 0 THEN DO;
 
-			IF &sektori = 3 THEN savamaksu = (&SavaKun/100) * &svpalkka;
-			IF &sektori = 8 THEN savamaksu = (&SavaVal/100) * &svpalkka;
+			IF &sektori in ('1313') THEN savamaksu = (&SavaKun/100) * &svpalkka;
+			IF &sektori in ('1311', '1314') THEN savamaksu = (&SavaVal/100) * &svpalkka;
 			ELSE savamaksu = (&SavaYks/100) * &svpalkka;
 
 	END;
@@ -62,8 +61,7 @@ DROP savamaksu;
 	inf: Deflaattori euromääräisten parametrien kertomiseksi
 	ikavu: Ikä, vuosia
 	svpalkka: Työnantajamaksujen pohjalla olevat palkkatulot
-	sektori: Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
-		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
+	sektori: Työnantajasektori (Sektoriluokitus 2023);
 
 %MACRO SairVakMaksuVTAS (tulos, mvuosi, inf, ikavu, svpalkka, sektori)/
 DES = 'TAMAKSU: Työnantajan sairausvakuutusmaksu kuukausitasolla vuosikeskiarvona';
@@ -92,8 +90,7 @@ DROP sava temp;
 	inf: Deflaattori euromääräisten parametrien kertomiseksi
 	ikavu: Ikä, vuosia
 	svpalkka: Työnantajamaksujen pohjalla olevat palkkatulot, e/v
-	sektori: Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
-		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
+	sektori: Työnantajasektori (Sektoriluokitus 2023);
 
 
 %MACRO TyotVakMaksuKTAS (tulos, mvuosi, mkuuk, inf, ikavu, svpalkka, sektori)/
@@ -104,7 +101,7 @@ DES = 'TAMAKSU: Työnantajan työttömyysvakuutusmaksu kuukausitasolla';
 
 IF &mvuosi >= 2022 THEN DO;
 
-	IF 18 LE &ikavu LE 65 AND &svpalkka GT 0 AND &sektori NE 8 THEN DO;
+	IF 18 LE &ikavu LE 65 AND &svpalkka GT 0 AND &sektori not in ('1311', '1314') THEN DO;
 			&tulos = (&TyVa/100) * &svpalkka;
 			END; 
 			ELSE DO;
@@ -115,7 +112,7 @@ END;
 ELSE DO;
 
 
-IF 17 LE &ikavu LE 65 AND &svpalkka GT 0 AND &sektori NE 8 THEN DO;
+IF 17 LE &ikavu LE 65 AND &svpalkka GT 0 AND &sektori not in ('1311', '1314') THEN DO;
 		&tulos = (&TyVa/100) * &svpalkka;
 		END; 
 		ELSE DO;
@@ -135,8 +132,7 @@ END;
 	inf: Deflaattori euromääräisten parametrien kertomiseksi
 	ikavu: Ikä, vuosia
 	svpalkka: Työnantajamaksujen pohjalla olevat palkkatulot, e/v
-	sektori: Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
-		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
+	sektori: Työnantajasektori (Sektoriluokitus 2023);
 
 %MACRO TyotVakMaksuVTAS (tulos, mvuosi, inf, ikavu, svpalkka, sektori)/
 DES = 'TAMAKSU: Työnantajan työttömyysvakuutusmaksu kuukausitasolla vuosikeskiarvona';
@@ -164,8 +160,7 @@ DROP tyotvmaksu temp;
 	inf: Deflaattori euromääräisten parametrien kertomiseksi
 	ikavu: Ikä, vuosia
 	svpalkka: Työnantajamaksujen pohjalla olevat palkkatulot
-	sektori:Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
-		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
+	sektori:Työnantajasektori (Sektoriluokitus 2023);
 
 %MACRO ElMaksuKTAS (tulos, mvuosi, mkuuk, inf, ikavu, svpalkka, sektori)/
 DES = 'TAMAKSU: Työnantajan eläkevakuutusmaksu kuukausitasolla';
@@ -175,14 +170,14 @@ DES = 'TAMAKSU: Työnantajan eläkevakuutusmaksu kuukausitasolla';
 
 IF &mvuosi LE 2016 AND 18 LE &ikavu LE 67 AND &svpalkka GT 0 THEN DO;
 
-		IF &sektori EQ 3 THEN &tulos = (&KuEL/100) * &svpalkka;
-		ELSE IF &sektori EQ 8 THEN &tulos = (&VaEL/100) * &svpalkka;
+		IF &sektori in ('1313') THEN &tulos = (&KuEL/100) * &svpalkka;
+		ELSE IF &sektori in ('1311', '1314') THEN &tulos = (&VaEL/100) * &svpalkka;
 		ELSE  &tulos = (&TyEL/100) * &svpalkka;
 	END;
 ELSE IF &mvuosi GT 2016 AND 17 LE &ikavu LE 67 AND &svpalkka GT 0 THEN DO;
 
-		IF &sektori EQ 3 THEN &tulos = (&KuEL/100) * &svpalkka;
-		ELSE IF &sektori EQ 8 THEN &tulos = (&VaEL/100) * &svpalkka;
+		IF &sektori in ('1313') THEN &tulos = (&KuEL/100) * &svpalkka;
+		ELSE IF &sektori in ('1311', '1314') THEN &tulos = (&VaEL/100) * &svpalkka;
 		ELSE  &tulos = (&TyEL/100) * &svpalkka;
 	END;
 ELSE DO;
@@ -202,8 +197,7 @@ END;
 	inf: Deflaattori euromääräisten parametrien kertomiseksi
 	ikavu: Ikä, vuosia
 	svpalkka: Työnantajamaksujen pohjalla olevat palkkatulot
-	sektori:Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
-		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
+	sektori:Työnantajasektori (Sektoriluokitus 2023);
 
 
 %MACRO ElMaksuVTAS (tulos, mvuosi, inf, ikavu, svpalkka, sektori)/
@@ -231,8 +225,7 @@ DROP elmaksuV temp;
 	mkuuk: Kuukausi, jonka lainsäädäntöä käytetään 
 	inf: Deflaattori euromääräisten parametrien kertomiseksi
 	svpalkka: Työnantajamaksujen pohjalla olevat palkkatulot
-	sektori: Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
-		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
+	sektori: Työnantajasektori (Sektoriluokitus 2023);
 
 %MACRO RyHeMaksuKTAS (tulos, mvuosi, mkuuk, inf, svpalkka, sektori)/
 DES = 'TAMAKSU: Työnantajan ryhmähenkivakuutusmaksu kuukausitasolla';
@@ -242,9 +235,9 @@ DES = 'TAMAKSU: Työnantajan ryhmähenkivakuutusmaksu kuukausitasolla';
 
 	IF &svpalkka > 0 THEN DO;
 
-		IF &sektori NE 3 OR &sektori NE 8  
+		IF &sektori not in ('1311', '1313', '1314') 
 			THEN &tulos = (&RyHeYks/100) * &svpalkka;
-		ELSE IF &sektori = 3 
+		ELSE IF &sektori in ('1313')
 			THEN &tulos = (&RyHeKun/100) * &svpalkka;
 
 	END;
@@ -259,8 +252,7 @@ DES = 'TAMAKSU: Työnantajan ryhmähenkivakuutusmaksu kuukausitasolla';
 	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
 	inf: Deflaattori euromääräisten parametrien kertomiseksi
 	svpalkka: Työnantajamaksujen pohjalla olevat palkkatulot
-	sektori: Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
-		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
+	sektori: Työnantajasektori (Sektoriluokitus 2023);
 
 
 %MACRO RyHeMaksuVTAS (tulos, mvuosi, inf, svpalkka, sektori)/
@@ -289,8 +281,7 @@ DROP rymaksu temp;
 	mkuuk: Kuukausi, jonka lainsäädäntöä käytetään 
 	inf: Deflaattori euromääräisten parametrien kertomiseksi
 	svpalkka: Työnantajamaksujen pohjalla olevat palkkatulot
-	sektori: Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
-		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
+	sektori: Työnantajasektori (Sektoriluokitus 2023);
 
 %MACRO TaTuMaksuKTAS (tulos, mvuosi, mkuuk, inf, svpalkka, sektori)/
 DES = 'TAMAKSU: Työnantajan tapaturmavakuutusmaksu kuukausitasolla';
@@ -298,7 +289,7 @@ DES = 'TAMAKSU: Työnantajan tapaturmavakuutusmaksu kuukausitasolla';
 %HaeParam&TYYPPI(&mvuosi, &mkuuk, &TAMAKSU_PARAM, PARAM.&PTAMAKSU);
 %ParamInf&TYYPPI(&mvuosi, &mkuuk, &TAMAKSU_MUUNNOS, &inf);
 
-IF &svpalkka GT 0 AND &sektori NE 8 THEN DO;
+IF &svpalkka GT 0 AND &sektori not in ('1311', '1314') THEN DO;
 	&tulos = (&TaTu/100) * &svpalkka;
 	END;
 ELSE DO;
@@ -316,8 +307,7 @@ END;
 	mvuosi: Vuosi, jonka lainsäädäntöä käytetään
 	inf: Deflaattori euromääräisten parametrien kertomiseksi
 	svpalkka: Työnantajamaksujen pohjalla olevat palkkatulot
-	sektori: Työnantajasektori (1=yritykset, 2=rah. ja vak.laitokset, 3=kunta, kuntien liikelaitokset,
-		4=voittoa tavoittelemattomat, 5=kotitaloudet, 6=ulkomaat, 8=valtio ja sos rahastot, 9=as oy);
+	sektori: Työnantajasektori (Sektoriluokitus 2023);
 
 
 %MACRO TaTuMaksuVTAS (tulos, mvuosi, inf, svpalkka, sektori)/

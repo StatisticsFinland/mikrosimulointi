@@ -29,9 +29,9 @@
 
 	%IF &EG NE 1 %THEN %DO;
 
-	%LET AVUOSI = 2023;		* Aineistovuosi (vvvv);
+	%LET AVUOSI = 2024;		* Aineistovuosi (vvvv);
 
-	%LET LVUOSI = 2023;		* Lainsäädäntövuosi (vvvv);
+	%LET LVUOSI = 2024;		* Lainsäädäntövuosi (vvvv);
 
 	%LET TYYPPI = SIMUL;	* Parametrien hakutyyppi: SIMUL (vuosikeskiarvo) tai SIMULX (parametrit haetaan tietylle kuukaudelle);
 

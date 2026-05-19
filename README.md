@@ -4,7 +4,7 @@ Tilastokeskus kehittää, ylläpitää ja jakaa Suomen henkilövero- ja sosiaali
 
 Lisätietoja mallin käyttöönotosta [Tilastokeskuksen sivuilla](https://stat.fi/fi/palvelut/palvelut-tutkijoille/sisu-mikrosimulointimalli).
 
-Mallin tarkempi sisältö kuvattu [SISU-mallin käyttäjän oppaassa (pdf)](https://stat.fi/media/uploads/sisu_kasikirja.pdf).
+Mallin tarkempi sisältö kuvattu [SISU-mallin käyttäjän oppaassa (pdf)](https://github.com/StatisticsFinland/mikrosimulointi/blob/main/SISU/DOKUM/SISU_kasikirja.pdf).
 
 ### SISU-mikrosimulointimallin lataus
 

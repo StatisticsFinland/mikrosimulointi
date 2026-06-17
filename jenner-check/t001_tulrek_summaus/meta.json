@@ -1,0 +1,8 @@
+{
+  "bundle": "t001_tulrek_summaus",
+  "source_file": "SISU/DATA/POHJADAT/tulrek_summaus.sas",
+  "source_blob_sha": "217e7b9aad245c784d30ed5b2795c0898676fb6a",
+  "source_commit": "ca8a9ff78463083dbaf8455fee9120e07ec7225b",
+  "tier": "real_data",
+  "notes": "Active TTURVA_KK block of tulrek_summaus.sas: a PROC SQL pipeline (CASE WHEN ... NOT IN aggregation, UNION ALL, GROUP BY hnro/kk) that builds the unemployment-benefit monthly sum table from income-register source tables. POHJADAT libname repointed to a relative path; POHJADAT.tulrek_palkka2024 and POHJADAT.tulrek_etuus2024 replaced with small synthetic tables (hnro, kk, transactionCode, summa) whose codes straddle the exclusion lists. PROC PRINT added to display the result table. Aggregation logic unchanged."
+}

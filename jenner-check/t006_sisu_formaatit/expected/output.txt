@@ -1,0 +1,9 @@
+                            SisuFormaatit: luokitusformaatit liitettyna esimerkkiaineistoon                             
+
+hnro  ikavuosi                                soss                                                 koulas       desmod                  tulot
+   1      0-24       3. Opiskelijat ja koululaiset                                           2. Keskiaste  01. desiili  0 000 000 000 008 500
+   2     35-44                     2. Palkansaajat                              5. Alempi korkeakouluaste  05. desiili  0 000 000 000 034 200
+   3     45-54  1. Yrittajat ja maatalousyrittajat                              6. Ylempi korkeakouluaste  07. desiili  0 000 000 000 061 000
+   4     65-74                      4. Elakelaiset                          3. Erikoisammattikoulutusaste  09. desiili  0 000 000 000 029 800
+   5     25-34                5. Tyottomat ja muut  1. Perusaste, ei suoritettua tutkintoa tai tuntematon  03. desiili  0 000 000 000 012 750
+

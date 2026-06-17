@@ -1,0 +1,18 @@
+{
+  "_captured_at": "2026-06-17T16:52:39.061522Z",
+  "_captured_run_id": "r_019ed67fc8e477b286110470a4ed8678",
+  "status": "ok",
+  "exit_code": 0,
+  "log_contains": [
+    "NOTE: Wrote vertailu_muutos (3 rows, 9 columns).",
+    "NOTE: PROC PRINT completed: 3 observations printed, 9 variables"
+  ],
+  "log_does_not_contain": [
+    "ERROR:",
+    "[JENNER-ERROR"
+  ],
+  "diagnostics": {
+    "parse_warnings": [],
+    "runtime_warnings": []
+  }
+}

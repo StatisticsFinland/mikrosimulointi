@@ -1,0 +1,8 @@
+{
+  "bundle": "t004_vertailu_laskemuutos",
+  "source_file": "SISU/MAKROT/YLEISET/VertailuMakrot.sas",
+  "source_blob_sha": "b5c5cd5980769fa85fa07bfa023c9359e756d08b",
+  "source_commit": "ca8a9ff78463083dbaf8455fee9120e07ec7225b",
+  "tier": "macro_caller",
+  "notes": "Caller for the LaskeMuutos macro from VertailuMakrot.sas, which walks a list of statistic names (via %DO %WHILE over %SCAN) and emits difference + percent-change assignments and Finnish LABEL statements for two compared scenarios. Macro definition reproduced verbatim. A DATA step calls it on a small two-scenario summary table for verot/tuet; PROC PRINT shows the computed differences and percent changes. Macro logic unchanged."
+}

@@ -1,0 +1,18 @@
+{
+  "_captured_at": "2026-06-17T16:52:37.509700Z",
+  "_captured_run_id": "r_019ed67fc29c7a9182e98d905ffe0062",
+  "status": "ok",
+  "exit_code": 0,
+  "log_contains": [
+    "NOTE: Wrote ika_kuukaudet (4 rows, 4 columns).",
+    "NOTE: PROC PRINT completed: 4 observations printed, 4 variables"
+  ],
+  "log_does_not_contain": [
+    "ERROR:",
+    "[JENNER-ERROR"
+  ],
+  "diagnostics": {
+    "parse_warnings": [],
+    "runtime_warnings": []
+  }
+}

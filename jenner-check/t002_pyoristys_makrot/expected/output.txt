@@ -1,0 +1,9 @@
+                               PyoristysMakrot: rahamaaran pyoristys eri tarkkuustasoille                               
+
+rahamaara   sentti  euro  kymppi  satanen
+   12.345    12.35    12      20      100
+    99.99    99.99   100     100      100
+    250.5    250.5   251     260      300
+     1001     1001  1001    1010     1100
+ 4567.891  4567.89  4568    4570     4600
+

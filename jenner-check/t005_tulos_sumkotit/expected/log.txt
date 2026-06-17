@@ -1,0 +1,25 @@
+Jenner 0.1.0 (Unlicensed - limited to 100 observations)
+Get a license at https://jenneranalytics.com/license
+
+NOTE: Option OBS changed to 100.
+NOTE: DATA henkilot
+
+NOTE: Processing inline DATALINES (5 lines)
+
+NOTE: Read 5 rows from DATALINES.
+NOTE: Wrote henkilot (5 rows, 13 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: PROC SORT data=henkilot
+
+NOTE: Unlicensed mode - input limited to 100 observations.
+NOTE: Read 5 rows from henkilot.
+NOTE: Wrote henkilot (5 rows, 13 columns).
+NOTE: PROC SORT statement used.
+NOTE: PROC MEANS
+NOTE: Output dataset kotitaloustaso has 3 observations and 12 variables.
+NOTE: PROC MEANS statement used.
+NOTE: PROC PRINT data=kotitaloustaso
+
+NOTE: PROC PRINT completed: 3 observations printed, 7 variables

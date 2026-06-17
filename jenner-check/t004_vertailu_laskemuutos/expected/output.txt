@@ -1,0 +1,7 @@
+                              LaskeMuutos: erotus ja muutosprosentti skenaarioiden valilla                              
+
+   ryhma  verot_1  verot_2  tuet_1  tuet_2  Erotus verot _2 - _1  Muutospros verot _2 - _1  Erotus tuet _2 - _1  Muutospros tuet _2 - _1
+desiili1     1200     1260     800     760                    60                      0.05                  -40                    -0.05
+desiili2     2400     2520     600     570                   120                      0.05                  -30                    -0.05
+desiili3     4100     4305     300     300                   205                      0.05                    0                        0
+

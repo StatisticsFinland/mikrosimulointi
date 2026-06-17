@@ -1,0 +1,7 @@
+                            SumKotitT: henkilotason verot ja tuet summattuna kotitalouksille                            
+
+KNRO  YKOR  IKAVUV  DESMOD  MAAKUNTA  VEROT  TUET
+   1   100      35       4         9  10000  2700
+   2   100      52       7         1   9100  3200
+   3   100      19       1         5      0  3600
+

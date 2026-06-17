@@ -1,0 +1,8 @@
+{
+  "bundle": "t006_sisu_formaatit",
+  "source_file": "SISU/OHJAUS/SisuFormaatit.sas",
+  "source_blob_sha": "5a38c1cfca262650fa07d395172c620504b27722",
+  "source_commit": "ca8a9ff78463083dbaf8455fee9120e07ec7225b",
+  "tier": "real_data",
+  "notes": "PROC FORMAT slice from SisuFormaatit.sas reproducing the model's classification formats: the tuhat thousand-separator PICTURE plus the desmod (income decile), ikavu (age band), soss (socioeconomic status), and koulas (education level) VALUE formats, with their original value ranges and selites (Finnish a-/o-umlaut transliterated to ASCII; NOTSORTED MULTILABEL kept). A small example person table is then printed with PROC PRINT applying each format. Format definitions and ranges unchanged."
+}

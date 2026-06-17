@@ -1,0 +1,19 @@
+{
+  "_captured_at": "2026-06-17T16:55:09.240525Z",
+  "_captured_run_id": "r_019ed681e93d784186798186a95ab281",
+  "status": "ok",
+  "exit_code": 0,
+  "log_contains": [
+    "NOTE: FORMAT desmod defined (11 ranges).",
+    "NOTE: FORMAT koulas defined (8 ranges).",
+    "NOTE: PROC PRINT completed: 5 observations printed, 6 variables"
+  ],
+  "log_does_not_contain": [
+    "ERROR:",
+    "[JENNER-ERROR"
+  ],
+  "diagnostics": {
+    "parse_warnings": [],
+    "runtime_warnings": []
+  }
+}

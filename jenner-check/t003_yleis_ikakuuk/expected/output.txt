@@ -1,0 +1,8 @@
+                                      IkaKuuk: kuukaudet ikavalilla 18-64 ja 0-17                                       
+
+ henkilo  ikakk  kk_18_64  kk_0_17
+lapsi       120         0       12
+nuori       210         0       12
+aikuinen    480        12        0
+elaketta    780        12        0
+

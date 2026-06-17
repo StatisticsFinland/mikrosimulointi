@@ -1,0 +1,22 @@
+                          TTURVA_KK summaerat henkilon ja kuukauden mukaan (esimerkkiaineisto)                          
+
+hnro  kk                     tuloera  summa
+A001   1  tturva_palkka                1500
+A001   2  tturva_palkka                1600
+A002   1  tturva_palkka                2000
+A002   3  tturva_palkka                1800
+B003   1  tturva_palkka                2500
+B003   2  tturva_palkka                2400
+A001   1  tturva_etuus_tarveharkinta    400
+A001   2  tturva_etuus_tarveharkinta    410
+A002   1  tturva_etuus_tarveharkinta    250
+A002   3  tturva_etuus_tarveharkinta      0
+B003   1  tturva_etuus_tarveharkinta    600
+B003   2  tturva_etuus_tarveharkinta    520
+A001   1  tturva_etuus_vahennettava     520
+A001   2  tturva_etuus_vahennettava     410
+A002   1  tturva_etuus_vahennettava     250
+A002   3  tturva_etuus_vahennettava       0
+B003   1  tturva_etuus_vahennettava     600
+B003   2  tturva_etuus_vahennettava     520
+

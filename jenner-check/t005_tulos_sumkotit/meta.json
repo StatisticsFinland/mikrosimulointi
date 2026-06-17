@@ -1,0 +1,8 @@
+{
+  "bundle": "t005_tulos_sumkotit",
+  "source_file": "SISU/MAKROT/YLEISET/TulosMakrot.sas",
+  "source_blob_sha": "f8359eb31b3e4ffb13f8a8032660ca4a4a8aefe4",
+  "source_commit": "ca8a9ff78463083dbaf8455fee9120e07ec7225b",
+  "tier": "macro_caller",
+  "notes": "Caller for the SumKotitT macro from TulosMakrot.sas, which sums person-level results to household level via PROC SUMMARY (BY knro, ID list of household-constant variables, VAR measures, OUTPUT SUM=). Macro definition reproduced verbatim; called with KUTSMALLI=VERO and global &PAINO=ykor. Input is a small synthetic person-level table whose columns match the ID/VAR lists; PROC PRINT shows the summed household totals. Macro logic unchanged."
+}

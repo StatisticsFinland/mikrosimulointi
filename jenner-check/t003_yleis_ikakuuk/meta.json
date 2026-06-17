@@ -1,0 +1,8 @@
+{
+  "bundle": "t003_yleis_ikakuuk",
+  "source_file": "SISU/MAKROT/YLEISET/YleisMakrot.sas",
+  "source_blob_sha": "09c4f95957010969635c71ee7077a553f6ad9fc2",
+  "source_commit": "ca8a9ff78463083dbaf8455fee9120e07ec7225b",
+  "tier": "macro_caller",
+  "notes": "Caller for the IkaKuuk macro from YleisMakrot.sas, which counts the months a person spends inside an age interval during the reference year using SELECT/WHEN and a chained comparison. Macro definition reproduced verbatim (DES transliterated). A DATA step calls it for the 18-64 and 0-17 age bands over four example persons; PROC PRINT shows results. Macro logic unchanged."
+}

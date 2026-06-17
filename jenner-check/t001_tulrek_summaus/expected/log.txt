@@ -1,0 +1,30 @@
+Jenner 0.1.0 (Unlicensed - limited to 100 observations)
+Get a license at https://jenneranalytics.com/license
+
+NOTE: Option OBS changed to 100.
+NOTE: Library POHJADAT assigned path=..
+NOTE: DATA POHJADAT.tulrek_palkka2024
+
+NOTE: Processing inline DATALINES (10 lines)
+
+NOTE: Read 10 rows from DATALINES.
+NOTE: Wrote POHJADAT.tulrek_palkka2024 (10 rows, 4 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: DATA POHJADAT.tulrek_etuus2024
+
+NOTE: Processing inline DATALINES (9 lines)
+
+NOTE: Read 9 rows from DATALINES.
+NOTE: Wrote POHJADAT.tulrek_etuus2024 (9 rows, 4 columns).
+NOTE: DATA elapsed:
+  wall  0.00 seconds
+  cpu   0.00 seconds
+NOTE: PROC SQL 
+
+NOTE: Table POHJADAT.tturva_tulrek2024 created.
+NOTE: PROC SQL statement used.
+NOTE: PROC PRINT data=POHJADAT.tturva_tulrek2024
+
+NOTE: PROC PRINT completed: 18 observations printed, 4 variables

@@ -1,0 +1,8 @@
+{
+  "bundle": "t002_pyoristys_makrot",
+  "source_file": "SISU/MAKROT/YLEISET/PyoristysMakrot.sas",
+  "source_blob_sha": "6e906ab223d1deaeea63bc7ba94d9786f9c6f1c6",
+  "source_commit": "ca8a9ff78463083dbaf8455fee9120e07ec7225b",
+  "tier": "macro_caller",
+  "notes": "Caller for the money-rounding macros defined in PyoristysMakrot.sas (PyoristysSentinTarkkuuteen, PyoristysEuronTarkkuuteen, Pyoristys10e, Pyoristys100e). Macro definitions reproduced verbatim (DES strings transliterated to ASCII); &euro set to 1. A DATA step invokes the function-style macros on a small set of example amounts, then PROC PRINT shows each rounding level. Macro logic unchanged."
+}

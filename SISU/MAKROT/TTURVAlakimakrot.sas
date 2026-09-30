@@ -209,7 +209,6 @@ ELSE DO;
 	IF &oikeuskor NE 0 AND &mvuosi >= 2010 AND &mvuosi <= 2024 THEN temp = SUM(temp, &TTPAIVIA * &KorotusOsa);
 
 	*Tarveharkittu tuki;
-
 	IF &tarvhark NE 0 THEN DO;
 
 		*Perheellisen tarveharkinta;
@@ -257,14 +256,14 @@ ELSE DO;
 		ELSE temp = &OsPros * temp;
 	END;
 
-
 	*Aktiivimallin leikkuri;
 	IF &aktiivi = 1 AND 2018 =< &mvuosi <= 2019 THEN temp = SUM(temp * SUM(1, -&AlePros)); 
 
 	* Lopullisen tuen määrä on pienempi kahdesta vaihtoehdosta: ;
 	* 1. Tarveharkittu tuki 2. Täysi tuki, josta vähennetty muut sosiaalietuudet ;
-	temp = MIN(temp, (&TTPAIVIA * SUM(&TTPerus, lapsikor) - &vahsosetuus));
-
+	IF &oikeuskor NE 0 AND &mvuosi >= 2010 AND &mvuosi <= 2024 
+	THEN temp = MIN(temp, (&TTPAIVIA * SUM(&TTPerus, lapsikor, &KorotusOsa) - &vahsosetuus));
+	ELSE temp = MIN(temp, (&TTPAIVIA * SUM(&TTPerus, lapsikor) - &vahsosetuus));
 	
 	IF temp < 0 THEN temp = 0;
 	IF &mvuosi < 1994 THEN temp = .;
@@ -376,7 +375,9 @@ ELSE DO;
 
 	* Lopullisen tuen määrä on pienempi kahdesta vaihtoehdosta: ;
 	* 1. Tarveharkittu tuki 2. Täysi tuki, josta vähennetty muut sosiaalietuudet ;
-	temp = MIN(temp, (&TTPAIVIA * SUM(&TTPerus, lapsikor) - &vahsosetuus));
+	IF &muutturva NE 0 
+	THEN temp = MIN(temp, (&TTPAIVIA * SUM(&TTPerus, lapsikor, &KorotusOsa) - &vahsosetuus));
+	ELSE temp = MIN(temp, (&TTPAIVIA * SUM(&TTPerus, lapsikor) - &vahsosetuus));
 
 	IF temp < 0 THEN temp = 0;
 

@@ -133,7 +133,6 @@ DES = "TOIMTUKI: Toimeentulotuki kuukaudessa";
 	normi = SUM(normi, lapskerr * perus);
 		
 	*Toimeentulotuessa huomioon otettava työtulo.;
-	*Vuodesta 2015 lähtien työtulon suojaosa on henkilökohtainen.;
 	IF &mvuosi < 2015 THEN DO;
 		tyotulosum = SUM(OF &tyotulo{*});
 		tulonhanksum = SUM(OF &tulonhank{*});
@@ -141,6 +140,7 @@ DES = "TOIMTUKI: Toimeentulotuki kuukaudessa";
 		IF vapaatulo > &VapaaOsRaja THEN vapaatulo = &VapaaOsRaja;
 		tyotulohuomioon = SUM(tyotulosum, -vapaatulo);
 	END;
+	*Vuodesta 2015 lähtien työtulon suojaosa on henkilökohtainen.;
 	ELSE DO;
 		tyotulohuomioon = 0;
 		DO i = 1 TO DIM(&tyotulo);
@@ -150,14 +150,15 @@ DES = "TOIMTUKI: Toimeentulotuki kuukaudessa";
 				vapaatulo = &VapaaOs * SUM(&tyotulo{i}, &tulonhank{i});
 			END;
 			ELSE DO;
-				vapaatulo = SUM(&tyotulo{i}, &tulonhank{i});
+				vapaatulo = SUM(&tyotulo{i});
 			END;	
 			IF vapaatulo > &VapaaOsRaja THEN vapaatulo = &VapaaOsRaja;
 
 			IF kuuid >= MDY(3, 1, 2026) THEN DO;
 				IF &ika{i} >= 18 THEN vapaatulo = 0;
 			END;
-			tyotulohuomioon = SUM(tyotulohuomioon, &tyotulo{i}, -vapaatulo);
+			tyotulohuomioon_henkilo = MAX(0, SUM(&tyotulo{i}, -vapaatulo));
+			tyotulohuomioon = SUM(tyotulohuomioon, tyotulohuomioon_henkilo);
 		END;
 	END;
 	
@@ -179,7 +180,7 @@ DES = "TOIMTUKI: Toimeentulotuki kuukaudessa";
 	&tulos = tuki;
 
 	DROP perusmaara perus perusyh kuuid i
-		 normi lapskerr tyotulosum tulonhanksum vapaatulo
+		 normi lapskerr tyotulosum tulonhanksum vapaatulo tyotulohuomioon_henkilo
 		 tyotulohuomioon tulothuomioon asmenothuomioon netto tuki;
 
 %MEND ToimTukiKS;

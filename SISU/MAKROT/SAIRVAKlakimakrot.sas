@@ -496,19 +496,18 @@ lapsia: alaikäisten lasten lukumäärä (ei vaikutusta vuoden 1993 jälkeen, paramet
 vanhtulo: Henkilön omat (työ)tulot, e/vuosi
 tulonhankk: tuloverolain mukaiset tulonhankkimiskulut, €/vuosi;
 
-%MACRO VanhPRahaKS (tulos, mvuosi, mkuuk, minf, ait, kor, norm, lapsia, vanhtulo, yrittaja =0, tulonhankk=0)/
+%MACRO VanhPRahaKS (tulos, mvuosi, mkuuk, minf, ait, kor, norm, lapsia, vanhtulo, yrittaja=0, tulonhankk=0)/
 DES = 'SAIRVAK: Eri suuruiset vanhempainpäivärahat päivää kohden kuukausitasolla';
 
-/*Ennen vuotta 2007 lasketaan normaali päiväraha. Samoin vuodesta 2016 lähtien, jos kyse ei ole äitien
-ensimmäisen 56 päivän äitiysrahasta;*/
-IF &mvuosi < 2007 or (&mvuosi > 2015 AND &ait = 0) THEN DO;
-	%SairVakPrahaKS(temp, &mvuosi, &mkuuk, &minf, 1, &lapsia, 0, &vanhtulo, yrittaja = &yrittaja, tulonhankk=&tulonhankk);
+/* Ennen vuotta 2007 lasketaan vanhempainpäiväraha SairVakPrahaKS-makrolla.
+   Samoin välillä 1/2016-7/2022, jos kyse ei ole äitien ensimmäisen 56 päivän äitiysrahasta. */
+IF &mvuosi < 2007 OR (&mvuosi > 2015 AND (&mvuosi < 2022 OR (&mvuosi = 2022 AND &mkuuk < 8)) AND &ait = 0) THEN DO;
+	%SairVakPrahaKS(temp, &mvuosi, &mkuuk, &minf, 1, &lapsia, 0, &vanhtulo, yrittaja=&yrittaja, tulonhankk=&tulonhankk);
 	&tulos = temp / &SPaivat;
 END;
 
-*Muussa tapauksessa noudatetaan uutta lainsäädäntöä;
-*Ehtolauseiden järjestys merkitsee sitä, että vain ensimmäinen ehdoista (ait, kor, norm) hyväksytään;
-
+/* Muussa tapauksessa noudatetaan uutta lainsäädäntöä.
+   Ehtolauseiden järjestys merkitsee sitä, että vain ensimmäinen ehdoista (ait, kor, norm) hyväksytään. */
 ELSE DO;
 	%HaeParam&TYYPPI(&mvuosi, &mkuuk, &SAIRVAK_PARAM, PARAM.&PSAIRVAK);
 	%ParamInf&TYYPPI(&mvuosi, &mkuuk, &SAIRVAK_MUUNNOS, &minf);

@@ -58,28 +58,22 @@ OPTIONS VALIDVARNAME = V7;
 *%LET KENO = \; 		/* Kenoviivan suunta */
 
 %MACRO SYSCHECK;
-/* Jos mallia ajetaan AIX-ymp‰ristˆss‰, m‰‰ritell‰‰n sijainti k‰sin */
-%IF &SYSSCPL = AIX %THEN %DO;
-		%LET HAKEM = USER/SISU; 	/* Kansio, jossa ohjelmakansiot ovat */
-		%LET LEVY = %SYSGET(HOME) ; /* Levyasema, jossa ohjelma sijaitsee */
-		%LET KENO = /;				/* Kenoviivan suunta */
+
+/* K‰ytet‰‰n t‰m‰n ALKUsimul-koodin sijaintia mallin sijainnin m‰‰ritt‰miseksi */
+/* SAS EG:ss‰ tiedoston polku lˆytyy makromuuttujasta _SASPROGRAMFILE */
+%IF %SYMEXIST(_SASPROGRAMFILE) %THEN %DO;
+	%LET POLKU = %SYSFUNC(COMPRESS(&_SASPROGRAMFILE, "'"));
 %END;
-/* Muussa tapauksessa k‰ytet‰‰n t‰m‰n ALKUsimul-koodin sijaintia mallin sijainnin m‰‰ritt‰miseksi */
+/* Base SAS:ssa polku on SAS_EXECFILEPATH -system variablessa */
 %ELSE %DO;
-	/* SAS EG:ss‰ tiedoston polku lˆytyy makromuuttujasta _SASPROGRAMFILE */
-	%IF %SYMEXIST(_SASPROGRAMFILE) %THEN %DO;
-		%LET POLKU = %SYSFUNC(COMPRESS(&_SASPROGRAMFILE, "'"));
-	%END;
-	/* Base SAS:ssa polku on SAS_EXECFILEPATH -system variablessa */
-	%ELSE %DO;
-		%LET POLKU = %SYSGET(SAS_EXECFILEPATH);
-	%END;
-	/* P‰‰tell‰‰n levyasema, jossa ohjelma sijaitsee */
-	%LET LEVY = %SCAN(&POLKU, 1, '\');
-	/* P‰‰tell‰‰n kansio, jossa ohjelmakansiot ovat */
-	%LET HAKEM = %SUBSTR(&POLKU, %LENGTH(&LEVY) + 2, %LENGTH(&POLKU) - %LENGTH(%SCAN(&POLKU, -2, '\')) - %LENGTH(%SCAN(&POLKU, -1, '\')) - %LENGTH(&LEVY) - 3);
-	%LET KENO = \;
+	%LET POLKU = %SYSGET(SAS_EXECFILEPATH);
 %END;
+/* P‰‰tell‰‰n levyasema, jossa ohjelma sijaitsee */
+%LET LEVY = %SCAN(&POLKU, 1, '\');
+/* P‰‰tell‰‰n kansio, jossa ohjelmakansiot ovat */
+%LET HAKEM = %SUBSTR(&POLKU, %LENGTH(&LEVY) + 2, %LENGTH(&POLKU) - %LENGTH(%SCAN(&POLKU, -2, '\')) - %LENGTH(%SCAN(&POLKU, -1, '\')) - %LENGTH(&LEVY) - 3);
+%LET KENO = \;
+
 %MEND SYSCHECK;
 
 %SYSCHECK;

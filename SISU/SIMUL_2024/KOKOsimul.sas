@@ -311,14 +311,14 @@
 	 tvakpr tpotel tmuuel teanstu tmtatt kuto amstipe
 	 ase_siv_praha_yht
 	 rsyhte sotvammakorvaus elasaimp per_apuraha omakkiiv
-	 lveru elamaveror saiprva vkpmkyv vkpopmkyv aiprva kreurv cdmky htkapr dtyhtet vvvmk1
-	 vvvmk3 vvvmk5 tkoultuk etuki vtukia16 vtukiy16 lapsikorotus rielake ryelake lgkthr lgkthl lgktku
+	 lveru elamaveror saiprva vkpmkyv vkpopmkyv aiprva kreurv cdmky htkapr dtyhtet dtyhtep dtyllae dtyllaep
+	 vvvmk1 vvvmk3 vvvmk5 tkoultuk etuki vtukia16 vtukiy16 lapsikorotus rielake ryelake lgkthr lgkthl lgktku
 	 lgos lgjhhr tkotimuo odalsy odalke odmksyko odmksyke odmkkeko odmkkeke odkma verot svatvap svatpp lpvma lshma ltva ltvp lkuve lkive
 	 lelvak tnoosvvb teinovvb tuosvvap teinovv tnoosvab tuosvv einotptosva
 	 teinova tpeito bbyhte aitav lbeltuki yastuki eastuki totu_yhteensa
 	 hoimaksk hoimakso
 	 tvahep50 tptvs tvahep20 tptsu50 korosatkg 
-	 dtyhtep korosapkw lylen tkapite
+	 korosapkw lylen tkapite
 	 tansel tkansel tperhel takuuel tkopira tkuntra teleuve
 	 einotpyjatva einotyjptva toyjmyvvap toyjmavvap 
 	 ymetspuptulo tulkelvp ymaatattulo elyelattulo ymaatpttulo elyelpttulo tmaat1evyr tmaat1pevyr
@@ -382,8 +382,8 @@
 	SAIRVAK_DATA =  SUM(MAX(vkpmkyv, 0), MAX(vkpopmkyv, 0), MAX(aiprva, 0), MAX(cdmky, 0), MAX(kreurv, 0), htkapr);
 
 	TTURVA_DATA = SUM(MAX(vvvmk1, 0), MAX(vvvmk3, 0), MAX(vvvmk5, 0),
-					MAX(dtyhtep, 0),
-				    MAX(dtyhtet, 0));
+					MAX(dtyhtep, 0), -MAX(dtyllaep, 0),
+				    MAX(dtyhtet, 0), -MAX(dtyllae, 0));
 
 	KANSEL_PERHEL_DATA = SUM(tkansel, tperhel, takuuel);
 	VEROTT_KANSEL_DATA = SUM(vtukiy16, vtukia16, etuki, lapsikorotus, rielake, ryelake);

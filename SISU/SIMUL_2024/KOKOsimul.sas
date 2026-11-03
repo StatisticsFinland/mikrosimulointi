@@ -311,7 +311,7 @@
 	 tvakpr tpotel tmuuel teanstu tmtatt kuto amstipe
 	 ase_siv_praha_yht
 	 rsyhte sotvammakorvaus elasaimp per_apuraha omakkiiv
-	 lveru elamaveror saiprva vkpmkyv vkpopmkyv aiprva kreurv cdmky htkapr dtyhtet dtyhtep dtyllae dtyllaep
+	 lveru elamaveror vkpmkyv vkpopmkyv aiprva kreurv cdmky htkapr tkuntra dtyhtet dtyhtep dtyllae dtyllaep
 	 vvvmk1 vvvmk3 vvvmk5 tkoultuk etuki vtukia16 vtukiy16 lapsikorotus rielake ryelake lgkthr lgkthl lgktku
 	 lgos lgjhhr tkotimuo odalsy odalke odmksyko odmksyke odmkkeko odmkkeke odkma verot svatvap svatpp lpvma lshma ltva ltvp lkuve lkive
 	 lelvak tnoosvvb teinovvb tuosvvap teinovv tnoosvab tuosvv einotptosva
@@ -319,7 +319,7 @@
 	 hoimaksk hoimakso
 	 tvahep50 tptvs tvahep20 tptsu50 korosatkg 
 	 korosapkw lylen tkapite
-	 tansel tkansel tperhel takuuel tkopira tkuntra teleuve
+	 tansel tkansel tperhel takuuel tkopira teleuve
 	 einotpyjatva einotyjptva toyjmyvvap toyjmavvap 
 	 ymetspuptulo tulkelvp ymaatattulo elyelattulo ymaatpttulo elyelpttulo tmaat1evyr tmaat1pevyr
 	 tliik1evyr tliikpevyr tporo1evyr ymaatattuloevyr elyelattuloevyr tmaat2evyr
@@ -335,8 +335,9 @@
 	PALKAT = MAX(SUM(PALKAT, -vthmp), 0);
 
 	/* Sosiaalietuuksia, joita ei simuoida */
+	/* Työeläkekuntoutuksen kuntoutusrahat = SUM(tkuntra, -MAX(kreurv, 0)) */
 
-	SEKAL_PRAHAT = SUM(ttappr, tmuupr, tvakpr, tkuntra); 
+	SEKAL_PRAHAT = SUM(ttappr, tmuupr, tvakpr, SUM(tkuntra, -MAX(kreurv, 0))); 
 
 	/* Ansioeläkkeet ym. */
 

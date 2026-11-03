@@ -151,12 +151,14 @@ DES = "TOIMTUKI: Toimeentulotuki kuukaudessa";
 			END;
 			ELSE DO;
 				vapaatulo = SUM(&tyotulo{i});
-			END;	
-			IF vapaatulo > &VapaaOsRaja THEN vapaatulo = &VapaaOsRaja;
-
-			IF kuuid >= MDY(3, 1, 2026) THEN DO;
-				IF &ika{i} >= 18 THEN vapaatulo = 0;
 			END;
+	
+			IF vapaatulo > &VapaaOsRaja THEN vapaatulo = &VapaaOsRaja;
+			* 3/2026 alkaen työtulon suojaosaan sovelletaan ikärajaa ;
+			IF kuuid >= MDY(3, 1, 2026) THEN DO;
+				IF &ika{i} >= &AnsiotulovahennysIkaRaja THEN vapaatulo = 0;
+			END;
+
 			tyotulohuomioon_henkilo = MAX(0, SUM(&tyotulo{i}, -vapaatulo));
 			tyotulohuomioon = SUM(tyotulohuomioon, tyotulohuomioon_henkilo);
 		END;

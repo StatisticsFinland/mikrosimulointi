@@ -176,6 +176,8 @@
 	%KuukSimul(TTURVA);
     
 	/* Vähennetään takaisinperinnät ansiopäivärahoista ja -päivistä kuukausittain */
+	/* HUOM! Käytettäessä vuoden 2024 aineistoa on lapsimaara-muuttuja tietosisällöltään
+		puutteellinen lapsikorotusten lainsäädännöstä poistumisen myötä. */
 	PROC SORT DATA = POHJADAT.&AINEISTO_KK&AVUOSI
 		OUT = TEMP.TTURVA_KK&avuosi._SORT;
 		BY hnro akuuk;

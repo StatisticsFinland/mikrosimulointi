@@ -60,5 +60,5 @@ taulu: 			Päivitettävä taulu (kirjastoviite.taulun_nimi).
 /* Varsinainen makrokutsu, jota muokkaamalla voi lisätä haluamasi muuttujat tauluun */
 
 *Esimerkki makrokutsusta;
-%lisaa_parametrit(sarakenimi=OPINTUKI, parametrit=VuokraKatto1 VuokraKatto2 VuokraKatto3, euromaarainen=1, taulu=ohjaus.kaikki_param);
+%lisaa_parametrit(sarakenimi=TOIMTUKI, parametrit=AnsiotulovahennysIkaRaja, euromaarainen=0, taulu=ohjaus.kaikki_param);
 

@@ -163,14 +163,14 @@
 	 tlakko tmerile tmetsp tmetspp tepalkat toptiot tosinktp tmtatt tmuuel tmuukor
 	 tmuutp tmyynt tmyynt1 tnoosvab tnoosvvb tomlis einotyjptva toyjmavvap
 	 einotpyjatva toyjmyvvap treitosva tpalv tepertyok1 tepertyok2 telps41 telps42 telps8 tpalv2a
-	 tpeito tperhel tpjta tpotel trespa tsiraho tsuurpu ttapel tkuntra tlapel ttappr ttyoltuk
+	 tpeito tperhel tpjta tpotel trespa tsiraho tsuurpu ttapel tlapel ttappr ttyoltuk
 	 upuhdateisv tulkp htpuhdatvap tulkyhp tuosvv tuosvvap tutmp235
 	 tutmp4 tvahevas tptmuu tvakpr tvaksp tvuokr tvuokr1 tyhtat
 	 ptyhtyma alematka_kk velatk asukorot vkortu vkotita
 	 vkotitki vkotitku vkotitp vkotitsh vlahj luhlomak vmatk vmuut1
 	 vmuutk vmuutav vohvah vopintov vthmp vulthanmu vthm4 vtyasv vtyomj
-	 vvevah vvvmk1 vvvmk3 vvvmk5 saiprva aiprva cdmky tkotihtu
-	 tkoultuk dtyhtet tkopira lgktku htkapr tkotimuo takuuel
+	 vvevah vvvmk1 vvvmk3 vvvmk5 vkpmkyv vkpopmkyv aiprva cdmky kreurv htkapr tkuntra tkotihtu
+	 tkoultuk dtyhtet tkopira lgktku tkotimuo takuuel
 	 tjmarkh tvahep50 tptvs tvahep20 tptsu50
 	 dtyhtep elivtu lylen tkapite tsijova
 	 palksiku_remontti palksiku_koti palksiku_oljy palkomos_remontti palkomos_koti palkomos_oljy
@@ -232,7 +232,7 @@
 	DATA STARTDAT.START_VERO;
 	SET STARTDAT.START_VERO;
 
-	SAIRVAK_DATA = SUM(MAX(saiprva, 0), MAX(aiprva, 0), MAX(cdmky, 0), htkapr);
+	SAIRVAK_DATA = SUM(MAX(vkpmkyv, 0), MAX(vkpopmkyv, 0), MAX(aiprva, 0), MAX(cdmky, 0), MAX(kreurv, 0), htkapr);
 	TTURVA_DATA = SUM(MAX(vvvmk1, 0), MAX(vvvmk3, 0), MAX(vvvmk5, 0),
 					MAX(dtyhtep, 0),
 				    MAX(dtyhtet, 0));
@@ -347,7 +347,7 @@
 		tsuurpu ttapel tlapel ttyoltuk htpuhdatvap tutmp235
 		tutmp4 tvahevas tptmuu tvaksp tvuokr tvuokr1
 		vkotita vkotitki vkotitku vkotitp vkotitsh vlahj vmuut1 vmuutk
-		vmuutav vthm4 vvvmk1 vvvmk3 vvvmk5 saiprva aiprva cdmky
+		vmuutav vthm4 vvvmk1 vvvmk3 vvvmk5 vkpmkyv vkpopmkyv aiprva cdmky
 		tkoultuk dtyhtet tkopira takuuel tvahep50 tptvs tvahep20 tptsu50
 		dtyhtep
 		lylen tkapite tsijova;
@@ -374,7 +374,7 @@
 		/* 3.1 Sairausvakuutus */
 		%IF &SAIRVAK = 1 %THEN %DO;
 			TEMP.&TULOSNIMI_SV
-			(KEEP = hnro SAIRPR VANHPR ERITHOITR)
+			(KEEP = hnro SAIRPR SAIROSPR VANHPR KURAPR ERITHOITR)
 		%END;
 
 		/* 3.2 Työttömyysturva */
@@ -468,7 +468,7 @@
 		SAIRVAK_SIMUL = SAIRVAK_DATA;
 	%END;
 	%ELSE %DO;
-		SAIRVAK_SIMUL = SUM(SAIRPR, VANHPR, ERITHOITR, htkapr);
+		SAIRVAK_SIMUL = SUM(SAIRPR, SAIROSPR, VANHPR, KURAPR, ERITHOITR, htkapr);
 	%END;
 
 	%IF &TTURVA = 0 %THEN %DO; 
@@ -502,7 +502,8 @@
 		OPTUKI_SIMUL = SUM(TUKIKESK, TUKIKOR);
 	%END;
 
-	PRAHAT = SUM(SAIRVAK_SIMUL, TTURVA_SIMUL, KOTIHTUKI_SIMUL, tvakpr, ttappr, tkuntra);
+	/* Työeläkekuntoutuksen kuntoutusrahat = SUM(tkuntra, -MAX(kreurv, 0)) */
+	PRAHAT = SUM(SAIRVAK_SIMUL, TTURVA_SIMUL, KOTIHTUKI_SIMUL, tvakpr, ttappr, SUM(tkuntra, -MAX(kreurv, 0)));
 	ELAKE = SUM(KANSEL_SIMUL, MUUT_EL);
 
 	RUN;

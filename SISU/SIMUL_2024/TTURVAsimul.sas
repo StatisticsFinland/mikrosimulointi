@@ -151,13 +151,17 @@
 	DATA STARTDAT.START_TTURVA;
 	SET POHJADAT.&AINEISTO&AVUOSI (
 	KEEP = ykor hnro knro asko ikavu ikakk mkorpvt1
-	vvvmk3 vvvpvt3 vvvsopv3 vvvllkm3
+	vvvmk3 vvvpvt3 vvvsopv3
 	vvvmk5 mkorpvt5
 	dtyhtet dtpalkmt dtyhtep dtpalkmp ttyotpr dtvpv dttayspv dtospv dtovlkm dtopalkk vanh_omaishoitohp
-	dttspv dtomapal dtpspv dtpspalk dtyllae dtyllaep dtyllapv dttllkm dtthpv dttspalk 
+	dttspv dtomapal dtpspv dtpspalk dtyllae dtyllaep dtyllapv dtthpv dttspalk 
 	dtyllapvp koropvtkg
 	koropvpkw spalkka3 ikavu tklaskr:
 	vvvpvt3_ed tyokk_hist lasktyohist ypkotipvt ypkorpvt ypkotimk tyopv:
+
+	/* HUOM! Käytettäessä vuoden 2024 aineistoa ovat dttllkm, vvvllkm3 ja VVVLLKMQ -muuttujat
+		tietosisällöltään puutteelliset lapsikorotusten lainsäädännöstä poistumisen myötä. */
+	dttllkm vvvllkm3 VVVLLKMQ
 	
 	LAPSKORMAKS DTOMAPALX2 DTOPALKKX2 SOSETUVAH SOVPELK SOVOS
 	SOVTARV SOVVAH SOVKOR SOVPALKKATM SOVPALKKAPR SOVKORPA
@@ -169,7 +173,7 @@
 
 	VVVPALX3
 
-	VVVPVTQ VVVSOPVQ MKORPVTQ MLISPVTQ VVVMKQ VVVSOMKQ VVVPALQ VVVLLKMQ 
+	VVVPVTQ VVVSOPVQ MKORPVTQ MLISPVTQ VVVMKQ VVVSOMKQ VVVPALQ 
 	TAYSKORPVQ SOVKORPVQ PELKTAYSPVQ PELKSOPVQ
 	SOVPALKKAQ LASKPALKKAQ AILMKORQDAT
 

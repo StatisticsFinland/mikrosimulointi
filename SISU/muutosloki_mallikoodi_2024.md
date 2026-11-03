@@ -4,6 +4,22 @@
 
 Tähän dokumenttiin merkitään SISU-mikrosimulointimallin mallikoodiin tehdyt muutokset. Muutoslokista ilmenee yleiskuvaus muutoksesta ja tiedostot, joihin muutoksia on tehty.
 
+## Malliversio 26.40, jaettu 28.10.2026
+
+-  Vähennetty osittaiset varhennetut varhaiseläkkeet yleistuen tarveharkinnassa huomioonotettavista tuloista yleistukilain muutoksen mukaisesti
+  - /DATA/POHJADAT/tulrek_summaus.sas
+
+- Korjattu VEROsimulin data ja simuloitu sairauspäivärahakäsite lisäämällä osasairauspäivärahat sekä kuntoutusrahat verotettaviin etuustuloihin. Samalla poistettu Kelan kuntoutusrahat KOKOsimulin ja VEROsimulin ei simuloitavista eristä. Muutos yhdenmukaistaa simuloinnin KOKOsimulin kanssa ja korjaa Kelan kuntoutusrahojen kaksinkertaisen käsittelyn.
+  - /SIMUL_2024/KOKOsimul.sas
+  - /SIMUL_2024/VEROsimul.sas
+
+- Parametrisoitu 3/2026 voimaan astunut toimeentulotuen ansiotulovähennyksen ikäraja = &AnsiotulovahennysIkaRaja.
+  - /MAKROT/TOIMTUKIlakimakrot.sas
+  - /PARAM/ptoimtuki.sas7bdat
+
+- Tehty kotitalous- ja matkakuluvähennyksen muutokset verovuosille 2026 ja 2027 13.10.2026 voimaan tulleen lakimuutoksen mukaisesti.
+  - /PARAM/pvero.sas7bdat
+
 ## Malliversio 26.30, jaettu 21.9.2026
 
 - Julkaistu VM:n syksyn 2026 ennusteen mukaisesti ajantasaistetut rekisteriaineistot ja parametritaulut vuosille 2025-2030.
